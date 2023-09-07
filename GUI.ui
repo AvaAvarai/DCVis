@@ -60,7 +60,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QPushButton" name="uploadButton">
+           <widget class="QPushButton" name="upload_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -73,7 +73,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="recenterButton">
+           <widget class="QPushButton" name="recenter_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -88,7 +88,7 @@
          </layout>
         </item>
         <item alignment="Qt::AlignHCenter">
-         <widget class="QTextBrowser" name="datasetInfoBrowser">
+         <widget class="QTextBrowser" name="dataset_textbox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -138,7 +138,7 @@
          </layout>
         </item>
         <item alignment="Qt::AlignHCenter">
-         <widget class="QTextBrowser" name="attributeBrowser">
+         <widget class="QTextBrowser" name="clipped_area_textbox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -150,7 +150,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QPushButton" name="testButton">
+           <widget class="QPushButton" name="test_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -163,7 +163,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="removeClipButton">
+           <widget class="QPushButton" name="remove_clip_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -200,7 +200,7 @@
              <item>
               <layout class="QVBoxLayout" name="verticalLayout">
                <item>
-                <widget class="QRadioButton" name="pcCheck">
+                <widget class="QRadioButton" name="pc_checked">
                  <property name="text">
                   <string>PC Plot</string>
                  </property>
@@ -210,21 +210,21 @@
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="spcCheck">
+                <widget class="QRadioButton" name="spc_checked">
                  <property name="text">
                   <string>SPC Plot</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="dsc1Check">
+                <widget class="QRadioButton" name="dsc1_checked">
                  <property name="text">
                   <string>DSC1 Plot</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="dsc2Check">
+                <widget class="QRadioButton" name="dsc2_checked">
                  <property name="text">
                   <string>DSC2 Plot</string>
                  </property>
@@ -233,7 +233,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="makePlotButton">
+              <widget class="QPushButton" name="plot_button">
                <property name="text">
                 <string>Generate Plot</string>
                </property>
@@ -242,7 +242,7 @@
             </layout>
            </item>
            <item>
-            <widget class="QCheckBox" name="axesCheck">
+            <widget class="QCheckBox" name="show_axes">
              <property name="text">
               <string>Show Axes</string>
              </property>
@@ -259,7 +259,7 @@
       <item>
        <layout class="QVBoxLayout" name="plotDisplay">
         <item>
-         <widget class="QWidget" name="placeHolderWidget" native="true">
+         <widget class="QWidget" name="pl" native="true">
           <property name="minimumSize">
            <size>
             <width>850</width>
@@ -299,16 +299,16 @@
            <item>
             <layout class="QVBoxLayout" name="attributeFrameLayout">
              <item>
-              <layout class="QVBoxLayout" name="attributeTableLayout">
+              <layout class="QVBoxLayout" name="attribute_table_layout">
                <item>
-                <widget class="QTableWidget" name="attributeTablePlaceholder"/>
+                <widget class="QTableWidget" name="attribute_pl"/>
                </item>
               </layout>
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout">
                <item>
-                <widget class="QPushButton" name="checkAttributes">
+                <widget class="QPushButton" name="check_attributes">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -321,7 +321,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="uncheckAttributes">
+                <widget class="QPushButton" name="uncheck_attributes">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -336,7 +336,7 @@
               </layout>
              </item>
              <item alignment="Qt::AlignHCenter">
-              <widget class="QPushButton" name="replotFeatureButton">
+              <widget class="QPushButton" name="replot_attribute_button">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -349,12 +349,18 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="horizontalSlider">
+              <widget class="QSlider" name="attribute_slide">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>255</number>
+               </property>
+               <property name="value">
+                <number>128</number>
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -387,16 +393,16 @@
            <item>
             <layout class="QVBoxLayout" name="classFrameLayout">
              <item>
-              <layout class="QVBoxLayout" name="classTableLayout">
+              <layout class="QVBoxLayout" name="class_table_layout">
                <item>
-                <widget class="QTableWidget" name="classTablePlaceholder"/>
+                <widget class="QTableWidget" name="class_pl"/>
                </item>
               </layout>
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
-                <widget class="QPushButton" name="uncheckClasses">
+                <widget class="QPushButton" name="uncheck_classes">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -409,7 +415,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="checkClasses">
+                <widget class="QPushButton" name="check_classes">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -429,7 +435,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="exitButton">
+         <widget class="QPushButton" name="exit_button">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
