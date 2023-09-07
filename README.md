@@ -8,33 +8,45 @@ This application displays multi-dimensional data in 2D using OpenGL for renderin
 
 This visualization tool features multiple visualisation plots, including Parallel Coordinates, Paired Coordinates, DSC1, and DSC2. Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
 
-## Dataset Information
+## Datasets
 
-- Dataset must be in .txt or .csv format
-- Dataset must include headers
-- Dataset should only include class and attribute columns
-- Dataset class header must be labeled as "class" without quotations
-- Dataset features besides "class" must be in numeric representation
+Requirements of datasets:
 
-### Example dataset
+- .txt or .csv format
+- include headers
+- one label column and any number of feature columns
+- label header must be 'class'
+- Features must be numerical
+
+Datasets included:
+
+- Fisher Iris of flower measurements -- 150 samples, 4 features, 3 classes
+- Breast Cancer Wisconsin diagnostics -- 569 samples, 30 features, 2 classes
+- Diabetes diagnostics -- 768 samples, 8 features, 2 classes
+- Heart Disease diagnostics -- 1,025 samples, 13 features, 2 classes
+- Ionosphere atmosphere readings -- 351 samples, 34 features, 2 classes (some empty cells)
+- MNIST Capital Letters handwriting -- 20,000 samples, 16 features, 26 classes
+- Sinusoidal wave samplings -- 200 samples, 2 features, 2 classes
+- Wheat Seed variety measurements -- 210 samples, 7 features, 3 classes
+- Wine chemical analysis measurements -- 4,898 samples, 11 features, 7 classes
+
+Example dataset
 
 length,width,height,class  
 2.7,3.5,3.2,dog  
 1.2,5.5,2.1,cat  
 2.5,4.1,1.6,dog  
 
-### Language Used
+## Language and Libraries
 
-Python 3.9  
-PyOpenGL 3.1.5  
-PyQt6  
-numpy 1.21.4  
-pandas 1.3.4  
-scikit-learn 1.0.1  
+Written in Python using 3.11 with the libraries:
+pyopengl wheel pyopengl-accelerate pyqt6 numpy pandas scikit-learn
 
-QTDesigner not Required but the .UI file for PyQt6 was designed with.
+QTDesigner used for .UI file design used by PyQt6.
 
-### Functions
+See `requirements.txt` for the development environment libraries listing.
+
+## Features
 
 - scroll-wheel click and drag on plot to pan the plot.
 - Scroll the mouse wheel to zoom in/out of the plot.
