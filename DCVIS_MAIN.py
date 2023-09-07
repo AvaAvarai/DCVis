@@ -11,42 +11,7 @@ import ATTRIBUTE_TABLE
 import PLOT_CONTEXT
 import CLIPPING
 import WARNINGS
-
-
-class Dataset(object):
-    # dataset info
-    name = ''
-    dataframe = None
-
-    # class information
-    class_count = 0
-    count_per_class = []
-    class_names = []
-    class_colors = []
-    # attribute information
-    attribute_count = 0
-    attribute_names = []
-    attribute_alpha = 255  # for attribute slider
-    # sample information
-    sample_count = 0
-    clipped_samples = []  # for line clip option
-    vertex_in = []  # for vertex clip option
-    last_vertex_in = []  # for last vertex clip option
-
-    # plot information
-    plot_type = ''
-    positions = []
-    axis_positions = []
-    axis_on = True
-    axis_count = 0
-    vertex_count = 0  # number of vertices depends on plot type
-
-    active_attributes = []  # show/hide markers by attribute
-    active_classes = []  # show/hide classes
-    active_markers = []  # show/hide markers by class
-
-    class_order = []  # choose which class is on top
-    attribute_order = []  # choose attribute order (requires running graph construction algorithm again)
+import DATASET
 
 
 class Ui(QtWidgets.QMainWindow):
@@ -57,7 +22,6 @@ class Ui(QtWidgets.QMainWindow):
         self.plot_layout = None
         self.plot_widget = None
         self.data = None
-        self.data_uploaded = False
 
         self.warnings = WARNINGS.getWarning()
 
@@ -147,18 +111,16 @@ class Ui(QtWidgets.QMainWindow):
         self.pl_exists = True
 
     def upload_dataset(self):
-        if self.data_uploaded:
+        if self.data:
             del self.data
-            self.data = Dataset()
-        else:
-            self.data = None
-            self.data = Dataset()
+
+        self.data = DATASET.Dataset()
         filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File', 'datasets', '(*.csv)')
         if filename[0] == '':
             return
 
         # GUI changes for changing datasets
-        if self.data_uploaded:
+        if self.data and self.plot_widget and self.class_table and self.attribute_table:
             self.plot_layout.removeWidget(self.plot_widget)
             del self.plot_widget
             self.plot_widget = None
@@ -184,11 +146,11 @@ class Ui(QtWidgets.QMainWindow):
         GET_DATA.GetData(self.data, filename[0])
         DATA_DISPLAY.DisplayData(self.data, self.dataset_textbox)
         self.class_table = CLASS_TABLE.ClassTable(self.data, parent=self)
-        self.data_uploaded = True
+        
 
     # ====================================== create plots ======================================
     def create_plot(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
 
@@ -256,7 +218,7 @@ class Ui(QtWidgets.QMainWindow):
 
     # function to save clip files
     def test(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
 
@@ -264,7 +226,7 @@ class Ui(QtWidgets.QMainWindow):
 
     # function remove clip and reset variables
     def remove_clip(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
 
@@ -292,7 +254,7 @@ class Ui(QtWidgets.QMainWindow):
     # function to reorder attributes
     # reordering attributes requires running the GCA again
     def replot_attributes(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
 
@@ -306,7 +268,7 @@ class Ui(QtWidgets.QMainWindow):
         self.create_plot()
 
     def axes_func(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
 
@@ -322,31 +284,31 @@ class Ui(QtWidgets.QMainWindow):
         self.plot_widget.update()
 
     def check_all_attr(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
         ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.data.vertex_count, self.data.plot_type)
 
     def check_all_class(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
         CLASS_TABLE.reset_checkmarks(self.class_table, self.data.class_count)
 
     def uncheck_all_attr(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
         ATTRIBUTE_TABLE.uncheck_checkmarks(self.attribute_table, self.data.vertex_count, self.data.plot_type)
 
     def uncheck_all_class(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
         CLASS_TABLE.uncheck_checkmarks(self.class_table, self.data.class_count)
 
     def recenter_plot(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
 
@@ -363,7 +325,7 @@ class Ui(QtWidgets.QMainWindow):
 
     # function to get alpha value for hidden attributes
     def attr_slider(self):
-        if not self.data_uploaded:
+        if not self.data:
             self.warnings.noDataWarning()
             return
         value = self.attribute_slide.value()
@@ -371,7 +333,8 @@ class Ui(QtWidgets.QMainWindow):
         self.plot_widget.update()
 
 
-app = QtWidgets.QApplication(sys.argv)
-window = Ui()
-window.show()
-app.exec()
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    window = Ui()
+    window.show()
+    app.exec()

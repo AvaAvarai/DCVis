@@ -1,10 +1,10 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
-Formerly for CS Masters Program at CWU, renewed for further research.
+Continuation of a CS Masters Project at CWU.
 
 ## About
 
-This application displays multi-dimensional data in 2D using OpenGL for rendering. The plot can be dragged and zoomed in/out. Classes can be hidden, as well as specified attribute markers. A box-clipping algorithm is included to clip lines and return samples of the dataset.
+This application displays multi-dimensional numerical data in 2D using OpenGL for GPU rendering. The plot can be panned around and zoomed in/out. Classes can be hidden, specified attribute markers can be customized, classes can be reordered and recolored. A box-clipping algorithm is included to clip lines and return contained samples of the dataset as a training and validation dataset split for machine learning analysis.
 
 This visualization tool features multiple visualisation plots, including Parallel Coordinates, Paired Coordinates, DSC1, and DSC2. Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
 
