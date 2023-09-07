@@ -1,6 +1,9 @@
 from typing import List, Optional, Tuple
 import pandas as pd
 import numpy as np
+import os
+
+import COLORS
 
 class Dataset:
     def __init__(self):
@@ -39,3 +42,66 @@ class Dataset:
 
         self.class_order: List[int] = []  # choose which class is on top
         self.attribute_order: List[int] = []  # choose attribute order (requires running graph construction algorithm again)
+
+    def load_from_csv(self, filename: str):
+        try:
+            df = pd.read_csv(filename)
+
+            # get dataset name
+            self.name = os.path.basename(filename)
+
+            # make even attributes
+            if (len(df.columns) - 1) % 2 == 1:
+                df['Dupe-x' + str(len(df.columns) - 1)] = df.iloc[:, len(df.columns) - 1]
+
+            # put class column to end of dataframe
+            df.insert(len(df.columns) - 1, 'class', df.pop('class'))
+
+            # get class information
+            self.class_count = len(df['class'].unique())
+            self.class_names = df['class'].value_counts().index.tolist()
+            self.count_per_class = df['class'].value_counts().tolist()
+            self.class_order = np.arange(0, self.class_count)
+
+            # initial colors (10 options)
+            colors = COLORS.getColors()
+            class_color_array = colors.colors_array
+
+            cnt = 0  # counter for color array
+            self.class_colors = []
+            for i in range(self.class_count):
+                # repeat colors for more than 9 classes, class colors can be changed interactively later
+                if i % 9 == 0:
+                    cnt = 0
+                # make all classes and markers initially active
+                # add colors and update counter
+                self.class_colors.append(class_color_array[cnt])
+                cnt += 1
+            self.active_markers = np.repeat(True, self.class_count)
+            self.active_classes = np.repeat(True, self.class_count)
+
+            # get attribute information
+            self.attribute_names = df.columns.tolist()[:-1]
+            self.attribute_count = len(df.columns) - 1
+            self.attribute_order = np.arange(0, self.attribute_count)
+
+            self.active_attributes = np.repeat(True, self.attribute_count)
+
+            # get sample information
+            self.sample_count = len(df.index)
+            # initialize arrays for clipping options
+            self.clipped_samples = np.repeat(False, self.sample_count)
+            self.vertex_in = np.repeat(False, self.sample_count)
+            self.last_vertex_in = np.repeat(False, self.sample_count)
+
+            # general dataframe
+            self.dataframe = df
+        except FileNotFoundError:
+            print(f"File {filename} not found.")
+            # Notify the controller to show a warning message
+        except pd.errors.EmptyDataError:
+            print("The file is empty.")
+            # Notify the controller to show a warning message
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            # Notify the controller to show a warning message

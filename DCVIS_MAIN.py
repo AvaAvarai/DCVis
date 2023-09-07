@@ -4,7 +4,6 @@ from PyQt6.uic.load_ui import loadUi
 import numpy as np
 import sys
 
-import GET_DATA
 import DATA_DISPLAY
 import CLASS_TABLE
 import ATTRIBUTE_TABLE
@@ -139,7 +138,7 @@ class Ui(QtWidgets.QMainWindow):
 
             gc.collect()
 
-        GET_DATA.GetData(self.data, filename[0])
+        self.data.load_from_csv(filename[0])
         DATA_DISPLAY.DisplayData(self.data, self.dataset_textbox)
         self.class_table = CLASS_TABLE.ClassTable(self.data, parent=self)
 
