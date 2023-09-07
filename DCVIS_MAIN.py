@@ -1,6 +1,6 @@
 import gc
 from PyQt6 import QtWidgets
-from PyQt6 import uic
+from PyQt6.uic.load_ui import loadUi
 import numpy as np
 import sys
 
@@ -17,8 +17,7 @@ import DATASET
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         super(Ui, self).__init__()
-        # load Ui from ui File made in QTDesigner
-        uic.loadUi('GUI.ui', self)
+        loadUi('GUI.ui', self) # load GUI from .ui file (created in Qt Designer)
         self.plot_layout = None
         self.plot_widget = None
         self.data = None
@@ -108,7 +107,6 @@ class Ui(QtWidgets.QMainWindow):
         self.plot_layout = self.findChild(QtWidgets.QVBoxLayout, 'plotDisplay')
 
         self.pl = self.findChild(QtWidgets.QWidget, 'placeHolderWidget')
-        self.pl_exists = True
 
     def upload_dataset(self):
         if self.data:
@@ -120,7 +118,7 @@ class Ui(QtWidgets.QMainWindow):
             return
 
         # GUI changes for changing datasets
-        if self.data and self.plot_widget and self.class_table and self.attribute_table:
+        if self.data and self.plot_widget and self.class_table and self.plot_layout:
             self.plot_layout.removeWidget(self.plot_widget)
             del self.plot_widget
             self.plot_widget = None
@@ -140,25 +138,22 @@ class Ui(QtWidgets.QMainWindow):
             self.attribute_table_layout.addWidget(self.attribute_pl)
             self.attribute_pl_exists = True
 
-            self.pl_exists = True
             gc.collect()
 
         GET_DATA.GetData(self.data, filename[0])
         DATA_DISPLAY.DisplayData(self.data, self.dataset_textbox)
         self.class_table = CLASS_TABLE.ClassTable(self.data, parent=self)
-        
 
-    # ====================================== create plots ======================================
     def create_plot(self):
-        if not self.data:
+        if not self.data or not self.plot_layout:
             self.warnings.noDataWarning()
             return
 
         # remove initial placeholder
-        if not self.pl_exists:
+        if self.pl:
+            self.plot_layout.removeWidget(self.pl)
+        if self.plot_widget:
             self.plot_layout.removeWidget(self.plot_widget)
-            self.plot_layout.addWidget(self.pl)
-            self.pl_exists = True
 
         self.data.positions = []
 
@@ -203,11 +198,6 @@ class Ui(QtWidgets.QMainWindow):
 
         self.attribute_table = ATTRIBUTE_TABLE.AttributeTable(self.data, parent=self)
         self.attribute_table_layout.addWidget(self.attribute_table)
-
-        # plot placeholder
-        if self.pl_exists:
-            self.plot_layout.removeWidget(self.pl)
-            self.pl_exists = False
 
         self.plot_layout.addWidget(self.plot_widget)
 

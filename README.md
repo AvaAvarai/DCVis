@@ -1,6 +1,6 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
-Continuation of a CS Masters Project at CWU.
+Continuation of a [CS Masters Project at CWU](https://github.com/Charles57-CWU/DSCVis).
 
 ## About
 

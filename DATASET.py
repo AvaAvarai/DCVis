@@ -33,7 +33,7 @@ class Dataset:
         self.axis_count: int = 0
         self.vertex_count: int = 0  # number of vertices depends on plot type
 
-        self.active_attributes: List[bool] = []  # show/hide markers by attribute
+        self.active_attributes: np.ndarray = np.array([], dtype=bool)  # show/hide markers by attribute
         self.active_classes: List[bool] = []  # show/hide classes
         self.active_markers: List[bool] = []  # show/hide markers by class
 
