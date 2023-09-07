@@ -156,7 +156,7 @@ class MakePlot(QOpenGLWidget):
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(5)
-
+        
         # push dataset to GPU memory
         for i in range(self.data.class_count):
             # grab the class positions
@@ -236,19 +236,23 @@ class MakePlot(QOpenGLWidget):
         elif event.angleDelta().y() > 0:
             zoom_dir = 1 / zoom_factor
 
+        # Normalize mouse coordinates to [0,1] for both x and y.
         mouseX = event.position().x() / self.width
-        mouseY = (1 - event.position().y()) / self.height
+        mouseY = (self.height - event.position().y()) / self.height  # flipped y-axis
 
-        mouseX_in_world = self.m_left + mouseX * self.zoomed_width
-        mouseY_in_world = self.m_bottom + mouseY * self.zoomed_height
+        # Convert mouse coordinates to world coordinates.
+        mouseX_in_world = self.m_left + mouseX * (self.m_right - self.m_left)
+        mouseY_in_world = self.m_bottom + mouseY * (self.m_top - self.m_bottom)
 
-        self.zoomed_width *= zoom_dir
-        self.zoomed_height *= zoom_dir
+        # Compute new zoomed width and height.
+        new_zoomed_width = (self.m_right - self.m_left) * zoom_dir
+        new_zoomed_height = (self.m_top - self.m_bottom) * zoom_dir
 
-        self.m_left = mouseX_in_world - mouseX * self.zoomed_width
-        self.m_right = mouseX_in_world + (1 - mouseX) * self.zoomed_width
-        self.m_bottom = mouseY_in_world - mouseY * self.zoomed_height
-        self.m_top = mouseY_in_world + (1 - mouseY) * self.zoomed_height
+        # Update the viewport boundaries.
+        self.m_left = mouseX_in_world - mouseX * new_zoomed_width
+        self.m_right = mouseX_in_world + (1 - mouseX) * new_zoomed_width
+        self.m_bottom = mouseY_in_world - mouseY * new_zoomed_height
+        self.m_top = mouseY_in_world + (1 - mouseY) * new_zoomed_height
 
         self.update()
         event.accept()
@@ -260,7 +264,6 @@ class MakePlot(QOpenGLWidget):
 
         mouseX = event.position().x() / self.width
         mouseY = (1 - event.position().y()) / self.height
-
 
         if not self.has_dragged:
             self.prev_horiz = mouseX

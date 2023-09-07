@@ -103,7 +103,6 @@ class Ui(QtWidgets.QMainWindow):
         self.cell_swap = QtWidgets.QTableWidget()
         self.cell_swap.__class__.dropEvent = self.table_swap
 
-        # ====================================== plot module ======================================
         self.plot_layout = self.findChild(QtWidgets.QVBoxLayout, 'plotDisplay')
 
         self.pl = self.findChild(QtWidgets.QWidget, 'placeHolderWidget')
@@ -216,14 +215,13 @@ class Ui(QtWidgets.QMainWindow):
 
     # function remove clip and reset variables
     def remove_clip(self):
-        if not self.data:
+        if not self.data or not self.plot_widget:
             self.warnings.noDataWarning()
             return
 
         self.data.clipped_samples = np.zeros(self.data.sample_count)
         self.data.vertex_in = np.zeros(self.data.sample_count)
         self.data.last_vertex_in = np.zeros(self.data.sample_count)
-        self.plot_widget.rect = []
         self.plot_widget.all_rect = []
 
         self.clipped_area_textbox.setText('')
@@ -244,7 +242,7 @@ class Ui(QtWidgets.QMainWindow):
     # function to reorder attributes
     # reordering attributes requires running the GCA again
     def replot_attributes(self):
-        if not self.data:
+        if not self.data or not self.data.dataframe:
             self.warnings.noDataWarning()
             return
 
@@ -271,7 +269,8 @@ class Ui(QtWidgets.QMainWindow):
 
     # function to refresh plot
     def refresh(self):
-        self.plot_widget.update()
+        if self.plot_widget:
+            self.plot_widget.update()
 
     def check_all_attr(self):
         if not self.data:
@@ -298,7 +297,7 @@ class Ui(QtWidgets.QMainWindow):
         CLASS_TABLE.uncheck_checkmarks(self.class_table, self.data.class_count)
 
     def recenter_plot(self):
-        if not self.data:
+        if not self.data or not self.plot_widget:
             self.warnings.noDataWarning()
             return
 
@@ -315,7 +314,7 @@ class Ui(QtWidgets.QMainWindow):
 
     # function to get alpha value for hidden attributes
     def attr_slider(self):
-        if not self.data:
+        if not self.data or not self.plot_widget:
             self.warnings.noDataWarning()
             return
         value = self.attribute_slide.value()
