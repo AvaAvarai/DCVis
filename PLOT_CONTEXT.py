@@ -108,15 +108,14 @@ def drawBox(all_rect):
             glDisable(GL_BLEND)
 
 
-# set plot region
 def setViewFrustum(m_left, m_right, m_bottom, m_top):
+    if m_left == m_right or m_bottom == m_top:
+        return  # Avoid invalid parameters
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     glOrtho(m_left, m_right, m_bottom, m_top, 0, 1)
-
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-
 
 class MakePlot(QOpenGLWidget):
     def __init__(self, dataset, parent=None):
@@ -232,8 +231,6 @@ class MakePlot(QOpenGLWidget):
 
     def wheelEvent(self, event):
         self.is_zooming = True
-        min_zoom_width = 0.1  # Minimum zoom level for width
-        max_zoom_width = 10.0  # Maximum zoom level for width
         
         zoom_factor = 1.2
         zoom_dir = 1
@@ -251,10 +248,6 @@ class MakePlot(QOpenGLWidget):
         new_zoomed_width = (self.m_right - self.m_left) * zoom_dir
         new_zoomed_height = (self.m_top - self.m_bottom) * zoom_dir
 
-        # Check if the new zoomed width is within the bounds.
-        if new_zoomed_width < min_zoom_width or new_zoomed_width > max_zoom_width:
-            return
-
         # Convert mouse coordinates to world coordinates.
         mouseX_in_world = self.m_left + mouseX * (self.m_right - self.m_left)
         mouseY_in_world = self.m_bottom + mouseY * (self.m_top - self.m_bottom)
@@ -269,6 +262,7 @@ class MakePlot(QOpenGLWidget):
         self.prev_horiz = mouseX
         self.prev_vert = mouseY
         
+        self.is_zooming = False
         self.update()
         event.accept()
 
