@@ -119,9 +119,6 @@ def setViewFrustum(m_left, m_right, m_bottom, m_top):
 
 
 class MakePlot(QOpenGLWidget):
-    width = 800
-    height = 600
-
     def __init__(self, dataset, parent=None):
         super(MakePlot, self).__init__(parent)
 
@@ -145,7 +142,8 @@ class MakePlot(QOpenGLWidget):
         self.zoom_level = 1
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125
-
+        self.is_zooming = False
+        
         # for dragging
         self.has_dragged = False  # bool to check for starting location
         self.prev_horiz = None  # need previous x location
@@ -212,7 +210,7 @@ class MakePlot(QOpenGLWidget):
 
         drawBox(self.all_rect)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event):      
         if event.button() == Qt.MouseButton.RightButton:
             x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width
             y = self.m_bottom + ((self.height - event.position().y()) * (self.m_top - self.m_bottom)) / self.height
@@ -227,7 +225,16 @@ class MakePlot(QOpenGLWidget):
 
             event.accept()
 
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.MiddleButton:
+            self.has_dragged = False  # Reset the flag only when the middle mouse button is released
+            self.is_zooming = False  # Reset zooming flag
+
     def wheelEvent(self, event):
+        self.is_zooming = True
+        min_zoom_width = 0.1  # Minimum zoom level for width
+        max_zoom_width = 10.0  # Maximum zoom level for width
+        
         zoom_factor = 1.2
         zoom_dir = 1
 
@@ -240,13 +247,17 @@ class MakePlot(QOpenGLWidget):
         mouseX = event.position().x() / self.width
         mouseY = (self.height - event.position().y()) / self.height  # flipped y-axis
 
-        # Convert mouse coordinates to world coordinates.
-        mouseX_in_world = self.m_left + mouseX * (self.m_right - self.m_left)
-        mouseY_in_world = self.m_bottom + mouseY * (self.m_top - self.m_bottom)
-
         # Compute new zoomed width and height.
         new_zoomed_width = (self.m_right - self.m_left) * zoom_dir
         new_zoomed_height = (self.m_top - self.m_bottom) * zoom_dir
+
+        # Check if the new zoomed width is within the bounds.
+        if new_zoomed_width < min_zoom_width or new_zoomed_width > max_zoom_width:
+            return
+
+        # Convert mouse coordinates to world coordinates.
+        mouseX_in_world = self.m_left + mouseX * (self.m_right - self.m_left)
+        mouseY_in_world = self.m_bottom + mouseY * (self.m_top - self.m_bottom)
 
         # Update the viewport boundaries.
         self.m_left = mouseX_in_world - mouseX * new_zoomed_width
@@ -254,12 +265,22 @@ class MakePlot(QOpenGLWidget):
         self.m_bottom = mouseY_in_world - mouseY * new_zoomed_height
         self.m_top = mouseY_in_world + (1 - mouseY) * new_zoomed_height
 
+        # Update previous mouse coordinates according to new zoom level
+        self.prev_horiz = mouseX
+        self.prev_vert = mouseY
+        
         self.update()
         event.accept()
 
     def mouseMoveEvent(self, event):
+        # Define panning bounds and thresholds
+        drag_threshold = 0.01  # Small threshold to consider an event as a drag
+
         # exit if not middle mouse
         if event.buttons() != Qt.MouseButton.MiddleButton:
+            return
+
+        if self.is_zooming:
             return
 
         mouseX = event.position().x() / self.width
@@ -270,20 +291,19 @@ class MakePlot(QOpenGLWidget):
             self.prev_vert = mouseY
             self.has_dragged = True
         else:
-            if abs(mouseX - self.prev_horiz) > 0.02 or abs(mouseY - self.prev_vert) > 0.02:
-                self.has_dragged = False
-            else:
-                dx = mouseX - self.prev_horiz
-                dy = mouseY - self.prev_vert
+            dx = mouseX - self.prev_horiz
+            dy = mouseY - self.prev_vert
 
-                self.m_left -= dx
-                self.m_right -= dx
-                self.m_bottom -= dy
-                self.m_top -= dy
+            # Only consider the event as a drag if it's beyond a small threshold
+            if abs(dx) > drag_threshold or abs(dy) > drag_threshold:
+                self.m_left -= dx * (self.m_right - self.m_left)
+                self.m_right -= dx * (self.m_right - self.m_left)
+                self.m_bottom -= dy * (self.m_top - self.m_bottom)
+                self.m_top -= dy * (self.m_top - self.m_bottom)
 
-                self.prev_horiz = mouseX
-                self.prev_vert = mouseY
+                self.prev_horiz = mouseX  # Update for the next iteration
+                self.prev_vert = mouseY  # Update for the next iteration
 
-                self.update()
+            self.update()
 
         event.accept()
