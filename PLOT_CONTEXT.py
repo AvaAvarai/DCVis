@@ -21,8 +21,6 @@ poly_color = [[255, 0, 0],  # red
               [255, 233, 0],
               [233, 233, 233]]
 
-
-# draw polylines
 def drawPolyLines(dataset, class_vao):
     # loop through classes
     for i in range(dataset.class_count):
@@ -36,22 +34,34 @@ def drawPolyLines(dataset, class_vao):
             # draw polyline
             for j in range(0, len(dataset.positions[dataset.class_order[i]]), dataset.vertex_count):
                 glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
-
-            # ============================special =============================================================
-            # k = 0
-            # for j in range(0, len(dataset.positions[i]), dataset.vertex_count):
-            #     k = 0
-            #     for m in range(1, dataset.vertex_count):
-            #         color = poly_color[k]
-            #         glColor3ub(color[0], color[1], color[2])
-            #         glBegin(GL_LINES)
-            #         glVertex2f(dataset.positions[i][j+m][0], dataset.positions[i][j+m][1])
-            #         glVertex2f(dataset.positions[i][j+m-1][0], dataset.positions[i][j+m-1][1])
-            #         glEnd()
-            #         k += 1
-
-            # unbind
+                
             glBindVertexArray(0)
+
+def drawHighlightedPolyLines(dataset, class_vao):
+    # highlight color and width
+    glColor3ub(255, 255, 0)
+    glLineWidth(2)
+
+    # Draw highlighted polylines
+    for i in range(dataset.class_count):
+        datapoint_cnt = 0
+        # check if active
+        if dataset.active_classes[i]:
+            # positions of the class
+            glBindVertexArray(class_vao[dataset.class_order[i]])
+            size_index = 0
+            for j in range(dataset.class_count):
+                if j < dataset.class_order[i]:
+                    size_index += dataset.count_per_class[dataset.class_order[j]]
+            
+            # draw polyline
+            size = len(dataset.positions[dataset.class_order[i]])
+            for j in range(0, size, dataset.vertex_count):
+                if dataset.clipped_samples[size_index + datapoint_cnt]:
+                    glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
+                datapoint_cnt += 1
+            glBindVertexArray(0)
+    glLineWidth(1)
 
 # draw markers
 def drawMarkers(dataset, marker_vao):
@@ -107,7 +117,6 @@ def drawBox(all_rect):
             glEnd()
             glDisable(GL_BLEND)
 
-
 def setViewFrustum(m_left, m_right, m_bottom, m_top):
     if m_left == m_right or m_bottom == m_top:
         return  # Avoid invalid parameters
@@ -149,7 +158,7 @@ class MakePlot(QOpenGLWidget):
         self.prev_vert = None  # need previous y location
 
     def initializeGL(self):
-        glClearColor(1, 1, 1, 1)
+        glClearColor(0.7, 0.7, 0.7, 1)
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(5)
@@ -203,6 +212,7 @@ class MakePlot(QOpenGLWidget):
 
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         drawPolyLines(self.data, self.line_vao)
+        drawHighlightedPolyLines(self.data, self.line_vao)
         drawMarkers(self.data, self.marker_vao)
         if self.data.axis_on:
             drawAxes(self.data, self.axis_vao)

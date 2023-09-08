@@ -167,7 +167,6 @@ class UiView(QtWidgets.QMainWindow):
 
         CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
 
-    # function remove clip and reset variables
     def remove_clip(self):
         if not self.controller.data:
             self.warnings.noDataWarning()
@@ -182,7 +181,6 @@ class UiView(QtWidgets.QMainWindow):
 
         self.plot_widget.update()
 
-    # function to help with reordering tables when user swaps rows
     def table_swap(self, event):
         table = event.source()
 
@@ -195,8 +193,8 @@ class UiView(QtWidgets.QMainWindow):
 
 class MainController:
     def __init__(self, dataset, view):
-        self.data = dataset  # This is your Model.
-        self.view = view     # This is your View.
+        self.data = dataset
+        self.view = view
         if self.view is not None:
             self.setup_connections()
 
@@ -218,7 +216,6 @@ class MainController:
         self.view.cell_swap.__class__.dropEvent = self.view.table_swap
 
     def upload_dataset(self):
-        # Your upload logic here
         if self.data:
             del self.data
 
