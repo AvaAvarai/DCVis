@@ -41,7 +41,6 @@ def drawHighlightedPolyLines(dataset, class_vao):
     # highlight color and width
     glColor3ub(255, 255, 0)
     glLineWidth(2)
-
     # Draw highlighted polylines
     for i in range(dataset.class_count):
         datapoint_cnt = 0
@@ -75,7 +74,7 @@ def drawMarkers(dataset, marker_vao):
             # positions of the markers
             for j in range(dataset.vertex_count):
                 if j == dataset.vertex_count - 1:
-                    glPointSize(10)
+                    glPointSize(7)
 
                 glBindVertexArray(marker_vao[dataset.class_order[i] * dataset.vertex_count + j])
                 # colors of the class
@@ -92,11 +91,11 @@ def drawMarkers(dataset, marker_vao):
     glDisable(GL_BLEND)
 
 # draw axes
-def drawAxes(dataset, axis_vao):
+def drawAxes(dataset, axis_vao, color):
     # positions of the class
     glBindVertexArray(axis_vao)
     # colors
-    glColor3ub(0, 0, 0)
+    glColor4f(*color)
     for j in range(0, dataset.axis_count * 2, 2):
         glDrawArrays(GL_LINES, j, dataset.vertex_count)
     # unbind
@@ -157,12 +156,22 @@ class MakePlot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
+        self.background_color = [0.7, 0.7, 0.7, 1.0]  # Default grey in RGBA
+        self.axes_color = [0, 0, 0, 1]  # Default black in RGBA
+
+    def redraw_plot(self, background_color=None, axes_color=None):
+        if background_color is not None:
+            self.background_color = background_color
+        if axes_color is not None:
+            self.axes_color = axes_color
+        self.update()
+
     def initializeGL(self):
-        glClearColor(0.7, 0.7, 0.7, 1)
+        glClearColor(*self.background_color)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(5)
-        
         # push dataset to GPU memory
         for i in range(self.data.class_count):
             # grab the class positions
@@ -208,14 +217,15 @@ class MakePlot(QOpenGLWidget):
         glViewport(0, 0, w, h)
 
     def paintGL(self):
+        glClearColor(*self.background_color)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         drawPolyLines(self.data, self.line_vao)
-        drawHighlightedPolyLines(self.data, self.line_vao)
         drawMarkers(self.data, self.marker_vao)
+        
+        drawHighlightedPolyLines(self.data, self.line_vao)
         if self.data.axis_on:
-            drawAxes(self.data, self.axis_vao)
+            drawAxes(self.data, self.axis_vao, self.axes_color)
 
         drawBox(self.all_rect)
 

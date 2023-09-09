@@ -22,7 +22,6 @@ def table_swap(table, dataset, event):
     dataset.active_attributes[moved_from] = dataset.active_attributes[moved_to]
     dataset.active_attributes[moved_to] = place_holder
 
-
 def reset_checkmarks(table, count, plot_type):
     for idx in range(count):
         if plot_type == 'SPC' or plot_type == 'DSC2':
@@ -32,7 +31,6 @@ def reset_checkmarks(table, count, plot_type):
             cell = table.cellWidget(idx, 1)
             cell.setCheckState(Qt.CheckState.Checked)
 
-
 def uncheck_checkmarks(table, count, plot_type):
     for idx in range(count):
         if plot_type == 'SPC' or plot_type == 'DSC2':
@@ -41,7 +39,6 @@ def uncheck_checkmarks(table, count, plot_type):
         else:
             cell = table.cellWidget(idx, 1)
             cell.setCheckState(Qt.CheckState.Unchecked)
-
 
 class AttributeTable(QtWidgets.QTableWidget):
     def __init__(self, dataset, parent=None):
@@ -78,7 +75,6 @@ class AttributeTable(QtWidgets.QTableWidget):
                 self.setCellWidget(counter, 1, checkbox)
 
             counter += 1
-
 
 class CheckBox(QtWidgets.QCheckBox):
     def __init__(self, row, dataset, option, parent=None):

@@ -1,4 +1,5 @@
 from PyQt6 import QtWidgets
+from PyQt6.QtWidgets import QColorDialog
 
 from PyQt6.uic.load_ui import loadUi
 import numpy as np
@@ -83,7 +84,7 @@ class UiView(QtWidgets.QMainWindow):
         if not self.controller.data:
             self.warnings.noDataWarning()
             return
-        CLASS_TABLE.uncheck_checkmarks(self.class_table, self.data.class_count)
+        CLASS_TABLE.uncheck_checkmarks(self.class_table, self.controller.data.class_count)
 
     # function to refresh plot
     def refresh(self):
@@ -191,6 +192,19 @@ class UiView(QtWidgets.QMainWindow):
 
         event.accept()
 
+    def open_background_color_picker(self):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            self.background_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
+            self.plot_widget.redraw_plot(background_color=self.background_color)
+
+    def open_axes_color_picker(self):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            self.axes_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
+            self.plot_widget.redraw_plot(axes_color=self.axes_color)
+
+
 class MainController:
     def __init__(self, dataset, view):
         self.data = dataset
@@ -214,6 +228,8 @@ class MainController:
         self.view.check_attributes.clicked.connect(self.view.check_all_attr)
         self.view.uncheck_attributes.clicked.connect(self.view.uncheck_all_attr)
         self.view.cell_swap.__class__.dropEvent = self.view.table_swap
+        self.view.background_button.clicked.connect(self.view.open_background_color_picker)
+        self.view.axes_button.clicked.connect(self.view.open_axes_color_picker)
 
     def upload_dataset(self):
         if self.data:
