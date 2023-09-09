@@ -1,5 +1,6 @@
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as glvbo
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtGui import *
@@ -229,14 +230,20 @@ class MakePlot(QOpenGLWidget):
 
         drawBox(self.all_rect)
 
+    # === Mouse Events ===
+
     def mousePressEvent(self, event):      
         if event.button() == Qt.MouseButton.RightButton:
             x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width
             y = self.m_bottom + ((self.height - event.position().y()) * (self.m_top - self.m_bottom)) / self.height
-            # print(str(x) + " " + str(y))
             self.rect.append(x)
             self.rect.append(y)
+
+            if len(self.rect) == 2:
+                QApplication.instance().setOverrideCursor(QCursor(Qt.CursorShape.CrossCursor))
+            
             if len(self.rect) == 4:
+                QApplication.instance().restoreOverrideCursor()
                 CLIPPING.Clipping(self.rect, self.data)
                 self.all_rect.append(self.rect)
                 self.rect = []
@@ -246,8 +253,8 @@ class MakePlot(QOpenGLWidget):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.MiddleButton:
-            self.has_dragged = False  # Reset the flag only when the middle mouse button is released
-            self.is_zooming = False  # Reset zooming flag
+            self.has_dragged = False
+            self.is_zooming = False
 
     def wheelEvent(self, event):
         self.is_zooming = True
@@ -287,10 +294,8 @@ class MakePlot(QOpenGLWidget):
         event.accept()
 
     def mouseMoveEvent(self, event):
-        # Define panning bounds and thresholds
-        drag_threshold = 0.01  # Small threshold to consider an event as a drag
-
-        # exit if not middle mouse
+        drag_threshold = 0.01  # threshold to consider an event as a drag
+        
         if event.buttons() != Qt.MouseButton.MiddleButton:
             return
 
@@ -315,8 +320,9 @@ class MakePlot(QOpenGLWidget):
                 self.m_bottom -= dy * (self.m_top - self.m_bottom)
                 self.m_top -= dy * (self.m_top - self.m_bottom)
 
-                self.prev_horiz = mouseX  # Update for the next iteration
-                self.prev_vert = mouseY  # Update for the next iteration
+                # Update for the next iteration
+                self.prev_horiz = mouseX  
+                self.prev_vert = mouseY
 
             self.update()
 

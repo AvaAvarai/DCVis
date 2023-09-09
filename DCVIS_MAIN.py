@@ -115,33 +115,22 @@ class UiView(QtWidgets.QMainWindow):
             self.plot_layout.removeWidget(self.plot_widget)
 
         self.controller.data.positions = []
-
-        # draw PC plot
-        if self.pc_checked.isChecked():
+        
+        selected_plot_type = self.plot_select.currentText()
+        
+        if selected_plot_type == 'Parallel Coordinates':
             self.controller.data.plot_type = 'PC'
-            self.plot_widget = PLOT_CONTEXT.MakePlot(self.controller.data, parent=self)
-
-        # draw DSC1 plot
-        if self.dsc1_checked.isChecked():
+        elif selected_plot_type == 'Dynamic Scaffold Coordinates 1':
             self.controller.data.plot_type = 'DSC1'
-            self.plot_widget = PLOT_CONTEXT.MakePlot(self.controller.data, parent=self)
-
-        # draw DSC2 plot
-        if self.dsc2_checked.isChecked():
-            if self.controller.data.attribute_count % 2 != 0:
-                self.warnings.unevenAttributeWarning()
-                return
+        elif selected_plot_type == 'Dynamic Scaffold Coordinates 2':
             self.controller.data.plot_type = 'DSC2'
-            self.plot_widget = PLOT_CONTEXT.MakePlot(self.controller.data, parent=self)
-
-        # draw SPC plot
-        if self.spc_checked.isChecked():
-            if self.controller.data.attribute_count % 2 != 0:
-                self.warnings.unevenAttributeWarning()
-                return
+        elif selected_plot_type == 'Shifted Paired Coordinates':
             self.controller.data.plot_type = 'SPC'
-            self.plot_widget = PLOT_CONTEXT.MakePlot(self.controller.data, parent=self)
-
+        else:
+            return
+        
+        self.plot_widget = PLOT_CONTEXT.MakePlot(self.controller.data, parent=self)
+    
         # class table placeholder
         if self.class_pl_exists:
             self.class_table_layout.removeWidget(self.class_pl)
