@@ -5,7 +5,7 @@ class DSC1Info:
     def __init__(self, dataset):
         working_df = dataset.dataframe.copy()
         space = 1 / dataset.vertex_count
-        scaler = MinMaxScaler((0, space))
+        scaler = MinMaxScaler((0, space)) # [0, 1 / vertex_count] scaling
         working_df[dataset.attribute_names] = scaler.fit_transform(working_df[dataset.attribute_names])
 
         angle_array = np.repeat(45, repeats=dataset.vertex_count)
@@ -40,3 +40,4 @@ class DSC1Info:
         dataset.axis_positions = [[-1, -1], [-1, 1], [-1, -1], [1, -1]]
         dataset.axis_count = 2
 
+        print('DSC1 BASED GCA COMPLETE')

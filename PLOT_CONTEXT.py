@@ -163,8 +163,8 @@ class MakePlot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [0.7, 0.7, 0.7, 1.0]  # Default grey in RGBA
-        self.axes_color = [0, 0, 0, 1]  # Default black in RGBA
+        self.background_color = [0, 0, 0, 1]  # Default black in RGBA
+        self.axes_color = [1, 1, 1, 1]  # Default white in RGBA
         
         self.data = dataset
         

@@ -52,7 +52,7 @@ class AttributeTable(QtWidgets.QTableWidget):
         self.setColumnCount(2)
 
         self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Attribute Order'))
-        self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Highlight'))
+        self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Transparency'))
 
         self.setDragEnabled(True)
         self.setAcceptDrops(True)

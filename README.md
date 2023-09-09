@@ -55,10 +55,41 @@ See `requirements.txt` for the development environment libraries listing.
 - The slider below the attribute table will change the transparency of the attribute markers that are not selected in the highlight column.
 
 Application window with 4D Fisher Iris dataset in first visualisation
-![window](/Images/APP_WINDOW.png)
+![window](/screenshots/APP_WINDOW.png)
 
 MNIST on DSC2 using t-SNE as scaffold origin points. Image contains 3,120,000 data points (60,000 * 52)
-![mnist](/Images/MNIST.png)
+![mnist](/screenshots/MNIST.png)
 
 Showing zoom and pan capabilities
-![mnist](/Images/MNIST_ZOOM.png)
+![mnist](/screenshots/MNIST_ZOOM.png)
+
+### Dev Plans
+
+- Class Ordering Get Working
+  - Bug 1: Reordering classes highlighs wrong polylines
+  - Bug 2: Reordering classes makes marker checkbox not coresspond to correct class
+
+- Circular Coordinates
+  - Add SCC
+  - Add DCC
+
+- Attribute Optimization
+  - n-epoch search
+  - LDA based
+  - SVM based
+  - Hyperparam Tuning search
+
+- Histogram View
+  - Along axes each plot type
+
+- Draggable n-D points
+  - renormalize
+  - replot
+
+- Draggable Classification Boundary
+  - n-epoch search
+  - Update on drag
+  - Show confusion matrix
+  - LDA based
+  - SVM based
+  - Hyperparam tuning search
