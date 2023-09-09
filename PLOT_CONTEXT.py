@@ -156,6 +156,7 @@ class MakePlot(QOpenGLWidget):
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125
         self.is_zooming = False
+        self.is_panning = False
         
         # for dragging
         self.has_dragged = False  # bool to check for starting location
@@ -166,6 +167,7 @@ class MakePlot(QOpenGLWidget):
         self.axes_color = [0, 0, 0, 1]  # Default black in RGBA
         
         self.data = dataset
+        
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         self.data.class_colors = self.color_instance.colors_array
 
@@ -182,7 +184,7 @@ class MakePlot(QOpenGLWidget):
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(5)
-        QApplication.instance().setOverrideCursor(QCursor(Qt.CursorShape.ArrowCursor))
+        QApplication.instance().restoreOverrideCursor()
         # push dataset to GPU memory
         for i in range(self.data.class_count):
             # grab the class positions
@@ -243,8 +245,7 @@ class MakePlot(QOpenGLWidget):
         drawBox(self.all_rect) # draw clip box
 
     # === Mouse Events ===
-
-    def mousePressEvent(self, event):      
+    def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.RightButton:
             x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width
             y = self.m_bottom + ((self.height - event.position().y()) * (self.m_top - self.m_bottom)) / self.height
@@ -267,8 +268,12 @@ class MakePlot(QOpenGLWidget):
         if event.button() == Qt.MouseButton.MiddleButton:
             self.has_dragged = False
             self.is_zooming = False
+            self.is_panning = False
 
     def wheelEvent(self, event):
+        if self.is_panning:
+            return
+        
         self.is_zooming = True
         
         zoom_factor = 1.2
@@ -306,13 +311,13 @@ class MakePlot(QOpenGLWidget):
         event.accept()
 
     def mouseMoveEvent(self, event):
-        drag_threshold = 0.01  # threshold to consider an event as a drag
-        
         if event.buttons() != Qt.MouseButton.MiddleButton:
             return
 
         if self.is_zooming:
             return
+
+        self.is_panning = True
 
         mouseX = event.position().x() / self.width
         mouseY = (1 - event.position().y()) / self.height
@@ -325,17 +330,17 @@ class MakePlot(QOpenGLWidget):
             dx = mouseX - self.prev_horiz
             dy = mouseY - self.prev_vert
 
-            # Only consider the event as a drag if it's beyond a small threshold
-            if abs(dx) > drag_threshold or abs(dy) > drag_threshold:
-                self.m_left -= dx * (self.m_right - self.m_left)
-                self.m_right -= dx * (self.m_right - self.m_left)
-                self.m_bottom -= dy * (self.m_top - self.m_bottom)
-                self.m_top -= dy * (self.m_top - self.m_bottom)
+            self.m_left -= dx * (self.m_right - self.m_left)
+            self.m_right -= dx * (self.m_right - self.m_left)
+            self.m_bottom -= dy * (self.m_top - self.m_bottom)
+            self.m_top -= dy * (self.m_top - self.m_bottom)
 
-                # Update for the next iteration
-                self.prev_horiz = mouseX  
-                self.prev_vert = mouseY
+            # Update for the next iteration
+            self.prev_horiz = mouseX  
+            self.prev_vert = mouseY
 
             self.update()
+
+        self.is_panning = False
 
         event.accept()

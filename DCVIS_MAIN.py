@@ -17,7 +17,7 @@ class UiView(QtWidgets.QMainWindow):
     def __init__(self, controller=None):
         super(UiView, self).__init__()
         
-        self.controller = controller
+        self.controller: controller = controller
         loadUi('GUI.ui', self)  # load GUI from .ui file (created in Qt Designer)
         self.plot_widget = None
 
@@ -94,7 +94,7 @@ class UiView(QtWidgets.QMainWindow):
         self.refresh()
 
     def create_plot(self):
-        if not self.controller.data or not self.plot_layout:
+        if not self.controller.data:
             WARNINGS.noDataWarning()
             return
 
@@ -191,7 +191,7 @@ class UiView(QtWidgets.QMainWindow):
 
 
 class MainController:
-    def __init__(self, dataset, view):
+    def __init__(self, view, dataset=None):
         self.data = dataset
         self.view = view
         if self.view is not None:
@@ -250,10 +250,9 @@ class MainController:
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     
-    dataset_model = DATASET.Dataset()
     main_view = UiView()
     
-    main_controller = MainController(dataset_model, main_view)
+    main_controller = MainController(main_view)
     main_view.controller = main_controller
 
     main_view.show()
