@@ -31,20 +31,6 @@ class UiView(QtWidgets.QMainWindow):
         self.cell_swap = QtWidgets.QTableWidget()
         self.plot_layout = self.findChild(QtWidgets.QVBoxLayout, 'plotDisplay')
 
-    def replot_attributes(self):
-        if not self.plot_widget:
-            WARNINGS.noDataWarning()
-            return
-        
-        self.controller.data.attribute_names.append('class')
-        self.controller.data.dataframe = self.controller.data.dataframe[self.controller.data.attribute_names]
-
-        self.controller.data.attribute_names.pop()
-        self.controller.data.positions = []
-        self.controller.data.active_attributes = np.repeat(True, self.controller.data.attribute_count)
-        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
-        self.create_plot()
-
     def recenter_plot(self):
         if not self.plot_widget:
             WARNINGS.noDataWarning()
@@ -216,7 +202,6 @@ class MainController:
         self.view.plot_button.clicked.connect(self.view.create_plot)
         self.view.exit_button.clicked.connect(lambda: sys.exit())
         self.view.actionExit.triggered.connect(lambda: sys.exit())
-        self.view.replot_attribute_button.clicked.connect(self.view.replot_attributes)
         self.view.test_button.clicked.connect(self.view.test)
         self.view.remove_clip_button.clicked.connect(self.view.remove_clip)
         self.view.recenter_button.clicked.connect(self.view.recenter_plot)
