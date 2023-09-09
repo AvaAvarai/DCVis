@@ -6,21 +6,10 @@ from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 import numpy as np
-import random
+from COLORS import getColors
 
 import GCA
 import CLIPPING
-
-poly_color = [[255, 0, 0],  # red
-              [0, 255, 0],  # green
-              [0, 0, 255],  # blue
-              [255, 108, 221],  # purple
-              [255, 0, 0],
-              [128, 0, 128],
-              [0, 255, 255],
-              [233, 20, 20],
-              [255, 233, 0],
-              [233, 233, 233]]
 
 def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     glEnable(GL_BLEND)
@@ -153,6 +142,10 @@ class MakePlot(QOpenGLWidget):
 
         self.background_color = [0.7, 0.7, 0.7, 1.0]  # Default grey in RGBA
         self.axes_color = [0, 0, 0, 1]  # Default black in RGBA
+        
+        self.data = dataset
+        self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
+        self.data.class_colors = self.color_instance.colors_array
 
     def redraw_plot(self, background_color=None, axes_color=None):
         if background_color is not None:

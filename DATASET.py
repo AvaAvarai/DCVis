@@ -63,20 +63,10 @@ class Dataset:
             self.count_per_class = df['class'].value_counts().tolist()
             self.class_order = np.arange(0, self.class_count)
 
-            # initial colors (10 options)
-            colors = COLORS.getColors()
-            class_color_array = colors.colors_array
-
-            cnt = 0  # counter for color array
-            self.class_colors = []
-            for i in range(self.class_count):
-                # repeat colors for more than 9 classes, class colors can be changed interactively later
-                if i % 9 == 0:
-                    cnt = 0
-                # make all classes and markers initially active
-                # add colors and update counter
-                self.class_colors.append(class_color_array[cnt])
-                cnt += 1
+            # get class colors
+            self.class_colors = COLORS.getColors(self.class_count, [0.7, 0.7, 0.7, 1.0], [0.0, 0.0, 0.0, 1.0]).colors_array
+            
+            # initialize arrays for class options
             self.active_markers = np.repeat(True, self.class_count)
             self.active_classes = np.repeat(True, self.class_count)
 
