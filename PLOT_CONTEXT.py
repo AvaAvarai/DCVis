@@ -22,7 +22,10 @@ poly_color = [[255, 0, 0],  # red
               [255, 233, 0],
               [233, 233, 233]]
 
-def drawPolyLines(dataset, class_vao):
+def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    
     # loop through classes
     for i in range(dataset.class_count):
         # check if active
@@ -37,8 +40,28 @@ def drawPolyLines(dataset, class_vao):
                 glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
                 
             glBindVertexArray(0)
+        
+        if dataset.active_markers[dataset.class_order[i]]:
+            # positions of the markers
+            for j in range(dataset.vertex_count):
+                if j == dataset.vertex_count - 1:
+                    glPointSize(7)
 
-def drawHighlightedPolyLines(dataset, class_vao):
+                glBindVertexArray(marker_vao[dataset.class_order[i] * dataset.vertex_count + j])
+                # colors of the class
+                color = dataset.class_colors[i]
+                if not dataset.active_attributes[j]:
+                    glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
+                else:
+                    glColor4ub(color[0], color[1], color[2], 255)
+                # drawing
+                glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[dataset.class_order[i]]) / dataset.vertex_count))
+                # unbind
+                glBindVertexArray(0)
+                glPointSize(5)
+    glDisable(GL_BLEND)    
+
+def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
     # highlight color and width
     glColor3ub(255, 255, 0)
     glLineWidth(2)
@@ -62,34 +85,6 @@ def drawHighlightedPolyLines(dataset, class_vao):
                 datapoint_cnt += 1
             glBindVertexArray(0)
     glLineWidth(1)
-
-# draw markers
-def drawMarkers(dataset, marker_vao):
-    # loop through classes
-
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    for i in range(dataset.class_count):
-        # check if active
-        if dataset.active_markers[dataset.class_order[i]]:
-            # positions of the markers
-            for j in range(dataset.vertex_count):
-                if j == dataset.vertex_count - 1:
-                    glPointSize(7)
-
-                glBindVertexArray(marker_vao[dataset.class_order[i] * dataset.vertex_count + j])
-                # colors of the class
-                color = dataset.class_colors[i]
-                if not dataset.active_attributes[j]:
-                    glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
-                else:
-                    glColor4ub(color[0], color[1], color[2], 255)
-                # drawing
-                glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[dataset.class_order[i]]) / dataset.vertex_count))
-                # unbind
-                glBindVertexArray(0)
-                glPointSize(5)
-    glDisable(GL_BLEND)
 
 # draw axes
 def drawAxes(dataset, axis_vao, color):
@@ -130,7 +125,6 @@ class MakePlot(QOpenGLWidget):
     def __init__(self, dataset, parent=None):
         super(MakePlot, self).__init__(parent)
 
-        # for position vertex information
         self.data = dataset
         self.vertex_info = GCA.GCA_Option(self.data)
         self.line_vao = []
@@ -213,22 +207,23 @@ class MakePlot(QOpenGLWidget):
         # unbind
         glBindVertexArray(0)
 
-    def resizeGL(self, w, h):
-        self.width, self.height = w, h
-        glViewport(0, 0, w, h)
+    def resizeGL(self, width, height):
+        self.width, self.height = width, height
+        glViewport(0, 0, width, height)
 
     def paintGL(self):
         glClearColor(*self.background_color)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
-        drawPolyLines(self.data, self.line_vao)
-        drawMarkers(self.data, self.marker_vao)
         
-        drawHighlightedPolyLines(self.data, self.line_vao)
+        # draw points
+        draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
+        draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
+        
         if self.data.axis_on:
             drawAxes(self.data, self.axis_vao, self.axes_color)
 
-        drawBox(self.all_rect)
+        drawBox(self.all_rect) # draw clip box
 
     # === Mouse Events ===
 

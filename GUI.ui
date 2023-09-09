@@ -85,7 +85,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Upload Data</string>
+                  <string>Load Data</string>
                  </property>
                 </widget>
                </item>
