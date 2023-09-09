@@ -17,19 +17,39 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     
     # loop through classes
     for i in range(dataset.class_count):
-        # check if active
+        # draw polylines
         if dataset.active_classes[i]:
             # positions of the class
             glBindVertexArray(class_vao[dataset.class_order[i]])
-            # colors of the class
-            color = dataset.class_colors[i]
-            glColor3ub(color[0], color[1], color[2])
+            # colors of the class in class order
+            color = dataset.class_colors[dataset.class_order[i]]
+            
             # draw polyline
-            for j in range(0, len(dataset.positions[dataset.class_order[i]]), dataset.vertex_count):
-                glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
+            for j in range(dataset.vertex_count):
+                
+                if dataset.active_attributes[j]:
+                    glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
+                else:
+                    glColor4ub(color[0], color[1], color[2], 255)
+
+                # draw line string for n-1 to n with attribute alpha
+                for j in range(0, len(dataset.positions[i]), dataset.vertex_count):
+                    k = 0
+                    for m in range(1, dataset.vertex_count):
+                        if dataset.active_attributes[m-1]:
+                            glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
+                        else:
+                            glColor4ub(color[0], color[1], color[2], 255)
+                            
+                        glBegin(GL_LINES)
+                        glVertex2f(dataset.positions[i][j+m][0], dataset.positions[i][j+m][1])
+                        glVertex2f(dataset.positions[i][j+m-1][0], dataset.positions[i][j+m-1][1])
+                        glEnd()
+                        k += 1
                 
             glBindVertexArray(0)
-        
+
+        # draw markers
         if dataset.active_markers[dataset.class_order[i]]:
             # positions of the markers
             for j in range(dataset.vertex_count):
@@ -41,7 +61,7 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
 
                 glBindVertexArray(marker_vao[dataset.class_order[i] * dataset.vertex_count + j])
                 
-                if not dataset.active_attributes[j]:
+                if dataset.active_attributes[j]:
                     glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
                 else:
                     glColor4ub(color[0], color[1], color[2], 255)
@@ -162,6 +182,7 @@ class MakePlot(QOpenGLWidget):
         setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(5)
+        QApplication.instance().setOverrideCursor(QCursor(Qt.CursorShape.ArrowCursor))
         # push dataset to GPU memory
         for i in range(self.data.class_count):
             # grab the class positions
@@ -199,6 +220,7 @@ class MakePlot(QOpenGLWidget):
         glBindVertexArray(self.axis_vao)
         glEnableClientState(GL_VERTEX_ARRAY)
         glVertexPointer(2, GL_FLOAT, 0, None)
+        
         # unbind
         glBindVertexArray(0)
 
