@@ -16,6 +16,7 @@ import DATASET
 class UiView(QtWidgets.QMainWindow):
     def __init__(self, controller=None):
         super(UiView, self).__init__()
+        
         self.controller = controller
         loadUi('GUI.ui', self)  # load GUI from .ui file (created in Qt Designer)
         self.plot_widget = None
@@ -31,10 +32,10 @@ class UiView(QtWidgets.QMainWindow):
         self.plot_layout = self.findChild(QtWidgets.QVBoxLayout, 'plotDisplay')
 
     def replot_attributes(self):
-        if not self.controller.data or self.controller.data.dataframe.empty:
-            self.warnings.noDataWarning()
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
             return
-
+        
         self.controller.data.attribute_names.append('class')
         self.controller.data.dataframe = self.controller.data.dataframe[self.controller.data.attribute_names]
 
@@ -45,6 +46,9 @@ class UiView(QtWidgets.QMainWindow):
         self.create_plot()
 
     def recenter_plot(self):
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
+            return
         # for zooming
         self.plot_widget.m_left = -1.125
         self.plot_widget.m_right = 1.125
@@ -56,7 +60,7 @@ class UiView(QtWidgets.QMainWindow):
     # function to get alpha value for hidden attributes
     def attr_slider(self):
         if not self.controller.data or not self.plot_widget:
-            self.warnings.noDataWarning()
+            WARNINGS.noDataWarning()
             return
         value = self.attribute_slide.value()
         self.controller.data.attribute_alpha = value
@@ -64,25 +68,25 @@ class UiView(QtWidgets.QMainWindow):
 
     def check_all_attr(self):
         if not self.controller.data:
-            self.warnings.noDataWarning()
+            WARNINGS.noDataWarning()
             return
         ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
 
     def check_all_class(self):
         if not self.controller.data:
-            self.warnings.noDataWarning()
+            WARNINGS.noDataWarning()
             return
         CLASS_TABLE.reset_checkmarks(self.class_table, self.controller.data.class_count)
 
     def uncheck_all_attr(self):
         if not self.controller.data:
-            self.warnings.noDataWarning()
+            WARNINGS.noDataWarning()
             return
         ATTRIBUTE_TABLE.uncheck_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
 
     def uncheck_all_class(self):
         if not self.controller.data:
-            self.warnings.noDataWarning()
+            WARNINGS.noDataWarning()
             return
         CLASS_TABLE.uncheck_checkmarks(self.class_table, self.controller.data.class_count)
 
@@ -93,7 +97,7 @@ class UiView(QtWidgets.QMainWindow):
 
     def axes_func(self):
         if not self.controller.data:
-            self.warnings.noDataWarning()
+            WARNINGS.noDataWarning()
             return
 
         if self.show_axes.isChecked():
@@ -105,7 +109,7 @@ class UiView(QtWidgets.QMainWindow):
 
     def create_plot(self):
         if not self.controller.data or not self.plot_layout:
-            self.warnings.noDataWarning()
+            WARNINGS.noDataWarning()
             return
 
         # remove initial placeholder
@@ -151,15 +155,15 @@ class UiView(QtWidgets.QMainWindow):
 
     # function to save clip files
     def test(self):
-        if not self.controller.data:
-            self.warnings.noDataWarning()
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
             return
 
         CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
 
     def remove_clip(self):
-        if not self.controller.data:
-            self.warnings.noDataWarning()
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
             return
         
         self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
@@ -182,12 +186,18 @@ class UiView(QtWidgets.QMainWindow):
         event.accept()
 
     def open_background_color_picker(self):
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
+            return
         color = QColorDialog.getColor()
         if color.isValid():
             self.background_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
             self.plot_widget.redraw_plot(background_color=self.background_color)
 
     def open_axes_color_picker(self):
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
+            return
         color = QColorDialog.getColor()
         if color.isValid():
             self.axes_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
