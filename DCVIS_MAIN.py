@@ -167,9 +167,22 @@ class UiView(QtWidgets.QMainWindow):
         if table == self.class_table:
             CLASS_TABLE.table_swap(table, self.controller.data, self.plot_widget, event)
         elif table == self.attribute_table:
-            ATTRIBUTE_TABLE.table_swap(table, self.controller.data, event)
+            ATTRIBUTE_TABLE.table_swap(table, self.controller.data, event, self.replot_attributes)
 
         event.accept()
+
+    def replot_attributes(self):
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
+            return
+        self.controller.data.attribute_names.append('class')
+        self.controller.data.dataframe = self.controller.data.dataframe[self.controller.data.attribute_names]
+
+        self.controller.data.attribute_names.pop()
+        self.controller.data.positions = []
+        self.controller.data.active_attributes = np.repeat(True, self.controller.data.attribute_count)
+        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
+        self.create_plot()
 
     def open_background_color_picker(self):
         if not self.plot_widget:

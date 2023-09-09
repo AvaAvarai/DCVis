@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 
-def table_swap(table, dataset, event):
+def table_swap(table, dataset, event, replot_func):
     moved_from = table.currentRow()
     from_item = table.item(moved_from, 0).text()
     moved_to = table.rowAt(round(event.position().y()))
@@ -21,6 +21,8 @@ def table_swap(table, dataset, event):
     place_holder = dataset.active_attributes[moved_from]
     dataset.active_attributes[moved_from] = dataset.active_attributes[moved_to]
     dataset.active_attributes[moved_to] = place_holder
+    
+    replot_func()
 
 def reset_checkmarks(table, count, plot_type):
     for idx in range(count):
