@@ -23,7 +23,11 @@ def table_swap(table, dataset, plot, event):
     moved_from = table.currentRow()
     from_item = table.item(moved_from, 0).text()
     moved_to = table.rowAt(round(event.position().y()))
-    to_item = table.item(moved_to, 0).text()
+
+    to_item = table.item(moved_to, 0)
+    if not to_item:
+        return
+    to_item = to_item.text()
 
     from_rgb = dataset.class_colors[moved_to]
     table.item(moved_from, 0).setText(to_item)

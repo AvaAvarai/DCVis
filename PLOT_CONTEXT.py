@@ -33,12 +33,14 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
         if dataset.active_markers[dataset.class_order[i]]:
             # positions of the markers
             for j in range(dataset.vertex_count):
-                if j == dataset.vertex_count - 1:
-                    glPointSize(7)
-
-                glBindVertexArray(marker_vao[dataset.class_order[i] * dataset.vertex_count + j])
                 # colors of the class
                 color = dataset.class_colors[i]
+                if j == dataset.vertex_count - 1:
+                    glPointSize(7)
+                    color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
+
+                glBindVertexArray(marker_vao[dataset.class_order[i] * dataset.vertex_count + j])
+                
                 if not dataset.active_attributes[j]:
                     glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
                 else:
