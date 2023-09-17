@@ -30,20 +30,17 @@ def table_swap(table, dataset, plot, event):
     to_item = to_item.text()
 
     from_rgb = dataset.class_colors[moved_to]
-    table.item(moved_from, 0).setText(to_item)
-    table.item(moved_from, 0).setForeground(QBrush(QColor(from_rgb[0], from_rgb[1], from_rgb[2])))
-
     to_rgb = dataset.class_colors[moved_from]
+    
+    table.item(moved_from, 0).setText(to_item)
+    table.item(moved_from, 0).setForeground(QBrush(QColor(to_rgb[0], to_rgb[1], to_rgb[2])))
+    
     table.item(moved_to, 0).setText(from_item)
-    table.item(moved_to, 0).setForeground(QBrush(QColor(to_rgb[0], to_rgb[1], to_rgb[2])))
+    table.item(moved_to, 0).setForeground(QBrush(QColor(from_rgb[0], from_rgb[1], from_rgb[2])))
 
     place_holder = dataset.class_order[moved_from]
     dataset.class_order[moved_from] = dataset.class_order[moved_to]
     dataset.class_order[moved_to] = place_holder
-
-    place_holder = dataset.class_colors[moved_from]
-    dataset.class_colors[moved_from] = dataset.class_colors[moved_to]
-    dataset.class_colors[moved_to] = place_holder
 
     plot.update()
 

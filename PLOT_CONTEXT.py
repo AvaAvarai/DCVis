@@ -15,14 +15,14 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     
-    # loop through classes
-    for i in range(dataset.class_count):
+    # loop through classes in class order
+    for i in dataset.class_order[::-1]:
+        color = dataset.class_colors[i]
+        
         # draw polylines
         if dataset.active_classes[i]:
             # positions of the class
-            glBindVertexArray(class_vao[dataset.class_order[i]])
-            # colors of the class in class order
-            color = dataset.class_colors[dataset.class_order[i]]
+            glBindVertexArray(class_vao[i])
             
             # draw polyline
             for j in range(dataset.vertex_count):
@@ -50,46 +50,44 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
             glBindVertexArray(0)
 
         # draw markers
-        if dataset.active_markers[dataset.class_order[i]]:
+        if dataset.active_markers[i]:
             # positions of the markers
             for j in range(dataset.vertex_count):
-                # colors of the class
-                color = dataset.class_colors[i]
                 if j == dataset.vertex_count - 1:
                     glPointSize(7)
                     color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
-
-                glBindVertexArray(marker_vao[dataset.class_order[i] * dataset.vertex_count + j])
+                
+                glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
                 
                 if dataset.active_attributes[j]:
                     glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
                 else:
                     glColor4ub(color[0], color[1], color[2], 255)
                 # drawing
-                glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[dataset.class_order[i]]) / dataset.vertex_count))
+                glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
                 # unbind
                 glBindVertexArray(0)
                 glPointSize(5)
-    glDisable(GL_BLEND)    
+    glDisable(GL_BLEND)
 
-def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
+def draw_highlighted_nd_points(dataset, marker_vao, class_vao):    
     # highlight color and width
     glColor3ub(255, 255, 0)
     glLineWidth(2)
-    # Draw highlighted polylines
-    for i in range(dataset.class_count):
+    # loop through classes in class order
+    for i in dataset.class_order[::-1]:
         datapoint_cnt = 0
         # check if active
         if dataset.active_classes[i]:
             # positions of the class
-            glBindVertexArray(class_vao[dataset.class_order[i]])
+            glBindVertexArray(class_vao[i])
             size_index = 0
             for j in range(dataset.class_count):
-                if j < dataset.class_order[i]:
-                    size_index += dataset.count_per_class[dataset.class_order[j]]
+                if j < i:
+                    size_index += dataset.count_per_class[j]
             
             # draw polyline
-            size = len(dataset.positions[dataset.class_order[i]])
+            size = len(dataset.positions[i])
             for j in range(0, size, dataset.vertex_count):
                 if dataset.clipped_samples[size_index + datapoint_cnt]:
                     glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
