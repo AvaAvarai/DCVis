@@ -116,6 +116,8 @@ class UiView(QtWidgets.QMainWindow):
             self.controller.data.plot_type = 'DSC2'
         elif selected_plot_type == 'Shifted Paired Coordinates':
             self.controller.data.plot_type = 'SPC'
+        elif selected_plot_type == 'Static Circular Coordinates':
+            self.controller.data.plot_type = 'SCC'
         else:
             return
         

@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-import time
 
 
 class PCInfo:
@@ -13,7 +12,6 @@ class PCInfo:
         section_array = np.linspace(start=-1, stop=1, num=dataset.vertex_count)
 
         for name in dataset.class_names:
-            #start = time.time()
             df_name = working_df[working_df['class'] == name]
             df_name = df_name.drop(columns='class', axis=1)
 
@@ -24,8 +22,6 @@ class PCInfo:
             # final form is [[x1, y1], [x2, y2], [x3, y3]]
             pos_array = np.column_stack((x_coord, y_coord))
             dataset.positions.append(pos_array)
-            #end = time.time()
-            #print(end-start)
 
         axis_vertex_array = [[-1, -1], [-1, 1]]
         for idx in range(1, dataset.vertex_count):

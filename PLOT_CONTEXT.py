@@ -101,8 +101,21 @@ def drawAxes(dataset, axis_vao, color):
     glBindVertexArray(axis_vao)
     # colors
     glColor4f(*color)
-    for j in range(0, dataset.axis_count * 2, 2):
-        glDrawArrays(GL_LINES, j, dataset.vertex_count)
+    
+    if dataset.plot_type != 'SCC': # draw a line axis
+        for j in range(0, dataset.axis_count * 2, 2):
+            glDrawArrays(GL_LINES, j, dataset.vertex_count)
+    else: # draw a circle axis
+        diameter = dataset.attribute_count / np.pi
+        radius = diameter / 2
+        lineSeg = 100
+        # draw axis
+        glBegin(GL_LINE_LOOP)
+        for i in range(lineSeg + 1):
+            glVertex2f(radius * np.cos(i * 2 * np.pi / lineSeg), radius * np.sin(i * 2 * np.pi / lineSeg))
+        glEnd()
+        glBindVertexArray(0)
+        
     # unbind
     glBindVertexArray(0)
 
@@ -112,7 +125,7 @@ def drawBox(all_rect):
         for r in all_rect:
             glEnable(GL_BLEND)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-            glColor4f(1.0, 0.0, 0.0, 0.3)
+            glColor4f(1.0, 0.0, 0.0, 0.5)
             glBegin(GL_QUADS)
             glVertex2f(r[0], r[1])
             glVertex2f(r[0], r[3])
@@ -161,8 +174,8 @@ class MakePlot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [0, 0, 0, 1]  # Default black in RGBA
-        self.axes_color = [1, 1, 1, 1]  # Default white in RGBA
+        self.background_color = [0.9375, 0.9375, 0.9375, 1]  # Default gray in RGBA
+        self.axes_color = [0, 0, 0, 1]  # Default black in RGBA
         
         self.data = dataset
         

@@ -129,6 +129,11 @@
                     <string>Dynamic Scaffold Coordinates 2</string>
                    </property>
                   </item>
+                  <item>
+                   <property name="text">
+                    <string>Static Circular Coordinates</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item>
