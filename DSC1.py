@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-class DSC1Info:
+class DSC1:
     def __init__(self, dataset):
         working_df = dataset.dataframe.copy()
         space = 1 / dataset.vertex_count

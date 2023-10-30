@@ -213,7 +213,7 @@ class MainController:
             self.setup_connections()
 
     def setup_connections(self):
-        self.view.upload_button.clicked.connect(self.upload_dataset)
+        self.view.upload_button.clicked.connect(self.load_dataset)
         self.view.plot_button.clicked.connect(self.view.create_plot)
         self.view.exit_button.clicked.connect(lambda: sys.exit())
         self.view.actionExit.triggered.connect(lambda: sys.exit())
@@ -230,7 +230,7 @@ class MainController:
         self.view.background_button.clicked.connect(self.view.open_background_color_picker)
         self.view.axes_button.clicked.connect(self.view.open_axes_color_picker)
 
-    def upload_dataset(self):
+    def load_dataset(self):
         if self.data:
             del self.data
 

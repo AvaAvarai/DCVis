@@ -2,6 +2,7 @@ from typing import List, Optional, Tuple
 import pandas as pd
 import numpy as np
 import os
+from sklearn.preprocessing import MinMaxScaler
 
 import COLORS
 
@@ -95,3 +96,13 @@ class Dataset:
         except Exception as e:
             print(f"An error occurred: {e}")
             # Notify the controller to show a warning message
+    
+    def normalize_data(self, range: Tuple[float, float]):
+        scaler = MinMaxScaler(range)
+        self.dataframe[self.attribute_names] = scaler.fit_transform(self.dataframe[self.attribute_names])
+        return self.dataframe
+    
+    def normalize_col(self, col: int, range: Tuple[float, float]):
+        scaler = MinMaxScaler(range)
+        self.dataframe[self.attribute_names[col]] = scaler.fit_transform(self.dataframe[[self.attribute_names[col]]])
+        return self.dataframe

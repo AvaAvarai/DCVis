@@ -1,8 +1,7 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-
-class SPCInfo:
+class SPC:
     def __init__(self, dataset):
         working_df = dataset.dataframe.copy()
 

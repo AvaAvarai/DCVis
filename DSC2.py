@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-class DSC2Info:
+class DSC2:
     def __init__(self, dataset):
         working_df = dataset.dataframe.copy()
         scaler = MinMaxScaler((0, 1)) # [0, 1] scaling

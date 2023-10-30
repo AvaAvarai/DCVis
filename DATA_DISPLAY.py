@@ -10,7 +10,7 @@ class DisplayData:
         counter = 1
         for ele in dataset.class_names:
             data_info_string += ('\n\n' + 'Class ' + str(counter) + ': ' + str(ele) +
-                                 '\n' + '--Count: ' + str(dataset.count_per_class[counter - 1]))
+                                 '\n' + '--Sample Count: ' + str(dataset.count_per_class[counter - 1]))
             counter += 1
 
         textbox.setText(data_info_string)
