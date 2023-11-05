@@ -3,9 +3,16 @@ from PyQt6.QtCore import Qt
 
 def table_swap(table, dataset, event, replot_func):
     moved_from = table.currentRow()
-    from_item = table.item(moved_from, 0).text()
+    from_item = table.item(moved_from, 0)
+    if from_item == None:
+        return
+    from_item = from_item.text()
     moved_to = table.rowAt(round(event.position().y()))
-    to_item = table.item(moved_to, 0).text()
+
+    to_item = table.item(moved_to, 0)
+    if to_item == None:
+        return
+    to_item = to_item.text()
 
     table.item(moved_from, 0).setText(to_item)
     table.item(moved_to, 0).setText(from_item)

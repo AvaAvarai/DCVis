@@ -203,10 +203,10 @@ class MakePlot(QOpenGLWidget):
         self.m_top = 1.125
         
         if self.data.plot_type == 'SCC':
-            self.m_left *= self.data.attribute_count * 0.25
-            self.m_right *= self.data.attribute_count * 0.25
-            self.m_bottom *= self.data.attribute_count * 0.25
-            self.m_top *= self.data.attribute_count * 0.25
+            self.m_left = -self.data.attribute_count * 0.25
+            self.m_right = self.data.attribute_count * 0.25
+            self.m_bottom = -self.data.attribute_count * 0.25
+            self.m_top = self.data.attribute_count * 0.25
 
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125

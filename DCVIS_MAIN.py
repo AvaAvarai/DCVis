@@ -18,7 +18,7 @@ class UiView(QtWidgets.QMainWindow):
         super(UiView, self).__init__()
         
         self.controller: controller = controller
-        loadUi('GUI.ui', self)  # load GUI from .ui file (created in Qt Designer)
+        loadUi('GUI.ui', self)  # load .ui file for GUI made in Qt Designer
 
         self.plot_widget = None
 
@@ -43,10 +43,10 @@ class UiView(QtWidgets.QMainWindow):
         self.plot_widget.m_top = 1.125
         
         if self.controller.data.plot_type == 'SCC':
-            self.plot_widget.m_left *= self.controller.data.attribute_count * 0.25
-            self.plot_widget.m_right *= self.controller.data.attribute_count * 0.25
-            self.plot_widget.m_bottom *= self.controller.data.attribute_count * 0.25
-            self.plot_widget.m_top *= self.controller.data.attribute_count * 0.25
+            self.plot_widget.m_left = -self.controller.data.attribute_count * 0.25
+            self.plot_widget.m_right = self.controller.data.attribute_count * 0.25
+            self.plot_widget.m_bottom = -self.controller.data.attribute_count * 0.25
+            self.plot_widget.m_top = self.controller.data.attribute_count * 0.25
 
         self.refresh()
 
