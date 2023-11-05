@@ -117,6 +117,7 @@ def draw_axes(dataset, axis_vao, color):
     if dataset.plot_type != 'SCC': # draw a line axis
         for j in range(0, dataset.axis_count * 2, 2):
             glDrawArrays(GL_LINES, j, dataset.vertex_count)
+            
     else: # draw a circle axis
         diameter = dataset.attribute_count / np.pi
         radius = diameter / 2
@@ -126,6 +127,26 @@ def draw_axes(dataset, axis_vao, color):
         for i in range(lineSeg + 1):
             glVertex2f(radius * np.cos(i * 2 * np.pi / lineSeg), radius * np.sin(i * 2 * np.pi / lineSeg))
         glEnd()
+
+        # calculate angle between each tick mark
+        angle_between_ticks = 2 * np.pi / dataset.attribute_count
+
+        # draw tick marks
+        tick_length = 0.1 * radius  # adjust this value as needed
+        for i in range(dataset.attribute_count):
+            angle_for_tick = i * angle_between_ticks
+            # compute start and end position of the tick mark
+            inner_x = (radius - tick_length/2) * np.cos(angle_for_tick)
+            inner_y = (radius - tick_length/2) * np.sin(angle_for_tick)
+            outer_x = (radius + tick_length/2) * np.cos(angle_for_tick)
+            outer_y = (radius + tick_length/2) * np.sin(angle_for_tick)
+            
+            # draw tick mark
+            glBegin(GL_LINES)
+            glVertex2f(inner_x, inner_y)
+            glVertex2f(outer_x, outer_y)
+            glEnd()
+
         glBindVertexArray(0)
         
     # unbind
