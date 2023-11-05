@@ -1,5 +1,8 @@
+import typing
+
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as glvbo
+from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
@@ -11,10 +14,14 @@ from COLORS import getColors
 import GCA
 import CLIPPING
 
+
 def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     glEnable(GL_BLEND)
+    glEnable(GL_LINE_SMOOTH)
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    
+    glLineWidth(1)
+
     # loop through classes in class order
     for i in dataset.class_order[::-1]:
         color = dataset.class_colors[i]
@@ -26,14 +33,13 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
             
             # draw polyline
             for j in range(dataset.vertex_count):
-                
                 if dataset.active_attributes[j]:
                     glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
                 else:
                     glColor4ub(color[0], color[1], color[2], 255)
 
-                # draw line string for n-1 to n with attribute alpha
-                for j in range(0, len(dataset.positions[i]), dataset.vertex_count):
+                # draw line for n-1 to n with attribute alpha
+                for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
                     k = 0
                     for m in range(1, dataset.vertex_count):
                         if dataset.active_attributes[m-1]:
@@ -42,8 +48,8 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                             glColor4ub(color[0], color[1], color[2], 255)
                             
                         glBegin(GL_LINES)
-                        glVertex2f(dataset.positions[i][j+m][0], dataset.positions[i][j+m][1])
-                        glVertex2f(dataset.positions[i][j+m-1][0], dataset.positions[i][j+m-1][1])
+                        glVertex2f(dataset.positions[i][l+m][0], dataset.positions[i][l+m][1])
+                        glVertex2f(dataset.positions[i][l+m-1][0], dataset.positions[i][l+m-1][1])
                         glEnd()
                         k += 1
                 
@@ -56,9 +62,9 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                 if j == dataset.vertex_count - 1:
                     glPointSize(7)
                     color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
-                
+
                 glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
-                
+
                 if dataset.active_attributes[j]:
                     glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
                 else:
@@ -70,10 +76,14 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                 glPointSize(5)
     glDisable(GL_BLEND)
 
+
 def draw_highlighted_nd_points(dataset, marker_vao, class_vao):    
     # highlight color and width
+    glEnable(GL_BLEND)
+    glEnable(GL_LINE_SMOOTH)
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
     glColor3ub(255, 255, 0)
-    glLineWidth(2)
+    glLineWidth(4)
     # loop through classes in class order
     for i in dataset.class_order[::-1]:
         datapoint_cnt = 0
@@ -93,10 +103,12 @@ def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
                     glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
                 datapoint_cnt += 1
             glBindVertexArray(0)
+
     glLineWidth(1)
 
+
 # draw axes
-def drawAxes(dataset, axis_vao, color):
+def draw_axes(dataset, axis_vao, color):
     # positions of the class
     glBindVertexArray(axis_vao)
     # colors
@@ -119,8 +131,9 @@ def drawAxes(dataset, axis_vao, color):
     # unbind
     glBindVertexArray(0)
 
+
 # draw box for box clipping
-def drawBox(all_rect):
+def draw_box(all_rect):
     if all_rect:
         for r in all_rect:
             glEnable(GL_BLEND)
@@ -134,7 +147,8 @@ def drawBox(all_rect):
             glEnd()
             glDisable(GL_BLEND)
 
-def setViewFrustum(m_left, m_right, m_bottom, m_top):
+
+def set_view_frustrum(m_left, m_right, m_bottom, m_top):
     if m_left == m_right or m_bottom == m_top:
         return  # Avoid invalid parameters
     glMatrixMode(GL_PROJECTION)
@@ -143,12 +157,13 @@ def setViewFrustum(m_left, m_right, m_bottom, m_top):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
+
 class MakePlot(QOpenGLWidget):
     def __init__(self, dataset, parent=None):
         super(MakePlot, self).__init__(parent)
 
         self.data = dataset
-        self.vertex_info = GCA.GCA_Option(self.data)
+        self.vertex_info = GCA.GCA(self.data)
         self.line_vao = []
         self.marker_vao = []
         self.axis_vao = None
@@ -192,7 +207,7 @@ class MakePlot(QOpenGLWidget):
     def initializeGL(self):
         glClearColor(*self.background_color)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
+        set_view_frustrum(self.m_left, self.m_right, self.m_bottom, self.m_top)
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(5)
         QApplication.instance().restoreOverrideCursor()
@@ -244,16 +259,16 @@ class MakePlot(QOpenGLWidget):
     def paintGL(self):
         glClearColor(*self.background_color)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        setViewFrustum(self.m_left, self.m_right, self.m_bottom, self.m_top)
-        
+        set_view_frustrum(self.m_left, self.m_right, self.m_bottom, self.m_top)
+
         # draw points
         draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
         draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
         
         if self.data.axis_on:
-            drawAxes(self.data, self.axis_vao, self.axes_color)
+            draw_axes(self.data, self.axis_vao, self.axes_color)
 
-        drawBox(self.all_rect) # draw clip box
+        draw_box(self.all_rect) # draw clip box
 
     # === Mouse Events ===
     def mousePressEvent(self, event):

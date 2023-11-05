@@ -19,6 +19,7 @@ class UiView(QtWidgets.QMainWindow):
         
         self.controller: controller = controller
         loadUi('GUI.ui', self)  # load GUI from .ui file (created in Qt Designer)
+
         self.plot_widget = None
 
         self.class_table = None
@@ -122,7 +123,7 @@ class UiView(QtWidgets.QMainWindow):
             return
         
         self.plot_widget = PLOT_CONTEXT.MakePlot(self.controller.data, parent=self)
-    
+
         # class table placeholder
         if self.class_pl_exists:
             self.class_table_layout.removeWidget(self.class_pl)
@@ -235,7 +236,7 @@ class MainController:
             del self.data
 
         self.data = DATASET.Dataset()
-        filename = QtWidgets.QFileDialog.getOpenFileName(self.view, 'Open File', 'datasets', '(*.csv)')
+        filename = QtWidgets.QFileDialog.getOpenFileName(self.view, 'Open File')
         if filename[0] == '':
             return
 
@@ -261,6 +262,7 @@ class MainController:
         self.data.load_from_csv(filename[0])
         DATA_DISPLAY.DisplayData(self.data, self.view.dataset_textbox)
         self.view.class_table = CLASS_TABLE.ClassTable(self.data, parent=self.view)
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
