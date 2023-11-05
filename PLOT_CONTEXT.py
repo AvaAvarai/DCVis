@@ -119,9 +119,11 @@ def draw_axes(dataset, axis_vao, color):
             glDrawArrays(GL_LINES, j, dataset.vertex_count)
             
     else: # draw a circle axis
-        diameter = dataset.attribute_count / np.pi
+        circumference = dataset.attribute_count
+        diameter = circumference / np.pi
         radius = diameter / 2
-        lineSeg = 100
+        
+        lineSeg = 1000
         # draw axis
         glBegin(GL_LINE_LOOP)
         for i in range(lineSeg + 1):
@@ -132,9 +134,10 @@ def draw_axes(dataset, axis_vao, color):
         angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
         # draw tick marks
-        tick_length = 0.1 * radius  # adjust this value as needed
+        tick_length = 0.1 * radius
         for i in range(dataset.attribute_count):
-            angle_for_tick = i * angle_between_ticks
+            # Adjusting the angle to start from the 12 o'clock position
+            angle_for_tick = i * angle_between_ticks - np.pi/2
             # compute start and end position of the tick mark
             inner_x = (radius - tick_length/2) * np.cos(angle_for_tick)
             inner_y = (radius - tick_length/2) * np.sin(angle_for_tick)
@@ -198,8 +201,13 @@ class MakePlot(QOpenGLWidget):
         self.m_right = 1.125
         self.m_bottom = -1.125
         self.m_top = 1.125
+        
+        if self.data.plot_type == 'SCC':
+            self.m_left *= self.data.attribute_count * 0.25
+            self.m_right *= self.data.attribute_count * 0.25
+            self.m_bottom *= self.data.attribute_count * 0.25
+            self.m_top *= self.data.attribute_count * 0.25
 
-        self.zoom_level = 1
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125
         self.is_zooming = False

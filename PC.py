@@ -22,7 +22,7 @@ class PC:
     def __init__(self, data: DATASET.Dataset):
         # Normalization using the DATASET class function
         data.dataframe = data.normalize_data(range=(-1, 1))
-        # data.dataframe.iloc[:,1] *= -1
+
         # Create section_array based on vertex_count
         section_array = np.linspace(start=-1, stop=1, num=data.vertex_count)
 

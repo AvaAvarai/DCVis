@@ -2,7 +2,10 @@ import numpy as np
 import DATASET
 
 def compute_coordinates(data, df_name):
-    radius = data.attribute_count / (2 * np.pi)
+    circumference = data.attribute_count
+    diameter = circumference / np.pi
+    radius = diameter / 2
+    
     section_array = np.linspace(0, 1, data.attribute_count)
     x_coord = np.tile(section_array, reps=len(df_name.index))
     y_coord = df_name.to_numpy().ravel()
