@@ -185,12 +185,6 @@ class UiView(QtWidgets.QMainWindow):
             WARNINGS.noDataWarning()
             return
         
-        for index, is_inverted in enumerate(self.controller.data.attribute_inversions):
-            if is_inverted:
-                # Invert the axis by multiplying by -1
-                self.controller.data.dataframe.iloc[:, index] *= -1
-
-        
         self.controller.data.attribute_names.append('class')
         self.controller.data.dataframe = self.controller.data.dataframe[self.controller.data.attribute_names]
 

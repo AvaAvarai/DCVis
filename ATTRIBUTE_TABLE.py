@@ -62,7 +62,7 @@ class AttributeTable(QtWidgets.QTableWidget):
         # Set header labels for the new column
         self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Attribute Order'))
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Transparency'))
-        self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Inversion'))
+        self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Invert'))
 
 
         self.setDragEnabled(True)
@@ -112,15 +112,16 @@ class InversionCheckBox(QtWidgets.QCheckBox):
         self.dataset = dataset
         self.replot_func = replot_func
 
-        # Set the initial state of the checkbox based on the attribute_inversions list
+        # Initialize the checkbox state based on the attribute_inversions list
         self.setChecked(self.dataset.attribute_inversions[self.index])
 
         # Connect the stateChanged signal to the toggle_inversion method
         self.stateChanged.connect(self.toggle_inversion)
 
-    def toggle_inversion(self):
+    def toggle_inversion(self, state):
         # Update the attribute_inversions list with the new state
-        self.dataset.attribute_inversions[self.index] = self.isChecked()
+        # We use `not state` because the inversion list is meant to be True when not inverted
+        self.dataset.attribute_inversions[self.index] = not self.dataset.attribute_inversions[self.index]
 
         # Call the replot function to update the plot with the new inversion state
         self.replot_func()

@@ -5,7 +5,6 @@ def compute_coordinates(data, df_name):
     circumference = data.attribute_count
     diameter = circumference / np.pi
     radius = diameter / 2
-    
     section_array = np.linspace(0, 1, data.attribute_count)
     x_coord = np.tile(section_array, reps=len(df_name.index))
     y_coord = df_name.to_numpy().ravel()
@@ -19,7 +18,11 @@ def compute_coordinates(data, df_name):
             arc_length = 0
             arc_rule = 0
 
-        arc_length += y_coord[i]
+        if data.attribute_inversions[arc_rule]:
+            arc_length += (1 - y_coord[i])  # Invert the range
+        else:
+            arc_length += y_coord[i]
+            
         center_angle = arc_length * 360 / (2 * np.pi * radius)
         center_angle = np.pi * center_angle / 180
 

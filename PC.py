@@ -3,14 +3,14 @@ import DATASET
 
 
 def compute_positions(data, df_name, section_array):
-    # Check for inversions and apply them
-    for idx, inversion in enumerate(data.attribute_inversions):
-        if inversion:
-            df_name.iloc[:, idx] = -df_name.iloc[:, idx]  # Invert the column if needed
-
-    x_coord = np.tile(section_array, reps=len(df_name.index))
-    y_coord = df_name.to_numpy()
-    y_coord = y_coord.ravel()
+    # Use a copy of the dataframe to avoid changing the original data
+    df_copy = df_name.copy()
+    for index, is_inverted in enumerate(data.attribute_inversions):
+        if is_inverted:
+            df_copy.iloc[:, index] *= -1  # Apply inversion
+    
+    x_coord = np.tile(section_array, reps=len(df_copy.index))
+    y_coord = df_copy.to_numpy().ravel()
     pos_array = np.column_stack((x_coord, y_coord))
     return pos_array
 
