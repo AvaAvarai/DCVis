@@ -4,13 +4,13 @@ from PyQt6.QtCore import Qt
 def table_swap(table, dataset, event, replot_func):
     moved_from = table.currentRow()
     from_item = table.item(moved_from, 0)
-    if from_item == None:
+    if from_item == None:  # if no item is selected
         return
     from_item = from_item.text()
     moved_to = table.rowAt(round(event.position().y()))
 
     to_item = table.item(moved_to, 0)
-    if to_item == None:
+    if to_item == None:  # if no item is selected
         return
     to_item = to_item.text()
 
@@ -50,16 +50,20 @@ def uncheck_checkmarks(table, count, plot_type):
             cell.setCheckState(Qt.CheckState.Unchecked)
 
 class AttributeTable(QtWidgets.QTableWidget):
-    def __init__(self, dataset, parent=None):
+    def __init__(self, dataset, replot_func, parent=None):
         super(AttributeTable, self).__init__(parent)
 
-        self.data = dataset
+        self.dataset = dataset
+        self.replot_func = replot_func
 
-        self.setRowCount(dataset.attribute_count)
-        self.setColumnCount(2)
+        self.setRowCount(self.dataset.attribute_count)
+        self.setColumnCount(3)  # Add an extra column for the toggle buttons
 
+        # Set header labels for the new column
         self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Attribute Order'))
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Transparency'))
+        self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Inversion'))
+
 
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
@@ -70,20 +74,15 @@ class AttributeTable(QtWidgets.QTableWidget):
         header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        counter = 0
-        for ele in dataset.attribute_names:
-            item = QtWidgets.QTableWidgetItem(str(ele))
-            self.setItem(counter, 0, item)
+        for idx, attribute_name in enumerate(self.dataset.attribute_names):
+            self.setItem(idx, 0, QtWidgets.QTableWidgetItem(attribute_name))
 
-            if self.data.plot_type == 'SPC' or self.data.plot_type == 'DSC2':
-                if counter % 2 == 0:
-                    checkbox = CheckBox(counter, self.data, 'class', parent=self)
-                    self.setCellWidget(counter, 1, checkbox)
-            else:
-                checkbox = CheckBox(counter, self.data, 'class', parent=self)
-                self.setCellWidget(counter, 1, checkbox)
+            transparency_checkbox = CheckBox(idx, self.dataset, 'transparency', parent=self)
+            self.setCellWidget(idx, 1, transparency_checkbox)
 
-            counter += 1
+            # Add a toggle button for inversion
+            inversion_checkbox = InversionCheckBox(idx, self.dataset, self.replot_func, parent=self)
+            self.setCellWidget(idx, 2, inversion_checkbox)
 
 class CheckBox(QtWidgets.QCheckBox):
     def __init__(self, row, dataset, option, parent=None):
@@ -105,3 +104,23 @@ class CheckBox(QtWidgets.QCheckBox):
                 self.data.active_attributes[int(self.index / 2)] = False
             else:
                 self.data.active_attributes[self.index] = False
+
+class InversionCheckBox(QtWidgets.QCheckBox):
+    def __init__(self, index, dataset, replot_func, parent=None):
+        super(InversionCheckBox, self).__init__(parent)
+        self.index = index
+        self.dataset = dataset
+        self.replot_func = replot_func
+
+        # Set the initial state of the checkbox based on the attribute_inversions list
+        self.setChecked(self.dataset.attribute_inversions[self.index])
+
+        # Connect the stateChanged signal to the toggle_inversion method
+        self.stateChanged.connect(self.toggle_inversion)
+
+    def toggle_inversion(self):
+        # Update the attribute_inversions list with the new state
+        self.dataset.attribute_inversions[self.index] = self.isChecked()
+
+        # Call the replot function to update the plot with the new inversion state
+        self.replot_func()

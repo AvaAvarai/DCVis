@@ -202,7 +202,7 @@ class MakePlot(QOpenGLWidget):
         self.m_bottom = -1.125
         self.m_top = 1.125
         
-        if self.data.plot_type == 'SCC':
+        if self.data.plot_type == 'SCC':    # fit CC to window
             self.m_left = -self.data.attribute_count * 0.25
             self.m_right = self.data.attribute_count * 0.25
             self.m_bottom = -self.data.attribute_count * 0.25

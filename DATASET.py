@@ -22,6 +22,8 @@ class Dataset:
         self.attribute_count: int = 0
         self.attribute_names: List[str] = []
         self.attribute_alpha: int = 255  # for attribute slider
+        
+        self.attribute_inversions: List[bool] = []  # for attribute inversion option
 
         # sample information
         self.sample_count: int = 0
@@ -77,6 +79,7 @@ class Dataset:
             self.attribute_order = np.arange(0, self.attribute_count)
 
             self.active_attributes = np.repeat(True, self.attribute_count)
+            self.attribute_inversions = np.repeat(False, self.attribute_count)
 
             # get sample information
             self.sample_count = len(df.index)

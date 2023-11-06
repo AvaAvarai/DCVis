@@ -42,7 +42,7 @@ class UiView(QtWidgets.QMainWindow):
         self.plot_widget.m_bottom = -1.125
         self.plot_widget.m_top = 1.125
         
-        if self.controller.data.plot_type == 'SCC':
+        if self.controller.data.plot_type == 'SCC':  # fit CC to window
             self.plot_widget.m_left = -self.controller.data.attribute_count * 0.25
             self.plot_widget.m_right = self.controller.data.attribute_count * 0.25
             self.plot_widget.m_bottom = -self.controller.data.attribute_count * 0.25
@@ -143,7 +143,7 @@ class UiView(QtWidgets.QMainWindow):
         else:
             self.attribute_table_layout.removeWidget(self.attribute_table)
 
-        self.attribute_table = ATTRIBUTE_TABLE.AttributeTable(self.controller.data, parent=self)
+        self.attribute_table = ATTRIBUTE_TABLE.AttributeTable(self.controller.data, self.replot_attributes, parent=self)
         self.attribute_table_layout.addWidget(self.attribute_table)
 
         self.plot_layout.addWidget(self.plot_widget)
@@ -184,6 +184,13 @@ class UiView(QtWidgets.QMainWindow):
         if not self.plot_widget:
             WARNINGS.noDataWarning()
             return
+        
+        for index, is_inverted in enumerate(self.controller.data.attribute_inversions):
+            if is_inverted:
+                # Invert the axis by multiplying by -1
+                self.controller.data.dataframe.iloc[:, index] *= -1
+
+        
         self.controller.data.attribute_names.append('class')
         self.controller.data.dataframe = self.controller.data.dataframe[self.controller.data.attribute_names]
 
@@ -191,6 +198,7 @@ class UiView(QtWidgets.QMainWindow):
         self.controller.data.positions = []
         self.controller.data.active_attributes = np.repeat(True, self.controller.data.attribute_count)
         ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
+        
         self.create_plot()
 
     def open_background_color_picker(self):
