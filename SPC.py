@@ -21,11 +21,12 @@ class SPC:
         for i in range(dataset.attribute_count):
             if dataset.attribute_inversions[i]:
                 if i % 2 != 0:
-                    print('even inversion')
                     working_df.iloc[:, i] = -working_df.iloc[:, i]
                 else:
-                    print('odd inversion')
-                    working_df.iloc[:, i] = i//2 - working_df.iloc[:, i]  # works for everything but x1
+                    if i == 0:
+                        working_df.iloc[:, i] = -working_df.iloc[:, i] - 1
+                    else:
+                        working_df.iloc[:, i] = i//2 - working_df.iloc[:, i]  # works for everything but x1
                     
         # After computing positions
         for name in dataset.class_names:
