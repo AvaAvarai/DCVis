@@ -18,18 +18,14 @@ class SPC:
             working_df[working_df.columns[i]] = scaler.fit_transform(working_df[[working_df.columns[i]]])
 
         # Apply inversions to the scaled data if necessary
-        j = 0
         for i in range(dataset.attribute_count):
             if dataset.attribute_inversions[i]:
                 if i % 2 != 0:
+                    print('even inversion')
                     working_df.iloc[:, i] = -working_df.iloc[:, i]
                 else:
-                    print('Inverting section ' + str(i) + ' ' + str(j))
-                    if j == 0:
-                        working_df.iloc[:, i] = 1 - working_df.iloc[:, i]
-                    else:
-                        working_df.iloc[:, i] = i - working_df.iloc[:, i]  # BUG: this does not work for x1 for some reason
-                    j += 1
+                    print('odd inversion')
+                    working_df.iloc[:, i] = i//2 - working_df.iloc[:, i]  # works for everything but x1
                     
         # After computing positions
         for name in dataset.class_names:
