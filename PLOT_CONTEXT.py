@@ -187,6 +187,7 @@ class MakePlot(QOpenGLWidget):
         super(MakePlot, self).__init__(parent)
 
         self.data = dataset
+        
         self.vertex_info = GCA.GCA(self.data)
         self.line_vao = []
         self.marker_vao = []
@@ -220,9 +221,7 @@ class MakePlot(QOpenGLWidget):
 
         self.background_color = [0.9375, 0.9375, 0.9375, 1]  # Default gray in RGBA
         self.axes_color = [0, 0, 0, 1]  # Default black in RGBA
-        
-        self.data = dataset
-        
+
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         self.data.class_colors = self.color_instance.colors_array
 

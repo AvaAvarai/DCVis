@@ -46,50 +46,47 @@ class Dataset:
         self.class_order: List[int] = []  # choose which class is on top
         self.attribute_order: List[int] = []  # choose attribute order (requires running graph construction algorithm again)
 
+    def load_frame(self, df: pd.DataFrame):
+        # put class column to end of dataframe
+        df.insert(len(df.columns) - 1, 'class', df.pop('class'))
+
+        # get class information
+        self.class_count = len(df['class'].unique())
+        self.class_names = df['class'].value_counts().index.tolist()
+        self.count_per_class = df['class'].value_counts().tolist()
+        self.class_order = np.arange(0, self.class_count)
+
+        # get class colors
+        self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0, 1], [1, 1, 1, 1]).colors_array
+        
+        # initialize arrays for class options
+        self.active_markers = np.repeat(True, self.class_count)
+        self.active_classes = np.repeat(True, self.class_count)
+
+        # get attribute information
+        self.attribute_names = df.columns.tolist()[:-1]
+        self.attribute_count = len(df.columns) - 1
+        self.attribute_order = np.arange(0, self.attribute_count)
+
+        self.active_attributes = np.repeat(True, self.attribute_count)
+        self.attribute_inversions = np.repeat(False, self.attribute_count)
+
+        # get sample information
+        self.sample_count = len(df.index)
+        # initialize arrays for clipping options
+        self.clipped_samples = np.repeat(False, self.sample_count)
+        self.vertex_in = np.repeat(False, self.sample_count)
+        self.last_vertex_in = np.repeat(False, self.sample_count)
+
+        # general dataframe
+        self.dataframe = df
+
     def load_from_csv(self, filename: str):
         try:
             df = pd.read_csv(filename)
-
-            # get dataset name
             self.name = os.path.basename(filename)
-
-            # make even attributes
-            if (len(df.columns) - 1) % 2 == 1:
-                df['Dupe-x' + str(len(df.columns) - 1)] = df.iloc[:, len(df.columns) - 1]
-
-            # put class column to end of dataframe
-            df.insert(len(df.columns) - 1, 'class', df.pop('class'))
-
-            # get class information
-            self.class_count = len(df['class'].unique())
-            self.class_names = df['class'].value_counts().index.tolist()
-            self.count_per_class = df['class'].value_counts().tolist()
-            self.class_order = np.arange(0, self.class_count)
-
-            # get class colors
-            self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0, 1], [1, 1, 1, 1]).colors_array
+            self.load_frame(df)
             
-            # initialize arrays for class options
-            self.active_markers = np.repeat(True, self.class_count)
-            self.active_classes = np.repeat(True, self.class_count)
-
-            # get attribute information
-            self.attribute_names = df.columns.tolist()[:-1]
-            self.attribute_count = len(df.columns) - 1
-            self.attribute_order = np.arange(0, self.attribute_count)
-
-            self.active_attributes = np.repeat(True, self.attribute_count)
-            self.attribute_inversions = np.repeat(False, self.attribute_count)
-
-            # get sample information
-            self.sample_count = len(df.index)
-            # initialize arrays for clipping options
-            self.clipped_samples = np.repeat(False, self.sample_count)
-            self.vertex_in = np.repeat(False, self.sample_count)
-            self.last_vertex_in = np.repeat(False, self.sample_count)
-
-            # general dataframe
-            self.dataframe = df
         except FileNotFoundError:
             print(f"File {filename} not found.")
             # Notify the controller to show a warning message
