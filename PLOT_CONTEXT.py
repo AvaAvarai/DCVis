@@ -15,6 +15,90 @@ import GCA
 import CLIPPING
 
 
+
+def calculate_inner_control_point(coef, start, end, radius):
+    # Compute the midpoint
+    midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
+    # Determine the distance from the center to the midpoint
+    mDistance = np.sqrt(midX**2 + midY**2)
+    # Calculate the scale factor for the inner curve
+    factor = 0.1 * coef / 100 + 0.3
+    # Compute the scaled control point
+    mScale = factor * radius / mDistance
+    return (midX * mScale, midY * mScale)
+
+def calculate_outer_control_point(coef, start, end, radius, attribute_count, class_index):
+    # Compute the midpoint
+    midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
+    # Determine the distance from the center to the midpoint
+    mDistance = np.sqrt(midX**2 + midY**2)
+    # Adjust the outer curve scale based on class index and attribute count
+    factor = (0.5 * coef / 100 + 1.5) * (1 + class_index / attribute_count)
+    # Compute the scaled control point
+    mScale = factor * radius / mDistance
+    return (midX * mScale, midY * mScale)
+
+def draw_class_curves(data, class_index, vao, radius):
+    glBindVertexArray(vao)
+    color = data.class_colors[class_index]
+    inside = (class_index == data.class_order[0])  # Determine if this is the first class
+
+    for j in range(0, len(data.positions[class_index]), data.vertex_count):
+        for h in range(1, data.vertex_count):
+            if h > data.attribute_count:
+                continue
+
+            if data.active_attributes[h]:
+                glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
+            else:
+                glColor4ub(color[0], color[1], color[2], 255)
+
+            start = data.positions[class_index][j + h - 1]
+            end = data.positions[class_index][j + h]
+            coef = 1  # TODO: set to coefficients from attribute sliders
+
+            # Determine whether to use inner or outer control point calculation
+            if inside:
+                control = calculate_inner_control_point(coef, start, end, radius)
+            else:
+                control = calculate_outer_control_point(coef, start, end, radius, data.attribute_count, class_index)
+
+            draw_bezier_curve(start, control, end)
+
+    glBindVertexArray(0)
+
+def draw_curves(data, marker_vao, class_vao):
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    radius = calculate_radius(data)
+    
+    # Draw all classes, the function will determine if it's inside or outside
+    for class_index in data.class_order:
+        if data.active_classes[class_index]:
+            draw_class_curves(data, class_index, class_vao[class_index], radius)
+    
+    glDisable(GL_BLEND)
+
+
+def draw_bezier_curve(start, control, end):
+    # Draw the Bezier curve using OpenGL's immediate mode.
+    # 'control' is a tuple containing the control point.
+    segments = 20  # More segments means a smoother curve.
+    glBegin(GL_LINE_STRIP)
+    for t in np.linspace(0, 1, segments):
+        # Compute the quadratic Bezier curve point.
+        x = (1 - t)**2 * start[0] + 2 * (1 - t) * t * control[0] + t**2 * end[0]
+        y = (1 - t)**2 * start[1] + 2 * (1 - t) * t * control[1] + t**2 * end[1]
+        glVertex2f(x, y)
+    glEnd()
+
+def calculate_radius(data):
+    # The circumference is the number of attributes, as each attribute represents a point on the circle
+    circumference = data.attribute_count
+    # Calculate the radius from the circumference
+    radius = circumference / (2 * np.pi)
+    return radius
+
 def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
@@ -84,6 +168,7 @@ def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
     glColor3ub(255, 255, 0)
     glLineWidth(4)
+    
     # loop through classes in class order
     for i in dataset.class_order[::-1]:
         datapoint_cnt = 0
@@ -290,9 +375,12 @@ class MakePlot(QOpenGLWidget):
         set_view_frustrum(self.m_left, self.m_right, self.m_bottom, self.m_top)
 
         # draw points
-        draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
-        draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
-        
+        if self.data.plot_type == 'SCC':
+            draw_curves(self.data, self.marker_vao, self.line_vao)
+        else:
+            draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
+            draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
+            
         if self.data.axis_on:
             draw_axes(self.data, self.axis_vao, self.axes_color)
 

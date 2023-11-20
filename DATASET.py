@@ -16,7 +16,7 @@ class Dataset:
         self.class_count: int = 0
         self.count_per_class: List[int] = []
         self.class_names: List[str] = []
-        self.class_colors: List[Tuple[int, int, int]] = []  # RGB colors
+        self.class_colors: List[Tuple[int, int, int]] = []  # RGB colors TODO: change to using RGBA for individualized attribute alpha slider control
 
         # attribute information
         self.attribute_count: int = 0
