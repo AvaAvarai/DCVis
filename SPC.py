@@ -20,13 +20,15 @@ class SPC:
         # Apply inversions to the scaled data if necessary
         for i in range(dataset.attribute_count):
             if dataset.attribute_inversions[i]:
-                if i % 2 != 0:
-                    working_df.iloc[:, i] = -working_df.iloc[:, i]
-                else:
-                    if i == 0:
-                        working_df.iloc[:, i] = -working_df.iloc[:, i] - 1
-                    else:
-                        working_df.iloc[:, i] = i//2 - working_df.iloc[:, i]  # works for everything but x1
+                # Calculate the min and max from the data for each attribute
+                attribute_min = working_df.iloc[:, i].min()
+                attribute_max = working_df.iloc[:, i].max()
+                
+                # Calculate the midpoint
+                midpoint = (attribute_max + attribute_min) / 2
+                
+                # Invert the attribute by reflecting it across the midpoint
+                working_df.iloc[:, i] = (midpoint - (working_df.iloc[:, i] - midpoint))
                     
         # After computing positions
         for name in dataset.class_names:
