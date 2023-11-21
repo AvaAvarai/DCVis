@@ -73,6 +73,43 @@ def draw_curves(data, vao, radius):
 
         glBindVertexArray(0)
 
+def draw_highlighted_curves(dataset, vao, radius):
+    glEnable(GL_BLEND)
+    glEnable(GL_LINE_SMOOTH)
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+    glColor3ub(255, 255, 0)  # Highlight color
+    glLineWidth(4)  # Highlight line width
+
+    for class_index in range(dataset.class_count):
+        if dataset.active_classes[class_index]:
+            glBindVertexArray(vao[class_index])
+            datapoint_count = 0
+            size_index = 0
+            for j in range(dataset.class_count):
+                if j < class_index:
+                    size_index += dataset.count_per_class[j]
+
+            is_inner = (class_index == dataset.class_order[0])  # Determine if this is the inner class
+
+            for j in range(0, len(dataset.positions[class_index]), dataset.vertex_count):
+                if dataset.clipped_samples[size_index + datapoint_count]:
+                    for h in range(1, dataset.vertex_count):
+                        if h > dataset.attribute_count:
+                            continue
+
+                        start = dataset.positions[class_index][j + h - 1]
+                        end = dataset.positions[class_index][j + h]
+                        coef = 1  # Adjust to control curvature
+
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, is_inner)
+                        draw_cubic_bezier_curve(start, control1, control2, end)
+                datapoint_count += 1
+
+            glBindVertexArray(0)
+
+    glLineWidth(1)  # Reset line width
+    glDisable(GL_BLEND)
+
 def draw_unhighlighted_curves(data, marker_vao, line_vao):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -368,6 +405,7 @@ class MakePlot(QOpenGLWidget):
         # draw points
         if self.data.plot_type == 'SCC':
             draw_unhighlighted_curves(self.data, self.marker_vao, self.line_vao)
+            draw_highlighted_curves(self.data, self.line_vao, calculate_radius(self.data))
         else:
             draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
             draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
