@@ -1,12 +1,16 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
+## Project history
+
 Continuation of a [CS Masters Project at CWU](https://github.com/Charles57-CWU/DSCVis).
+Rebuild of former development during research assistance [lab project](https://github.com/CWU-VKD-LAB/DCVis).
+Now built on a refactored base with a Model-View-Controller architecture and precise zoom & panning controls during self-study and directed research.
 
 ## About
 
 This application displays multi-dimensional numerical data in 2D using OpenGL for GPU rendering. The plot can be panned around and zoomed in/out. Classes can be hidden, specified attribute markers can be customized, classes can be reordered and recolored. A box-clipping algorithm is included to clip lines and return contained samples of the dataset as a training and validation dataset split for machine learning analysis.
 
-This visualization tool features multiple visualisation plots, including Parallel Coordinates, Paired Coordinates, DSC1, and DSC2. Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
+This visualization tool features multiple visualisation plots, including Parallel Coordinates, Paired Coordinates, Dynamic Scaffold Coordinates 1, Dynamic Scaffold Coordinates 2, Static Circular Coordinates. Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
 
 ## Datasets
 
@@ -17,6 +21,14 @@ Requirements of datasets:
 - one label column and any number of feature columns
 - label header must be 'class'
 - Features must be numerical
+
+Example dataset:
+
+length,width,height,class  
+2.7,3.5,3.2,dog  
+1.2,5.5,2.1,cat  
+2.5,4.1,1.6,dog  
+1.0,1.0,1.0,cow
 
 Datasets included:
 
@@ -29,13 +41,7 @@ Datasets included:
 - Sinusoidal wave samplings -- 200 samples, 2 features, 2 classes
 - Wheat Seed variety measurements -- 210 samples, 7 features, 3 classes
 - Wine chemical analysis measurements -- 4,898 samples, 11 features, 7 classes
-
-Example dataset
-
-length,width,height,class  
-2.7,3.5,3.2,dog  
-1.2,5.5,2.1,cat  
-2.5,4.1,1.6,dog  
+- Artificial testing datasets
 
 ## Language and Libraries
 
@@ -70,8 +76,7 @@ Showing zoom and pan capabilities
   - Bug 2: Reordering classes makes marker checkbox not coresspond to correct class
 
 - Circular Coordinates
-  - Add SCC
-  - Add DCC
+  - Add Dynamic Circular Coordinates
 
 - Attribute Optimization
   - n-epoch search
