@@ -15,29 +15,46 @@ import GCA
 import CLIPPING
 
 
-def calculate_cubic_bezier_control_points(start, end, radius, coef, is_inner):
+def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner):
+    # Calculate midpoint between start and end points
     midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
-    distance = np.sqrt(midX**2 + midY**2)
-
-    # Determine scaling factors for inner and outer curves
+    
+    # Calculate the angle from the circle's center to the midpoint
+    angle = np.arctan2(midY, midX)
+    
+    # Adjust radius based on whether it's an inner or outer curve
     if is_inner:
-        factor1 = factor2 = 0.1 * coef / 100 + 0.3
+        factor = 0.1 * coef / 100 + 0.3
+        midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
+        distance = np.sqrt(midX**2 + midY**2)
+        # Calculate scaled control points
+        scale = factor * radius / distance
+
+        control1 = (midX * scale, midY * scale)
+        control2 = (midX * scale, midY * scale)
+
+        return control1, control2
     else:
-        factor1 = 0.5 * coef / 100 + 1.5
-        factor2 = 0.8 * coef / 100 + 1.8  # This factor is larger to create a wider arc
+        factor = 0.5 * coef / 100 + 1.5
+    
+    # Calculate the new radius for control points
+    new_radius = radius * factor * 2
 
-    # Calculate scaled control points
-    scale1 = factor1 * radius / distance
-    scale2 = factor2 * radius / distance
-
-    control1 = (midX * scale1, midY * scale1)
-    control2 = (midX * scale2, midY * scale2)
+    angle_adjustment = np.pi / attribute_count  # This can be tuned as needed
+    control1_angle = angle - angle_adjustment if is_inner else angle + angle_adjustment
+    # Calculate control points using circle formula
+    control1 = (new_radius * np.cos(control1_angle), new_radius * np.sin(control1_angle))
+    
+    # To spread out control2, we can adjust the angle
+    angle_adjustment = np.pi / attribute_count # This can be tuned as needed
+    control2_angle = angle + angle_adjustment if is_inner else angle - angle_adjustment
+    control2 = (new_radius * np.cos(control2_angle), new_radius * np.sin(control2_angle))
 
     return control1, control2
 
 def draw_cubic_bezier_curve(start, control1, control2, end):
     # Draw a cubic Bezier curve using OpenGL's immediate mode.
-    segments = 20  # The number of line segments to use
+    segments = 50  # The number of line segments to use
 
     glBegin(GL_LINE_STRIP)
     for t in np.linspace(0, 1, segments):
@@ -50,28 +67,38 @@ def draw_cubic_bezier_curve(start, control1, control2, end):
 # Update the draw_class_curves function to use the new cubic Bezier curve function
 def draw_curves(data, vao, radius):
     for class_index in range(data.class_count):
-        glBindVertexArray(vao[class_index])
-        color = data.class_colors[class_index]
-        is_inner = (class_index == data.class_order[0])
+        if data.active_classes[class_index]:
+        
+            glBindVertexArray(vao[class_index])
+            color = data.class_colors[class_index]
+            is_inner = (class_index == data.class_order[0])
 
-        for j in range(0, len(data.positions[class_index]), data.vertex_count):
-            for h in range(1, data.vertex_count):
-                if h > data.attribute_count:
-                    continue
+            for j in range(0, len(data.positions[class_index]), data.vertex_count):
+                for h in range(1, data.vertex_count):
+                    if h > data.attribute_count:
+                        continue
 
-                if data.active_attributes[h]:
-                    glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
-                else:
-                    glColor4ub(color[0], color[1], color[2], 255)
+                    if data.active_attributes[h]:
+                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
+                    else:
+                        glColor4ub(color[0], color[1], color[2], 255)
 
-                start = data.positions[class_index][j + h - 1]
-                end = data.positions[class_index][j + h]
-                coef = 1  # Adjust this to control the curvature
+                    start = data.positions[class_index][j + h - 1]
+                    end = data.positions[class_index][j + h]
+                    coef = 100  # Adjust this to control the curvature
 
-                control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, is_inner)
-                draw_cubic_bezier_curve(start, control1, control2, end)
+                    control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, data.attribute_count, is_inner)
+                    
+                    
+                    # # draw control points
+                    # glBegin(GL_POINTS)
+                    # glVertex2f(control1[0], control1[1])
+                    # glVertex2f(control2[0], control2[1])
+                    # glEnd()
+                                    
+                    draw_cubic_bezier_curve(start, control1, control2, end)
 
-        glBindVertexArray(0)
+            glBindVertexArray(0)
 
 def draw_highlighted_curves(dataset, vao, radius):
     glEnable(GL_BLEND)
@@ -99,9 +126,9 @@ def draw_highlighted_curves(dataset, vao, radius):
 
                         start = dataset.positions[class_index][j + h - 1]
                         end = dataset.positions[class_index][j + h]
-                        coef = 1  # Adjust to control curvature
+                        coef = 100  # Adjust to control curvature
 
-                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, is_inner)
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, dataset.attribute_count, is_inner)
                         draw_cubic_bezier_curve(start, control1, control2, end)
                 datapoint_count += 1
 
@@ -317,10 +344,10 @@ class MakePlot(QOpenGLWidget):
         self.m_top = 1.125
         
         if self.data.plot_type == 'SCC':    # fit CC to window
-            self.m_left = -self.data.attribute_count * 0.25
-            self.m_right = self.data.attribute_count * 0.25
-            self.m_bottom = -self.data.attribute_count * 0.25
-            self.m_top = self.data.attribute_count * 0.25
+            self.m_left = -self.data.attribute_count * 0.5
+            self.m_right = self.data.attribute_count * 0.5
+            self.m_bottom = -self.data.attribute_count * 0.5
+            self.m_top = self.data.attribute_count * 0.5
 
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125
