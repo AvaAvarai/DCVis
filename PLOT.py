@@ -263,7 +263,7 @@ def draw_axes(dataset, axis_vao, color):
     # colors
     glColor4f(*color)
     
-    if dataset.plot_type != 'SCC': # draw a line axis
+    if dataset.plot_type not in ['SCC', 'DCC']: # draw a line axis
         for j in range(0, dataset.axis_count * 2, 2):
             glDrawArrays(GL_LINES, j, dataset.vertex_count)
             
@@ -350,7 +350,7 @@ class MakePlot(QOpenGLWidget):
         self.m_bottom = -1.125
         self.m_top = 1.125
         
-        if self.data.plot_type == 'SCC': # fit CC to window
+        if self.data.plot_type in ['SCC', 'DCC']: # fit CC to window
             self.m_left = -self.data.attribute_count * 0.5
             self.m_right = self.data.attribute_count * 0.5
             self.m_bottom = -self.data.attribute_count * 0.5
@@ -437,7 +437,7 @@ class MakePlot(QOpenGLWidget):
         set_view_frustrum(self.m_left, self.m_right, self.m_bottom, self.m_top)
 
         # draw points
-        if self.data.plot_type == 'SCC':
+        if self.data.plot_type in ['SCC', 'DCC']:
             draw_unhighlighted_curves(self.data, self.line_vao, self.marker_vao)
             draw_highlighted_curves(self.data, self.line_vao, self.marker_vao, calculate_radius(self.data))
         else:

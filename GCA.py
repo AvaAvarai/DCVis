@@ -3,6 +3,7 @@ import SPC
 import DSC1
 import DSC2
 import SCC
+import DCC
 
 
 class GCA:
@@ -39,6 +40,10 @@ class GCA:
         elif dataset.plot_type == 'SCC':  # Static Circular Coordinates
             dataset.vertex_count = dataset.attribute_count
             SCC.SCC(dataset)
+        
+        elif dataset.plot_type == 'DCC':
+            dataset.vertex_count = dataset.attribute_count
+            DCC.DCC(dataset)
 
         else:
             print('No type selected')

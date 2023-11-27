@@ -137,6 +137,11 @@
                     <string>Static Circular Coordinates</string>
                    </property>
                   </item>
+                  <item>
+                   <property name="text">
+                    <string>Dynamic Circular Coordinates</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item>

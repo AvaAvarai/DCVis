@@ -42,7 +42,7 @@ class UiView(QtWidgets.QMainWindow):
         self.plot_widget.m_bottom = -1.125
         self.plot_widget.m_top = 1.125
         
-        if self.controller.data.plot_type == 'SCC':  # fit CC to window
+        if self.controller.data.plot_type in ['SCC', 'DCC']:  # fit CC to window
             self.plot_widget.m_left = -self.controller.data.attribute_count * 0.5
             self.plot_widget.m_right = self.controller.data.attribute_count * 0.5
             self.plot_widget.m_bottom = -self.controller.data.attribute_count * 0.5
@@ -125,6 +125,8 @@ class UiView(QtWidgets.QMainWindow):
             self.controller.data.plot_type = 'SPC'
         elif selected_plot_type == 'Static Circular Coordinates':
             self.controller.data.plot_type = 'SCC'
+        elif selected_plot_type == 'Dynamic Circular Coordinates':
+            self.controller.data.plot_type = 'DCC'
         else:
             return
         

@@ -45,6 +45,7 @@ class Dataset:
 
         self.class_order: List[int] = []  # choose which class is on top
         self.attribute_order: List[int] = []  # choose attribute order (requires running graph construction algorithm again)
+        self.all_arc_lengths: List[int] = []
 
     def load_frame(self, df: pd.DataFrame):
         # put class column to end of dataframe
