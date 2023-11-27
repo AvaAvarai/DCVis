@@ -60,10 +60,10 @@ def draw_cubic_bezier_curve(start, control1, control2, end):
 # Update the draw_class_curves function to use the new cubic Bezier curve function
 def draw_curves(data, line_vao, marker_vao, radius):
     for class_index in range(data.class_count):
+        color = data.class_colors[class_index]
         if data.active_classes[class_index]:
         
             glBindVertexArray(line_vao[class_index])
-            color = data.class_colors[class_index]
             is_inner = (class_index == data.class_order[0])
 
             for j in range(0, len(data.positions[class_index]), data.vertex_count):
@@ -81,7 +81,6 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     coef = 100  # Adjust this to control the curvature
 
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, data.attribute_count, is_inner)
-                    
                     
                     # # draw control points
                     # glBegin(GL_POINTS)

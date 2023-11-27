@@ -1,15 +1,13 @@
 import numpy as np
 import DATASET
 
-def compute_coordinates(data, df_name):
-    circumference = data.attribute_count
-    diameter = circumference / np.pi
-    radius = diameter / 2
+def compute_coordinates(data, df):
+    radius = data.attribute_count / (2 * np.pi)
     section_array = np.linspace(0, 1, data.attribute_count)
-    x_coord = np.tile(section_array, reps=len(df_name.index))
-    y_coord = df_name.to_numpy().ravel()
+    x_coord = np.tile(section_array, reps=len(df.index))
+    y_coord = df.to_numpy().ravel()
 
-    attribute_length = data.attribute_count * len(df_name.index)
+    attribute_length = data.attribute_count * len(df.index)
     arc_length = 0
     arc_rule = 0
 
@@ -38,17 +36,11 @@ def compute_coordinates(data, df_name):
 class SCC:
     def __init__(self, data: DATASET.Dataset):
         data.vertex_count = data.attribute_count
-
-        # Normalize data
         data.dataframe = data.normalize_data(range=(0, 1))
+
         # Compute coordinates for each class and store in data.positions
-        data.positions = []
-        for class_name in data.class_names:
-            df_name = data.dataframe[data.dataframe['class'] == class_name]
-            df_name = df_name.drop(columns='class', axis=1)
-            pos_array = compute_coordinates(data, df_name)
-            data.positions.append(pos_array)
+        data.positions = [compute_coordinates(data, data.dataframe[data.dataframe['class'] == class_name].drop('class', axis=1))
+                          for class_name in data.class_names]
 
         data.axis_count = 0
-
         print('SCC BASED GCA COMPLETE')
