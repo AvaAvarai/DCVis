@@ -19,13 +19,8 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
     # Calculate midpoint between start and end points
     midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
     
-    # Calculate the angle from the circle's center to the midpoint
-    angle = np.arctan2(midY, midX)
-    
-    # Adjust radius based on whether it's an inner or outer curve
-    if is_inner:
-        factor = 0.1 * coef / 100 + 0.3
-        midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
+    if is_inner: # first class always inside axis
+        factor = 0.1 * coef / 100
         distance = np.sqrt(midX**2 + midY**2)
         # Calculate scaled control points
         scale = factor * radius / distance
@@ -34,21 +29,19 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
         control2 = (midX * scale, midY * scale)
 
         return control1, control2
-    else:
-        factor = 0.5 * coef / 100 + 1.5
+    
+    factor = coef / 100 + 1
     
     # Calculate the new radius for control points
     new_radius = radius * factor * 2
-
-    angle_adjustment = np.pi / attribute_count  # This can be tuned as needed
-    control1_angle = angle - angle_adjustment if is_inner else angle + angle_adjustment
-    # Calculate control points using circle formula
-    control1 = (new_radius * np.cos(control1_angle), new_radius * np.sin(control1_angle))
     
-    # To spread out control2, we can adjust the angle
-    angle_adjustment = np.pi / attribute_count # This can be tuned as needed
-    control2_angle = angle + angle_adjustment if is_inner else angle - angle_adjustment
-    control2 = (new_radius * np.cos(control2_angle), new_radius * np.sin(control2_angle))
+    # Calculate the angle from the circle's center to the midpoint
+    angle = np.arctan2(midY, midX)
+    angle_adjustment = np.pi / attribute_count
+    
+    # Calculate control points using circle formula
+    control1 = (new_radius * np.cos(angle + angle_adjustment), new_radius * np.sin(angle + angle_adjustment))
+    control2 = (new_radius * np.cos(angle - angle_adjustment), new_radius * np.sin(angle - angle_adjustment))
 
     return control1, control2
 
@@ -65,11 +58,11 @@ def draw_cubic_bezier_curve(start, control1, control2, end):
     glEnd()
 
 # Update the draw_class_curves function to use the new cubic Bezier curve function
-def draw_curves(data, vao, radius):
+def draw_curves(data, line_vao, marker_vao, radius):
     for class_index in range(data.class_count):
         if data.active_classes[class_index]:
         
-            glBindVertexArray(vao[class_index])
+            glBindVertexArray(line_vao[class_index])
             color = data.class_colors[class_index]
             is_inner = (class_index == data.class_order[0])
 
@@ -99,8 +92,29 @@ def draw_curves(data, vao, radius):
                     draw_cubic_bezier_curve(start, control1, control2, end)
 
             glBindVertexArray(0)
+        
+        # draw markers
+        if data.active_markers[class_index]:
+            # positions of the markers
+            for j in range(data.vertex_count):
+                if j == data.vertex_count - 1:
+                    glPointSize(7)
+                    color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
 
-def draw_highlighted_curves(dataset, vao, radius):
+                glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
+
+                if data.active_attributes[j]:
+                    glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
+                else:
+                    glColor4ub(color[0], color[1], color[2], 255)
+                # drawing
+                glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
+                # unbind
+                glBindVertexArray(0)
+                glPointSize(5)
+    glDisable(GL_BLEND)
+
+def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
@@ -108,8 +122,9 @@ def draw_highlighted_curves(dataset, vao, radius):
     glLineWidth(4)  # Highlight line width
 
     for class_index in range(dataset.class_count):
+        color = dataset.class_colors[class_index]
         if dataset.active_classes[class_index]:
-            glBindVertexArray(vao[class_index])
+            glBindVertexArray(line_vao[class_index])
             datapoint_count = 0
             size_index = 0
             for j in range(dataset.class_count):
@@ -133,17 +148,15 @@ def draw_highlighted_curves(dataset, vao, radius):
                 datapoint_count += 1
 
             glBindVertexArray(0)
+    glLineWidth(1)
 
-    glLineWidth(1)  # Reset line width
-    glDisable(GL_BLEND)
-
-def draw_unhighlighted_curves(data, marker_vao, line_vao):
+def draw_unhighlighted_curves(data, line_vao, marker_vao):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     radius = calculate_radius(data)
 
     # Draw curves for the entire dataset
-    draw_curves(data, line_vao, radius)
+    draw_curves(data, line_vao, marker_vao, radius)
 
     glDisable(GL_BLEND)
 
@@ -431,8 +444,8 @@ class MakePlot(QOpenGLWidget):
 
         # draw points
         if self.data.plot_type == 'SCC':
-            draw_unhighlighted_curves(self.data, self.marker_vao, self.line_vao)
-            draw_highlighted_curves(self.data, self.line_vao, calculate_radius(self.data))
+            draw_unhighlighted_curves(self.data, self.line_vao, self.marker_vao)
+            draw_highlighted_curves(self.data, self.line_vao, self.marker_vao, calculate_radius(self.data))
         else:
             draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
             draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
