@@ -77,7 +77,7 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_9">
                <item>
-                <widget class="QPushButton" name="upload_button">
+                <widget class="QPushButton" name="load_button">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -85,7 +85,10 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Load Data</string>
+                  <string>Load Data (F1)</string>
+                 </property>
+                 <property name="autoDefault">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -98,7 +101,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Recenter Plot</string>
+                  <string>Recenter Plot (F2)</string>
                  </property>
                 </widget>
                </item>
@@ -145,7 +148,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>Generate Plot</string>
+                   <string>Generate Plot (F3)</string>
                   </property>
                  </widget>
                 </item>
@@ -500,7 +503,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Exit</string>
+           <string>Exit (Esc)</string>
           </property>
          </widget>
         </item>
@@ -562,7 +565,12 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
    <property name="text">
-    <string>Exit</string>
+    <string>Exit (Esc)</string>
+   </property>
+  </action>
+  <action name="actionLoad_Data">
+   <property name="text">
+    <string>Load Data</string>
    </property>
   </action>
  </widget>

@@ -64,7 +64,6 @@ class AttributeTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Transparency'))
         self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Invert'))
 
-
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.setDropIndicatorShown(True)
@@ -122,6 +121,4 @@ class InversionCheckBox(QtWidgets.QCheckBox):
         # Update the attribute_inversions list with the new state
         # We use `not state` because the inversion list is meant to be True when not inverted
         self.dataset.attribute_inversions[self.index] = not self.dataset.attribute_inversions[self.index]
-
-        # Call the replot function to update the plot with the new inversion state
         self.replot_func()

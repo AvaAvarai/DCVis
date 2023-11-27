@@ -14,7 +14,6 @@ from COLORS import getColors
 import GCA
 import CLIPPING
 
-
 def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner):
     # Calculate midpoint between start and end points
     midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
@@ -227,7 +226,6 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                 glPointSize(5)
     glDisable(GL_BLEND)
 
-
 def draw_highlighted_nd_points(dataset, marker_vao, class_vao):    
     # highlight color and width
     glEnable(GL_BLEND)
@@ -258,7 +256,6 @@ def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
 
     glLineWidth(1)
 
-
 # draw axes
 def draw_axes(dataset, axis_vao, color):
     # positions of the class
@@ -275,7 +272,7 @@ def draw_axes(dataset, axis_vao, color):
         diameter = circumference / np.pi
         radius = diameter / 2
         
-        lineSeg = 1000
+        lineSeg = 100
         # draw axis
         glBegin(GL_LINE_LOOP)
         for i in range(lineSeg + 1):
@@ -307,7 +304,6 @@ def draw_axes(dataset, axis_vao, color):
     # unbind
     glBindVertexArray(0)
 
-
 # draw box for box clipping
 def draw_box(all_rect):
     if all_rect:
@@ -322,7 +318,6 @@ def draw_box(all_rect):
             glVertex2f(r[2], r[1])
             glEnd()
             glDisable(GL_BLEND)
-
 
 def set_view_frustrum(m_left, m_right, m_bottom, m_top):
     if m_left == m_right or m_bottom == m_top:
@@ -355,7 +350,7 @@ class MakePlot(QOpenGLWidget):
         self.m_bottom = -1.125
         self.m_top = 1.125
         
-        if self.data.plot_type == 'SCC':    # fit CC to window
+        if self.data.plot_type == 'SCC': # fit CC to window
             self.m_left = -self.data.attribute_count * 0.5
             self.m_right = self.data.attribute_count * 0.5
             self.m_bottom = -self.data.attribute_count * 0.5
@@ -378,9 +373,9 @@ class MakePlot(QOpenGLWidget):
         self.data.class_colors = self.color_instance.colors_array
 
     def redraw_plot(self, background_color=None, axes_color=None):
-        if background_color is not None:
+        if background_color:
             self.background_color = background_color
-        if axes_color is not None:
+        if axes_color:
             self.axes_color = axes_color
         self.update()
 

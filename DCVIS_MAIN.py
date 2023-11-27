@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QColorDialog
-
+from PyQt6.QtCore import Qt
 from PyQt6.uic.load_ui import loadUi
 import numpy as np
 import sys
@@ -8,7 +8,7 @@ import sys
 import DATA_DISPLAY
 import CLASS_TABLE
 import ATTRIBUTE_TABLE
-import PLOT_CONTEXT
+import PLOT
 import CLIPPING
 import WARNINGS
 import DATASET
@@ -43,10 +43,10 @@ class UiView(QtWidgets.QMainWindow):
         self.plot_widget.m_top = 1.125
         
         if self.controller.data.plot_type == 'SCC':  # fit CC to window
-            self.plot_widget.m_left = -self.controller.data.attribute_count * 0.25
-            self.plot_widget.m_right = self.controller.data.attribute_count * 0.25
-            self.plot_widget.m_bottom = -self.controller.data.attribute_count * 0.25
-            self.plot_widget.m_top = self.controller.data.attribute_count * 0.25
+            self.plot_widget.m_left = -self.controller.data.attribute_count * 0.5
+            self.plot_widget.m_right = self.controller.data.attribute_count * 0.5
+            self.plot_widget.m_bottom = -self.controller.data.attribute_count * 0.5
+            self.plot_widget.m_top = self.controller.data.attribute_count * 0.5
 
         self.refresh()
 
@@ -128,7 +128,7 @@ class UiView(QtWidgets.QMainWindow):
         else:
             return
         
-        self.plot_widget = PLOT_CONTEXT.MakePlot(self.controller.data, parent=self)
+        self.plot_widget = PLOT.MakePlot(self.controller.data, parent=self)
 
         # class table placeholder
         if self.class_pl_exists:
@@ -222,13 +222,17 @@ class MainController:
             self.setup_connections()
 
     def setup_connections(self):
-        self.view.upload_button.clicked.connect(self.load_dataset)
+        self.view.load_button.clicked.connect(self.load_dataset)
+        self.view.load_button.setShortcut(Qt.Key.Key_F1)
         self.view.plot_button.clicked.connect(self.view.create_plot)
+        self.view.plot_button.setShortcut(Qt.Key.Key_F3)
         self.view.exit_button.clicked.connect(lambda: sys.exit())
+        self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
         self.view.actionExit.triggered.connect(lambda: sys.exit())
         self.view.test_button.clicked.connect(self.view.test)
         self.view.remove_clip_button.clicked.connect(self.view.remove_clip)
         self.view.recenter_button.clicked.connect(self.view.recenter_plot)
+        self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
         self.view.show_axes.stateChanged.connect(self.view.axes_func)
         self.view.attribute_slide.valueChanged.connect(self.view.attr_slider)
         self.view.check_classes.clicked.connect(self.view.check_all_class)
@@ -244,7 +248,7 @@ class MainController:
             del self.data
 
         self.data = DATASET.Dataset()
-        filename = QtWidgets.QFileDialog.getOpenFileName(self.view, 'Open File')
+        filename = QtWidgets.QFileDialog.getOpenFileName(self.view, 'Open File', 'datasets')
         if filename[0] == '':
             return
 
