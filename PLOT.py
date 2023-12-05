@@ -37,7 +37,7 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
     # Calculate the angle from the circle's center to the midpoint
     angle = np.arctan2(midY, midX)
     angle_adjustment = np.pi / attribute_count
-    
+    angle_adjustment /= 3
     # Calculate control points using circle formula
     control1 = (new_radius * np.cos(angle + angle_adjustment), new_radius * np.sin(angle + angle_adjustment))
     control2 = (new_radius * np.cos(angle - angle_adjustment), new_radius * np.sin(angle - angle_adjustment))
@@ -289,7 +289,7 @@ def draw_axes(dataset, axis_vao, color):
         angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
         # draw tick marks
-        tick_length = radius * dataset.attribute_count
+        tick_length = radius * dataset.attribute_count * 2
         for i in range(dataset.attribute_count):
             # Adjusting the angle to start from the 12 o'clock position
             angle_for_tick = i * angle_between_ticks - np.pi/2
