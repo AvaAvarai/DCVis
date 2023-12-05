@@ -108,4 +108,4 @@ class DCC:
                     dataset.cr_end_y = radius * np.cos(maxCA)
                 overlaps.append(dataset.minmax_arc_lengths[j])
 
-        dataset.model_output_str = f"Overlapping Distances: {np.round(distances, decimals=2)}\nOverlapping Circumferences: {np.round(overlaps, decimals=2)}"
+        print(f"Overlapping Distances: {np.round(distances, decimals=2)}\nOverlapping Circumferences: {np.round(overlaps, decimals=2)}")

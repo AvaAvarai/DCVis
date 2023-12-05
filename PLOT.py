@@ -58,7 +58,11 @@ def draw_cubic_bezier_curve(start, control1, control2, end):
 
 # Update the draw_class_curves function to use the new cubic Bezier curve function
 def draw_curves(data, line_vao, marker_vao, radius):
+    # Create a rotated color map
+    rotated_colors = [data.class_colors[(i + 1) % data.class_count] for i in range(data.class_count)]
+
     for class_index in range(data.class_count):
+        # Use the original color for all but the last attribute
         color = data.class_colors[class_index]
         if data.active_classes[class_index]:
         
@@ -69,6 +73,13 @@ def draw_curves(data, line_vao, marker_vao, radius):
                 for h in range(1, data.vertex_count):
                     if h > data.attribute_count:
                         continue
+
+                    # For the last attribute, use the rotated color
+                    if h == data.attribute_count - 1:
+                        color = rotated_colors[class_index]
+                    else:
+                        color = data.class_colors[class_index]
+                        
 
                     if data.active_attributes[h]:
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
@@ -81,17 +92,11 @@ def draw_curves(data, line_vao, marker_vao, radius):
 
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, data.attribute_count, is_inner)
                     
-                    # # draw control points
-                    # glBegin(GL_POINTS)
-                    # glVertex2f(control1[0], control1[1])
-                    # glVertex2f(control2[0], control2[1])
-                    # glEnd()
-                                    
                     draw_cubic_bezier_curve(start, control1, control2, end)
 
             glBindVertexArray(0)
         
-        # draw markers
+          # draw markers
         if data.active_markers[class_index]:
             # positions of the markers
             for j in range(data.vertex_count):
@@ -110,6 +115,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
                 # unbind
                 glBindVertexArray(0)
                 glPointSize(5)
+                
     glDisable(GL_BLEND)
 
 def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
@@ -283,7 +289,7 @@ def draw_axes(dataset, axis_vao, color):
         angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
         # draw tick marks
-        tick_length = 0.1 * radius
+        tick_length = radius * dataset.attribute_count
         for i in range(dataset.attribute_count):
             # Adjusting the angle to start from the 12 o'clock position
             angle_for_tick = i * angle_between_ticks - np.pi/2
