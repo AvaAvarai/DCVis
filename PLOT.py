@@ -1,5 +1,5 @@
 import typing
-
+from typing import List, Optional, Tuple
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as glvbo
 from PyQt6 import QtGui
@@ -45,7 +45,7 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
 
 def draw_cubic_bezier_curve(start, control1, control2, end):
     # Draw a cubic Bezier curve using OpenGL's immediate mode.
-    segments = 50  # The number of line segments to use
+    segments = 20  # The number of line segments to use
 
     glBegin(GL_LINE_STRIP)
     for t in np.linspace(0, 1, segments):
@@ -173,7 +173,7 @@ def calculate_radius(data):
     # The circumference is the number of attributes, as each attribute represents a point on the circle
     circumference = data.attribute_count
     # Calculate the radius from the circumference
-    radius = circumference / (2 * np.pi)
+    radius = circumference / ((2 + data.attribute_count / 100) * np.pi)
     return radius
 
 def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
@@ -294,7 +294,7 @@ def draw_axes(dataset, axis_vao, color):
         angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
         # draw tick marks
-        tick_length = radius * 2.5
+        tick_length = radius * 2
         for i in range(dataset.attribute_count):
             # Adjusting the angle to start from the 12 o'clock position
             angle_for_tick = i * angle_between_ticks - np.pi/2
@@ -354,7 +354,9 @@ class MakePlot(QOpenGLWidget):
         # for clipping
         self.all_rect = []  # holds all clip boxes
         self.rect = []  # working clip box
-
+        self.attribute_inversions: List[bool] = []  # for attribute inversion option
+        
+        
         # for zooming
         self.m_left = -1.125
         self.m_right = 1.125
