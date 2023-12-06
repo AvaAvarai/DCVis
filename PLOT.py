@@ -9,10 +9,22 @@ from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 import numpy as np
-from COLORS import getColors
+import colorsys
 
+from COLORS import getColors
 import GCA
 import CLIPPING
+
+# TODO: Move to COLORS module
+def shift_hue(rgb, amount):
+    # Convert RGB to HSV
+    r, g, b = rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+    # Shift the hue
+    h = (h + amount) % 1.0
+    # Convert back to RGB
+    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+    return int(r * 255), int(g * 255), int(b * 255)
 
 def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner):
     # Calculate midpoint between start and end points
@@ -55,11 +67,10 @@ def draw_cubic_bezier_curve(start, control1, control2, end):
         glVertex2f(x, y)
     glEnd()
 
-# Update the draw_class_curves function to use the new cubic Bezier curve function
 def draw_curves(data, line_vao, marker_vao, radius):
     # Create a rotated color map
-    rotated_colors = [data.class_colors[(i + 1) % data.class_count] for i in range(data.class_count)]
-
+    hue_shift_amount = 0.1
+    
     for class_index in range(data.class_count):
         # Use the original color for all but the last attribute
         color = data.class_colors[class_index]
@@ -81,9 +92,9 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     if h > data.attribute_count:
                         continue
                     
-                    # For the last attribute, use the rotated color
+                    # For the last attribute, use hue shift color
                     if h == data.attribute_count - 1:
-                        color = rotated_colors[class_index]
+                        color = shift_hue(data.class_colors[class_index], hue_shift_amount)
                     else:
                         color = data.class_colors[class_index]
 
@@ -103,7 +114,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
 
             glBindVertexArray(0)
         
-          # draw markers
+        # draw markers
         if data.active_markers[class_index]:
             # positions of the markers
             for j in range(data.vertex_count):
@@ -113,9 +124,9 @@ def draw_curves(data, line_vao, marker_vao, radius):
 
                 glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
 
-                # For the last attribute, use the rotated color
-                if j == data.attribute_count - 1:
-                    color = rotated_colors[class_index]
+                # For the last attribute, use hue shift color
+                if h == data.attribute_count - 1:
+                    color = shift_hue(data.class_colors[class_index], hue_shift_amount)
                 else:
                     color = data.class_colors[class_index]
 
