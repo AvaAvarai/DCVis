@@ -120,12 +120,11 @@ def draw_curves(data, line_vao, marker_vao, radius):
             for j in range(data.vertex_count):
                 if j == data.vertex_count - 1:
                     glPointSize(7)
-                    color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
 
                 glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
 
                 # For the last attribute, use hue shift color
-                if h == data.attribute_count - 1:
+                if j == data.attribute_count - 1:
                     color = shift_hue(data.class_colors[class_index], hue_shift_amount)
                 else:
                     color = data.class_colors[class_index]
@@ -238,7 +237,7 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
 
         # Draw markers
         if dataset.active_markers[i]:
-            datapoint_cnt = 0  # Reset datapoint counter for markers
+            datapoint_cnt = 0
             for j in range(dataset.vertex_count):
                 if dataset.clear_samples[size_index + datapoint_cnt]:
                     datapoint_cnt += 1
@@ -246,7 +245,6 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
 
                 if j == dataset.vertex_count - 1:
                     glPointSize(7)
-                    color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
 
                 glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
 
@@ -258,7 +256,7 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                 glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
                 glPointSize(5)
             glBindVertexArray(0)
-            datapoint_cnt += 1  # Increment at the end of each class' marker processing
+            datapoint_cnt += 1
 
     glDisable(GL_BLEND)
 
