@@ -68,17 +68,24 @@ def draw_curves(data, line_vao, marker_vao, radius):
             glBindVertexArray(line_vao[class_index])
             is_inner = (class_index == data.class_order[0])
 
+            datapoint_count = 0
+            size_index = 0
+            for j in range(data.class_count):
+                if j < class_index:
+                    size_index += data.count_per_class[j]
+            
             for j in range(0, len(data.positions[class_index]), data.vertex_count):
+                if data.clear_samples[size_index + datapoint_count]:
+                    continue
                 for h in range(1, data.vertex_count):
                     if h > data.attribute_count:
                         continue
-
+                    
                     # For the last attribute, use the rotated color
                     if h == data.attribute_count - 1:
                         color = rotated_colors[class_index]
                     else:
                         color = data.class_colors[class_index]
-                        
 
                     if data.active_attributes[h]:
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
@@ -92,6 +99,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, data.attribute_count, is_inner)
                     
                     draw_cubic_bezier_curve(start, control1, control2, end)
+                datapoint_count += 1
 
             glBindVertexArray(0)
         
@@ -183,43 +191,48 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glLineWidth(1)
 
-    # loop through classes in class order
+    # Loop through classes in class order
     for i in dataset.class_order[::-1]:
+        datapoint_cnt = 0
         color = dataset.class_colors[i]
-        
-        # draw polylines
-        if dataset.active_classes[i]:
-            # positions of the class
-            glBindVertexArray(class_vao[i])
-            
-            # draw polyline
-            for j in range(dataset.vertex_count):
-                if dataset.active_attributes[j]:
-                    glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
-                else:
-                    glColor4ub(color[0], color[1], color[2], 255)
 
-                # draw line for n-1 to n with attribute alpha
-                for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
-                    k = 0
-                    for m in range(1, dataset.vertex_count):
-                        if dataset.active_attributes[m-1]:
-                            glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
-                        else:
-                            glColor4ub(color[0], color[1], color[2], 255)
-                            
-                        glBegin(GL_LINES)
-                        glVertex2f(dataset.positions[i][l+m][0], dataset.positions[i][l+m][1])
-                        glVertex2f(dataset.positions[i][l+m-1][0], dataset.positions[i][l+m-1][1])
-                        glEnd()
-                        k += 1
-                
+        # Draw polylines
+        if dataset.active_classes[i]:
+            glBindVertexArray(class_vao[i])
+            size_index = 0
+            for j in range(dataset.class_count):
+                if j < i:
+                    size_index += dataset.count_per_class[j]
+
+            # Iterate over positions
+            for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
+                if dataset.clear_samples[size_index + datapoint_cnt]:
+                    datapoint_cnt += 1
+                    continue
+
+                # Set color based on attributes
+                for m in range(1, dataset.vertex_count):
+                    if dataset.active_attributes[m-1]:
+                        glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
+                    else:
+                        glColor4ub(color[0], color[1], color[2], 255)
+                    
+                    glBegin(GL_LINES)
+                    glVertex2f(dataset.positions[i][l+m][0], dataset.positions[i][l+m][1])
+                    glVertex2f(dataset.positions[i][l+m-1][0], dataset.positions[i][l+m-1][1])
+                    glEnd()
+
+                datapoint_cnt += 1
             glBindVertexArray(0)
 
-        # draw markers
+        # Draw markers
         if dataset.active_markers[i]:
-            # positions of the markers
+            datapoint_cnt = 0  # Reset datapoint counter for markers
             for j in range(dataset.vertex_count):
+                if dataset.clear_samples[size_index + datapoint_cnt]:
+                    datapoint_cnt += 1
+                    continue
+
                 if j == dataset.vertex_count - 1:
                     glPointSize(7)
                     color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
@@ -230,11 +243,12 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                     glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
                 else:
                     glColor4ub(color[0], color[1], color[2], 255)
-                # drawing
+
                 glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
-                # unbind
-                glBindVertexArray(0)
                 glPointSize(5)
+            glBindVertexArray(0)
+            datapoint_cnt += 1  # Increment at the end of each class' marker processing
+
     glDisable(GL_BLEND)
 
 def draw_highlighted_nd_points(dataset, marker_vao, class_vao):    
@@ -355,7 +369,6 @@ class MakePlot(QOpenGLWidget):
         self.all_rect = []  # holds all clip boxes
         self.rect = []  # working clip box
         self.attribute_inversions: List[bool] = []  # for attribute inversion option
-        
         
         # for zooming
         self.m_left = -1.125

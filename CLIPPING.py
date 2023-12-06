@@ -10,7 +10,6 @@ RIGHT = 2
 BOTTOM = 4
 TOP = 8
 
-
 def clip_display(textbox, total_sample):
     filenames = ['test_line.csv', 'test_vertex.csv', 'test_end.csv']
     clip_types = ['Line Clip', 'Vertex Clip', 'End Clip']
@@ -102,19 +101,11 @@ def clip_files(dataset, textbox):
     # build text box
     clip_display(textbox, dataset.sample_count)
 
-
-class DataSplits(object):
-    clipped_samples = None
-    vertex_in = None
-    last_vertex_in = None
-
-
 class MinAndMax(object):
     x_min = None
     x_max = None
     y_min = None
     y_max = None
-
 
 # Function to compute region code for a point(x, y)
 def compute_code(x, y, min_max):

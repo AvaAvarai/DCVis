@@ -1,17 +1,16 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QColorDialog
-from PyQt6.QtCore import Qt
 from PyQt6.uic.load_ui import loadUi
+
 import numpy as np
 import sys
 
-import DATA_DISPLAY
 import CLASS_TABLE
 import ATTRIBUTE_TABLE
 import PLOT
 import CLIPPING
 import WARNINGS
-import DATASET
+import CONTROLLER
 
 class UiView(QtWidgets.QMainWindow):
     def __init__(self, controller=None):
@@ -112,6 +111,10 @@ class UiView(QtWidgets.QMainWindow):
             self.plot_layout.removeWidget(self.plot_widget)
 
         self.controller.data.positions = []
+        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
+        self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
         
         selected_plot_type = self.plot_select.currentText()
         
@@ -165,12 +168,19 @@ class UiView(QtWidgets.QMainWindow):
             return
         
         self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
         self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
         self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
         self.plot_widget.all_rect = []
 
         self.clipped_area_textbox.setText('')
 
+        self.plot_widget.update()
+    
+    def hide_clip(self):
+        self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        
         self.plot_widget.update()
 
     def table_swap(self, event):
@@ -216,76 +226,13 @@ class UiView(QtWidgets.QMainWindow):
             self.axes_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
             self.plot_widget.redraw_plot(axes_color=self.axes_color)
 
-
-class MainController:
-    def __init__(self, view, dataset=None):
-        self.data = dataset
-        self.view = view
-        if self.view is not None:
-            self.setup_connections()
-
-    def setup_connections(self):
-        self.view.load_button.clicked.connect(self.load_dataset)
-        self.view.load_button.setShortcut(Qt.Key.Key_F1)
-        self.view.plot_button.clicked.connect(self.view.create_plot)
-        self.view.plot_button.setShortcut(Qt.Key.Key_F3)
-        self.view.exit_button.clicked.connect(lambda: sys.exit())
-        self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
-        self.view.actionExit.triggered.connect(lambda: sys.exit())
-        self.view.test_button.clicked.connect(self.view.test)
-        self.view.remove_clip_button.clicked.connect(self.view.remove_clip)
-        self.view.recenter_button.clicked.connect(self.view.recenter_plot)
-        self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
-        self.view.show_axes.stateChanged.connect(self.view.axes_func)
-        self.view.attribute_slide.valueChanged.connect(self.view.attr_slider)
-        self.view.check_classes.clicked.connect(self.view.check_all_class)
-        self.view.uncheck_classes.clicked.connect(self.view.uncheck_all_class)
-        self.view.check_attributes.clicked.connect(self.view.check_all_attr)
-        self.view.uncheck_attributes.clicked.connect(self.view.uncheck_all_attr)
-        self.view.cell_swap.__class__.dropEvent = self.view.table_swap
-        self.view.background_button.clicked.connect(self.view.open_background_color_picker)
-        self.view.axes_button.clicked.connect(self.view.open_axes_color_picker)
-
-    def load_dataset(self):
-        if self.data:
-            del self.data
-
-        self.data = DATASET.Dataset()
-        filename = QtWidgets.QFileDialog.getOpenFileName(self.view, 'Open File', 'datasets')
-        if filename[0] == '':
-            return
-
-        # GUI changes for changing datasets
-        if self.data and self.view.plot_widget and self.view.class_table and self.view.plot_layout:
-            self.view.plot_layout.removeWidget(self.view.plot_widget)
-            del self.view.plot_widget
-            self.view.plot_widget = None
-            self.view.plot_layout.addWidget(self.view.pl)
-
-            self.view.class_table_layout.removeWidget(self.view.class_table)
-            del self.view.class_table
-            self.view.class_table = None
-            self.view.class_table_layout.addWidget(self.view.class_pl)
-            self.view.class_pl_exists = True
-
-            self.view.attribute_table_layout.removeWidget(self.view.attribute_table)
-            del self.view.attribute_table
-            self.view.attribute_table = None
-            self.view.attribute_table_layout.addWidget(self.view.attribute_pl)
-            self.view.attribute_pl_exists = True
-
-        self.data.load_from_csv(filename[0])
-        DATA_DISPLAY.DisplayData(self.data, self.view.dataset_textbox)
-        self.view.class_table = CLASS_TABLE.ClassTable(self.data, parent=self.view)
-
-
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     
-    main_view = UiView()
+    view = UiView()
     
-    main_controller = MainController(main_view)
-    main_view.controller = main_controller
+    controller = CONTROLLER.Controller(view)
+    view.controller = controller
 
-    main_view.show()
+    view.show()
     app.exec()

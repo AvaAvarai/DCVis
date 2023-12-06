@@ -28,6 +28,7 @@ class Dataset:
         # sample information
         self.sample_count: int = 0
         self.clipped_samples: np.ndarray = np.array([], dtype=float)  # for line clip option
+        self.clear_samples: np.ndarray = np.array([], dtype=float)
         self.vertex_in: np.ndarray = np.array([], dtype=float)  # for vertex clip option
         self.last_vertex_in: np.ndarray = np.array([], dtype=float)  # for last vertex clip option
         
@@ -76,6 +77,7 @@ class Dataset:
         self.sample_count = len(df.index)
         # initialize arrays for clipping options
         self.clipped_samples = np.repeat(False, self.sample_count)
+        self.clear_samples = np.repeat(False, self.sample_count)
         self.vertex_in = np.repeat(False, self.sample_count)
         self.last_vertex_in = np.repeat(False, self.sample_count)
 
