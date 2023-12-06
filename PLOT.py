@@ -32,12 +32,11 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
     factor = coef / 100 + 1
     
     # Calculate the new radius for control points
-    new_radius = radius * factor * 2
+    new_radius = radius * factor * 1.2
     
     # Calculate the angle from the circle's center to the midpoint
     angle = np.arctan2(midY, midX)
-    angle_adjustment = np.pi / attribute_count
-    angle_adjustment /= 3
+    angle_adjustment = np.pi / attribute_count / 3
     # Calculate control points using circle formula
     control1 = (new_radius * np.cos(angle + angle_adjustment), new_radius * np.sin(angle + angle_adjustment))
     control2 = (new_radius * np.cos(angle - angle_adjustment), new_radius * np.sin(angle - angle_adjustment))
@@ -105,6 +104,12 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     color = [min(color[0] + 50, 255), min(color[1] + 50, 255), min(color[2] + 50, 255)]
 
                 glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
+
+                # For the last attribute, use the rotated color
+                if j == data.attribute_count - 1:
+                    color = rotated_colors[class_index]
+                else:
+                    color = data.class_colors[class_index]
 
                 if data.active_attributes[j]:
                     glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
@@ -289,7 +294,7 @@ def draw_axes(dataset, axis_vao, color):
         angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
         # draw tick marks
-        tick_length = radius * dataset.attribute_count * 2
+        tick_length = radius * 2.5
         for i in range(dataset.attribute_count):
             # Adjusting the angle to start from the 12 o'clock position
             angle_for_tick = i * angle_between_ticks - np.pi/2
@@ -357,10 +362,10 @@ class MakePlot(QOpenGLWidget):
         self.m_top = 1.125
         
         if self.data.plot_type in ['SCC', 'DCC']: # fit CC to window
-            self.m_left = -self.data.attribute_count * 0.5
-            self.m_right = self.data.attribute_count * 0.5
-            self.m_bottom = -self.data.attribute_count * 0.5
-            self.m_top = self.data.attribute_count * 0.5
+            self.m_left = -self.data.attribute_count * 0.35
+            self.m_right = self.data.attribute_count * 0.35
+            self.m_bottom = -self.data.attribute_count * 0.35
+            self.m_top = self.data.attribute_count * 0.35
 
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125
