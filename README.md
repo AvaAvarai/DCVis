@@ -1,10 +1,25 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
+## Project history
+
+- Continuation of a [CS Masters Project at CWU](https://github.com/Charles57-CWU/DSCVis).
+- Rebuild of former research [lab project](https://github.com/CWU-VKD-LAB/DCVis).
+- Now built on a refactored MVC architecture with precise zoom & panning controls.
+
 ## About
 
-This application displays multi-dimensional numerical data in 2D using OpenGL for GPU rendering. The plot can be panned around and zoomed in/out. Classes can be hidden, specified attribute markers can be customized, classes can be reordered and recolored. A box-clipping algorithm is included to clip lines and return contained samples of the dataset as a training and validation dataset split for machine learning analysis.
+This application displays multi-dimensional numerical data in 2D visualizations using OpenGL for GPU rendering. The plot can be interacted with, panning around, zooming in/out, configuring view, and exploring data interactively.
 
-This visualization tool features multiple visualisation plots of Parallel Coordinates, Paired Coordinates, Dynamic Scaffold Coordinates 1, Dynamic Scaffold Coordinates 2, Static Circular Coordinates, and Dynamic Circular Coordinates (unoptimized). Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
+This visualization tool features multiple visualisations:
+
+- PC - Parallel Coordinates
+- SPC - Shifted Paired Coordinates
+- DSC1 - Dynamic Scaffold Coordinates 1
+- DSC2 - Dynamic Scaffold Coordinates 2
+- SCC - Static Circular Coordinates
+- DCC - Dynamic Circular Coordinates (unoptimized)
+
+Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
 
 ## Datasets
 
@@ -66,9 +81,3 @@ MNIST on DSC2 using t-SNE as scaffold origin points. Image contains 3,120,000 da
 
 Showing zoom and pan capabilities
 ![mnist](/screenshots/MNIST_ZOOM.png)
-
-## Project history
-
-Continuation of a [CS Masters Project at CWU](https://github.com/Charles57-CWU/DSCVis).
-Rebuild of former development during research assistance [lab project](https://github.com/CWU-VKD-LAB/DCVis).
-Now built on a refactored base with a Model-View-Controller architecture and precise zoom & panning controls during self-study and directed research.
