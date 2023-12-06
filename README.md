@@ -57,44 +57,18 @@ See `requirements.txt` for the development environment libraries listing.
 - scroll-wheel click and drag on plot to pan the plot.
 - Scroll the mouse wheel to zoom in/out of the plot.
 - Right click twice to make a box clipping rectangle. The 1st right click is the upper right corner, and the 2nd right click is the bottom left corner.
+- Clipped samples are highlighted, 'Hide Clips' will suppress them from being drawn, removing them will restore.
 - The cells in the class and attribute tables can be dragged and dropped to switch their orders.
 - The slider below the attribute table will change the transparency of the attribute markers that are not selected in the highlight column.
 
 Application window with 4D Fisher Iris dataset in first visualisation
 ![window](/screenshots/APP_WINDOW.png)
 
+Iris on SCC using Virginica & Versicolor classes with 4D dataset of 100 data points.
+![scc](/screenshots/CC.png)
+
 MNIST on DSC2 using t-SNE as scaffold origin points. Image contains 3,120,000 data points (60,000 * 52)
 ![mnist](/screenshots/MNIST.png)
 
 Showing zoom and pan capabilities
 ![mnist](/screenshots/MNIST_ZOOM.png)
-
-### Dev Plans
-
-- Class Ordering Get Working
-  - Bug 1: Reordering classes highlighs wrong polylines
-  - Bug 2: Reordering classes makes marker checkbox not coresspond to correct class
-
-- Circular Coordinates
-  - Add Dynamic Circular Coordinates
-
-- Attribute Optimization
-  - n-epoch search
-  - LDA based
-  - SVM based
-  - Hyperparam Tuning search
-
-- Histogram View
-  - Along axes each plot type
-
-- Draggable n-D points
-  - renormalize
-  - replot
-
-- Draggable Classification Boundary
-  - n-epoch search
-  - Update on drag
-  - Show confusion matrix
-  - LDA based
-  - SVM based
-  - Hyperparam tuning search
