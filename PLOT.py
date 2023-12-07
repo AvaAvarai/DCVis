@@ -86,10 +86,10 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     size_index += data.count_per_class[j]
             
             for j in range(0, len(data.positions[class_index]), data.vertex_count):
-                if data.clear_samples[size_index + datapoint_count]:
-                    continue
                 for h in range(1, data.vertex_count):
                     if h > data.attribute_count:
+                        continue
+                    if data.clear_samples[size_index + datapoint_count]:
                         continue
                     
                     # For the last attribute, use hue shift color
@@ -245,6 +245,8 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
 
                 if j == dataset.vertex_count - 1:
                     glPointSize(7)
+                else:
+                    glPointSize(5)
 
                 glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
 
