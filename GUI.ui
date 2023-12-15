@@ -207,7 +207,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Clipped Data Analysis</string>
+           <string>Clip Analysis</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -227,7 +227,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QPushButton" name="test_clip_button">
+           <widget class="QPushButton" name="analyze_clip_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -249,6 +249,19 @@
             </property>
             <property name="text">
              <string>Hide Clips</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="undo_clip_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Undo Last Clip</string>
             </property>
            </widget>
           </item>

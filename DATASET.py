@@ -109,3 +109,6 @@ class Dataset:
         scaler = MinMaxScaler(range)
         self.dataframe[self.attribute_names[col]] = scaler.fit_transform(self.dataframe[[self.attribute_names[col]]])
         return self.dataframe
+
+    def roll_clips(self, roll_dir: int):
+        self.clipped_samples = list(np.roll(self.clipped_samples, roll_dir))

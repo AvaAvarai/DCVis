@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtWidgets import QColorDialog
 from PyQt6.uic.load_ui import loadUi
 
@@ -80,6 +80,18 @@ class View(QtWidgets.QMainWindow):
             return
         CLASS_TABLE.uncheck_checkmarks(self.class_table, self.controller.data.class_count)
 
+    def keyPressEvent(self, event) -> None:
+        if self.plot_widget is None or self.controller.data is None:
+            return
+        
+        key = event.key()
+        
+        if key == QtCore.Qt.Key.Key_Q:
+            self.controller.data.roll_clips(-1)
+        elif key == QtCore.Qt.Key.Key_E:
+            self.controller.data.roll_clips(1)
+        self.refresh()
+
     # function to refresh plot
     def refresh(self):
         if self.plot_widget:
@@ -153,12 +165,23 @@ class View(QtWidgets.QMainWindow):
         self.plot_layout.addWidget(self.plot_widget)
 
     # function to save clip files
-    def test(self):
+    def analyze_clip(self):
         if not self.plot_widget:
             WARNINGS.noDataWarning()
             return
 
         CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
+
+    def undo_clip(self):
+        if not self.plot_widget:
+            WARNINGS.noDataWarning()
+            return
+        
+        
+        
+        
+        self.clipped_area_textbox.setText('')
+        self.plot_widget.update()
 
     def remove_clip(self):
         if not self.plot_widget:

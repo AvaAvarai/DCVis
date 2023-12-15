@@ -13,6 +13,7 @@ import numpy as np
 from COLORS import getColors, shift_hue
 import GCA
 import CLIPPING
+import VIEW
 
 def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner):
     # Calculate midpoint between start and end points
@@ -476,9 +477,50 @@ class MakePlot(QOpenGLWidget):
 
     # === Mouse Events ===
     def mousePressEvent(self, event):
+        x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width
+        y = self.m_bottom + ((self.height - event.position().y()) * (self.m_top - self.m_bottom)) / self.height
+
+        # left mouse button single sample select
+        if event.button() == Qt.MouseButton.LeftButton:
+            precision_exp = -3
+            precision = 10 ** precision_exp
+            self.data.clipped_count = 0
+            self.data.clipped_samples = [False for _ in range(self.data.sample_count)]
+
+            # Expansive search outward for a sample
+            while self.data.clipped_count == 0 and precision_exp < -2:
+                self.left_rect = [x - precision, y - precision, x + precision, y + precision]
+                CLIPPING.Clipping(self.left_rect, self.data)
+
+                # Break immediately when a sample is found
+                if self.data.clipped_count > 0:
+                    break
+
+                precision_exp += 0.05  # Adjust the increment as needed
+                precision = 10 ** precision_exp
+
+            # Cull selection to single closest sample
+            if self.data.clipped_count > 1:
+                closest_sample_index = None
+                min_distance = float('inf')
+
+                for index, sample in enumerate(self.data.clipped_samples):
+                    if sample:
+                        sample_x, sample_y = self.data.get_sample_position(index)
+                        distance = ((sample_x - x) ** 2 + (sample_y - y) ** 2) ** 0.5
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_sample_index = index
+
+                # Reset all samples except the closest one
+                for index in range(self.data.sample_count):
+                    self.data.clipped_samples[index] = index == closest_sample_index
+
+            self.update()
+            event.accept()
+            return super().mousePressEvent(event)
+        
         if event.button() == Qt.MouseButton.RightButton:
-            x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width
-            y = self.m_bottom + ((self.height - event.position().y()) * (self.m_top - self.m_bottom)) / self.height
             self.rect.append(x)
             self.rect.append(y)
 

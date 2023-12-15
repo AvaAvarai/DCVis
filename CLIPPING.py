@@ -43,7 +43,6 @@ def clip_display(textbox, total_sample):
 
     textbox.setText(info_string)
 
-
 def clip_files(dataset, textbox):
     # for option 1 (lines clipped)
     output_train1 = open('train_line.csv', 'w', newline='')
