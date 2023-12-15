@@ -277,6 +277,9 @@ def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
             # draw polyline
             size = len(dataset.positions[i])
             for j in range(0, size, dataset.vertex_count):
+                if dataset.clear_samples[size_index + datapoint_cnt]:
+                    datapoint_cnt += 1
+                    continue
                 if dataset.clipped_samples[size_index + datapoint_cnt]:
                     glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
                 datapoint_cnt += 1
@@ -355,7 +358,6 @@ def set_view_frustrum(m_left, m_right, m_bottom, m_top):
     glOrtho(m_left, m_right, m_bottom, m_top, 0, 1)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-
 
 class MakePlot(QOpenGLWidget):
     def __init__(self, dataset, parent=None):

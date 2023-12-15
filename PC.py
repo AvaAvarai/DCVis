@@ -39,5 +39,3 @@ class PC:
         # Compute axis positions
         data.axis_positions = compute_axis_positions(data, section_array)
         data.axis_count = data.vertex_count
-
-        print('PC BASED GCA COMPLETE')

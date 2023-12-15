@@ -50,5 +50,3 @@ class SPC:
 
         dataset.axis_positions = axis_vertex_array
         dataset.axis_count = dataset.vertex_count + 1
-
-        print('SPC BASED GCA COMPLETE')

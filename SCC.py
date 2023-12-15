@@ -43,4 +43,3 @@ class SCC:
                           for class_name in data.class_names]
 
         data.axis_count = 0
-        print('SCC BASED GCA COMPLETE')

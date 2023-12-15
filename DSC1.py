@@ -39,5 +39,3 @@ class DSC1:
 
         dataset.axis_positions = [[-1, -1], [-1, 1], [-1, -1], [1, -1]]
         dataset.axis_count = 2
-
-        print('DSC1 BASED GCA COMPLETE')

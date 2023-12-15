@@ -25,6 +25,8 @@ class View(QtWidgets.QMainWindow):
         self.class_pl_exists = True
         self.attribute_pl_exists = True
 
+        self.rule_count = 0
+
         # for swapping cells
         self.cell_swap = QtWidgets.QTableWidget()
         self.plot_layout = self.findChild(QtWidgets.QVBoxLayout, 'plotDisplay')
@@ -169,9 +171,7 @@ class View(QtWidgets.QMainWindow):
             WARNINGS.noDataWarning()
             return
         
-        
-        
-        
+
         self.clipped_area_textbox.setText('')
         self.plot_widget.update()
 
@@ -188,15 +188,20 @@ class View(QtWidgets.QMainWindow):
 
         self.clipped_area_textbox.setText('')
 
+        self.rule_count = 0
+
         self.plot_widget.update()
     
     def hide_clip(self):
         if self.controller.data.plot_type not in ['SCC', 'DCC']:
             self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
-            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count) 
         else:
             self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.vertex_in)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+
+        print(f'Rule {self.rule_count + 1} {self.plot_widget.all_rect[self.rule_count]}')
+        self.rule_count += 1
         
         self.plot_widget.update()
 
