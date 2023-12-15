@@ -1,23 +1,19 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
-## Project history
-
-- Continuation of a [CS Masters Project at CWU](https://github.com/Charles57-CWU/DSCVis).
-- Rebuild of former research [lab project](https://github.com/CWU-VKD-LAB/DCVis).
-- Now built on a refactored MVC architecture with precise zoom & panning controls.
-
 ## About
 
-This application displays multi-dimensional numerical data in 2D visualizations using OpenGL for GPU rendering. The plot can be interacted with, panning around, zooming in/out, configuring view, and exploring data interactively.
+This application displays multi-dimensional numerical data in 2D visualizations using OpenGL for GPU rendering. The plot can be interacted with, panning around, zooming in/out, configuring view, and exploring data interactively. Data may be highlighted with dual-right click clipping, analyzed, and exported or hidden for further analysis. For building visual machine learning models using visualization region rules-based classification. Combining and chaining rules to produce classifiers for unseen data.
+
+## Visualization Methods
 
 This visualization tool features multiple visualisations:
 
-- PC - Parallel Coordinates
-- SPC - Shifted Paired Coordinates
-- DSC1 - Dynamic Scaffold Coordinates 1
-- DSC2 - Dynamic Scaffold Coordinates 2
-- SCC - Static Circular Coordinates
-- DCC - Dynamic Circular Coordinates (unoptimized)
+- Parallel Coordinates (PC) ![PC](/screenshots/PC.png)
+- Shifted Paired Coordinates (SPC)) ![SPC](/screenshots/SPC.png)
+- Dynamic Scaffold Coordinates 1 (DSC1)) ![DSC1](/screenshots/DSC1.png)
+- Dynamic Scaffold Coordinates 2 (DSC2)) ![DSC2](/screenshots/DSC2.png)
+- Static Circular Coordinates (SCC)) ![SCC](/screenshots/SCC.png)
+- Dynamic Circular Coordinates (DCC)) ![DCC](/screenshots/DCC.png)
 
 Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
 
@@ -30,14 +26,6 @@ Dataset requirements:
 - one label column and any number of feature columns
 - label header must be 'class'
 - Features must be numerical
-
-Example dataset:
-
-length,width,height,class  
-2.7,3.5,3.2,dog  
-1.2,5.5,2.1,cat  
-2.5,4.1,1.6,dog  
-1.0,1.0,1.0,cow
 
 Datasets included:
 
@@ -52,6 +40,18 @@ Datasets included:
 - Wine chemical analysis measurements -- 4,898 samples, 11 features, 7 classes
 - Artificial testing datasets
 
+## Program Features
+
+- scroll-wheel click and drag on plot to pan the plot.
+- Scroll the mouse wheel to zoom in/out of the plot.
+- Right click twice to make a box clipping rectangle. The 1st right click is the upper right corner, and the 2nd right click is the bottom left corner.
+- Clipped samples are highlighted, 'Hide Clips' button will suppress clipped samples from being drawn, 'Remove Clips' button will restore.
+- The cells in the class and attribute tables can be dragged and dropped to switch their orders.
+- The slider below the attribute table will change the transparency of the attribute markers that are not selected in the highlight column.
+
+Iris on PC with 4D Fisher Iris dataset of 150 data points with Setosa class highlighted.
+![Classify Setosa](/screenshots/IRIS_SETOSA_CLASSIFY.png)
+
 ## Language and Libraries
 
 Written in Python using 3.11 with the libraries:
@@ -61,23 +61,8 @@ QTDesigner used for .UI file design used by PyQt6.
 
 See `requirements.txt` for the development environment libraries listing.
 
-## Features
+## Project History
 
-- scroll-wheel click and drag on plot to pan the plot.
-- Scroll the mouse wheel to zoom in/out of the plot.
-- Right click twice to make a box clipping rectangle. The 1st right click is the upper right corner, and the 2nd right click is the bottom left corner.
-- Clipped samples are highlighted, 'Hide Clips' button will suppress clipped samples from being drawn, 'Remove Clips' button will restore.
-- The cells in the class and attribute tables can be dragged and dropped to switch their orders.
-- The slider below the attribute table will change the transparency of the attribute markers that are not selected in the highlight column.
-
-Iris on PC with 4D Fisher Iris dataset of 150 data points.
-![window](/screenshots/APP_WINDOW.png)
-
-Iris on SCC using Virginica & Versicolor classes with 4D dataset of 100 data points.
-![scc](/screenshots/CC.png)
-
-MNIST on DSC2 using t-SNE as scaffold origin points. Image contains 3,120,000 data points (60,000 * 52)
-![mnist](/screenshots/MNIST.png)
-
-Showing zoom and pan capabilities
-![mnist](/screenshots/MNIST_ZOOM.png)
+- Continuation of a [CS Masters Project at CWU](https://github.com/Charles57-CWU/DSCVis).
+- Rebuild of former research [lab project](https://github.com/CWU-VKD-LAB/DCVis).
+- Now built on a refactored MVC architecture with precise zoom & panning controls.

@@ -19,3 +19,13 @@ class getColors:
 
             self.colors_array.append([r, g, b])
             self.colors_names_array.append(f"color_{i}")
+    
+def shift_hue(rgb, amount):
+    # Convert RGB to HSV
+    r, g, b = rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+    # Shift the hue
+    h = (h + amount) % 1.0
+    # Convert back to RGB
+    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+    return int(r * 255), int(g * 255), int(b * 255)

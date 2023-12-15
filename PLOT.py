@@ -9,22 +9,10 @@ from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 import numpy as np
-import colorsys
 
-from COLORS import getColors
+from COLORS import getColors, shift_hue
 import GCA
 import CLIPPING
-
-# TODO: Move to COLORS module
-def shift_hue(rgb, amount):
-    # Convert RGB to HSV
-    r, g, b = rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    # Shift the hue
-    h = (h + amount) % 1.0
-    # Convert back to RGB
-    r, g, b = colorsys.hsv_to_rgb(h, s, v)
-    return int(r * 255), int(g * 255), int(b * 255)
 
 def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner):
     # Calculate midpoint between start and end points
@@ -161,7 +149,7 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
             is_inner = (class_index == dataset.class_order[0])  # Determine if this is the inner class
 
             for j in range(0, len(dataset.positions[class_index]), dataset.vertex_count):
-                if dataset.clipped_samples[size_index + datapoint_count]:
+                if dataset.vertex_in[size_index + datapoint_count]:
                     for h in range(1, dataset.vertex_count):
                         if h > dataset.attribute_count:
                             continue

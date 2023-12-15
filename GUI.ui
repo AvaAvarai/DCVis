@@ -34,7 +34,7 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>20</width>
+        <width>10</width>
         <height>20</height>
        </size>
       </property>
@@ -50,7 +50,7 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>20</width>
+        <width>10</width>
         <height>20</height>
        </size>
       </property>
@@ -207,7 +207,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Clipping Output</string>
+           <string>Clipped Data Analysis</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -261,7 +261,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Remove Clips</string>
+             <string>Unselect Clips</string>
             </property>
            </widget>
           </item>
@@ -365,6 +365,24 @@
                 </widget>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_5">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                 <kerning>true</kerning>
+                </font>
+               </property>
+               <property name="text">
+                <string>Attribute Transparency</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QSlider" name="attribute_slide">
@@ -540,7 +558,7 @@
       <property name="sizeHint" stdset="0">
        <size>
         <width>20</width>
-        <height>20</height>
+        <height>10</height>
        </size>
       </property>
      </spacer>
@@ -556,7 +574,7 @@
       <property name="sizeHint" stdset="0">
        <size>
         <width>20</width>
-        <height>20</height>
+        <height>10</height>
        </size>
       </property>
      </spacer>
