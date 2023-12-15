@@ -6,26 +6,25 @@ This application displays multi-dimensional numerical data in 2D visualizations 
 
 ## Visualization Methods
 
-This visualization tool features multiple visualisations:
+Generalized vertex class included for adding visualization methods.  
+This visualization tool features multiple visualisation methods:
 
 - Parallel Coordinates (PC) ![PC](/screenshots/PC.png)
-- Shifted Paired Coordinates (SPC)) ![SPC](/screenshots/SPC.png)
-- Dynamic Scaffold Coordinates 1 (DSC1)) ![DSC1](/screenshots/DSC1.png)
-- Dynamic Scaffold Coordinates 2 (DSC2)) ![DSC2](/screenshots/DSC2.png)
-- Static Circular Coordinates (SCC)) ![SCC](/screenshots/SCC.png)
-- Dynamic Circular Coordinates (DCC)) ![DCC](/screenshots/DCC.png)
-
-Additional multidimensional plots can be added with ease as the plot context class uses general vertices.
+- Shifted Paired Coordinates (SPC) ![SPC](/screenshots/SPC.png)
+- Dynamic Scaffold Coordinates 1 (DSC1) ![DSC1](/screenshots/DSC1.png)
+- Dynamic Scaffold Coordinates 2 (DSC2) ![DSC2](/screenshots/DSC2.png)
+- Static Circular Coordinates (SCC) ![SCC](/screenshots/SCC.png)
+- Dynamic Circular Coordinates (DCC) ![DCC](/screenshots/DCC.png)
 
 ## Datasets
 
 Dataset requirements:
 
-- .txt or .csv format
-- include headers
-- one label column and any number of feature columns
-- label header must be 'class'
-- Features must be numerical
+- Format of .txt or .csv
+- Header row required
+- One label column denoted 'class' in header
+- Any number of feature columns attribute name in header
+- Features must be numerical data
 
 Datasets included:
 
