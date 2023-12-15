@@ -6,7 +6,7 @@ def compute_positions(data, df_name, section_array):
     df_copy = df_name.copy()
     for index, is_inverted in enumerate(data.attribute_inversions):
         if is_inverted:
-            df_copy.iloc[:, index] *= -1  # Apply inversion
+            df_copy.iloc[:, index] = 1 - df_copy.iloc[:, index]
     
     x_coord = np.tile(section_array, reps=len(df_copy.index))
     y_coord = df_copy.to_numpy().ravel()
