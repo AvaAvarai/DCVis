@@ -376,11 +376,7 @@ class MakePlot(QOpenGLWidget):
         self.m_bottom = -1.125
         self.m_top = 1.125
         
-        if self.data.plot_type in ['SCC', 'DCC']: # fit CC to window
-            self.m_left = -self.data.attribute_count * 0.35
-            self.m_right = self.data.attribute_count * 0.35
-            self.m_bottom = -self.data.attribute_count * 0.35
-            self.m_top = self.data.attribute_count * 0.35
+        self.resize()
 
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125
@@ -397,6 +393,19 @@ class MakePlot(QOpenGLWidget):
 
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         self.data.class_colors = self.color_instance.colors_array
+
+    def resize(self):
+        if self.data.plot_type == 'PC':
+            self.m_left = -0.05
+            self.m_right = 1.05
+            self.m_bottom = -0.05
+            self.m_top = 1.05
+        
+        if self.data.plot_type in ['SCC', 'DCC']: # fit CC to window
+            self.m_left = -self.data.attribute_count * 0.35
+            self.m_right = self.data.attribute_count * 0.35
+            self.m_bottom = -self.data.attribute_count * 0.35
+            self.m_top = self.data.attribute_count * 0.35
 
     def redraw_plot(self, background_color=None, axes_color=None):
         if background_color:
