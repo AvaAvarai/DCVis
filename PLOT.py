@@ -13,7 +13,6 @@ import numpy as np
 from COLORS import getColors, shift_hue
 import GCA
 import CLIPPING
-import VIEW
 
 def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner):
     # Calculate midpoint between start and end points
@@ -75,6 +74,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     size_index += data.count_per_class[j]
             
             for j in range(0, len(data.positions[class_index]), data.vertex_count):
+                sub_alpha = 0
                 for h in range(1, data.vertex_count):
                     if h > data.attribute_count:
                         continue
@@ -87,10 +87,13 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     else:
                         color = data.class_colors[class_index]
 
+                    if any(data.vertex_in):
+                        sub_alpha = 200
+
                     if data.active_attributes[h]:
-                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
+                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha)
                     else:
-                        glColor4ub(color[0], color[1], color[2], 255)
+                        glColor4ub(color[0], color[1], color[2], 255 - sub_alpha)
 
                     start = data.positions[class_index][j + h - 1]
                     end = data.positions[class_index][j + h]
@@ -211,14 +214,18 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                 if dataset.clear_samples[size_index + datapoint_cnt]:
                     datapoint_cnt += 1
                     continue
-
+                
                 # Set color based on attributes
+                sub_alpha = 0
                 for m in range(1, dataset.vertex_count):
+                    if any(dataset.clipped_samples):
+                        sub_alpha = 200
+                        
                     if dataset.active_attributes[m-1]:
-                        glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
+                        glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha)
                     else:
-                        glColor4ub(color[0], color[1], color[2], 255)
-                    
+                        glColor4ub(color[0], color[1], color[2], 255 - sub_alpha)
+                        
                     glBegin(GL_LINES)
                     glVertex2f(dataset.positions[i][l+m][0], dataset.positions[i][l+m][1])
                     glVertex2f(dataset.positions[i][l+m-1][0], dataset.positions[i][l+m-1][1])

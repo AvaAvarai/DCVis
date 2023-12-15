@@ -171,7 +171,8 @@ class View(QtWidgets.QMainWindow):
             WARNINGS.noDataWarning()
             return
         
-
+        self.plot_widget.all_rect.pop()
+        
         self.clipped_area_textbox.setText('')
         self.plot_widget.update()
 
