@@ -151,6 +151,9 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
 
             for j in range(0, len(dataset.positions[class_index]), dataset.vertex_count):
                 if dataset.vertex_in[size_index + datapoint_count]:
+                    if dataset.clear_samples[size_index + datapoint_count]:
+                        datapoint_count += 1
+                        continue
                     for h in range(1, dataset.vertex_count):
                         if h > dataset.attribute_count:
                             continue
@@ -370,12 +373,7 @@ class MakePlot(QOpenGLWidget):
         self.rect = []  # working clip box
         self.attribute_inversions: List[bool] = []  # for attribute inversion option
         
-        # for zooming
-        self.m_left = -1.125
-        self.m_right = 1.125
-        self.m_bottom = -1.125
-        self.m_top = 1.125
-        
+        self.reset_zoom()
         self.resize()
 
         self.zoomed_width = 1.125
@@ -393,6 +391,12 @@ class MakePlot(QOpenGLWidget):
 
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         self.data.class_colors = self.color_instance.colors_array
+
+    def reset_zoom(self):
+        self.m_left = -1.125
+        self.m_right = 1.125
+        self.m_bottom = -1.125
+        self.m_top = 1.125
 
     def resize(self):
         if self.data.plot_type == 'PC':

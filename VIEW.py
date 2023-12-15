@@ -33,12 +33,8 @@ class View(QtWidgets.QMainWindow):
         if not self.plot_widget:
             WARNINGS.noDataWarning()
             return
-        # for zooming
-        self.plot_widget.m_left = -1.125
-        self.plot_widget.m_right = 1.125
-        self.plot_widget.m_bottom = -1.125
-        self.plot_widget.m_top = 1.125
         
+        self.plot_widget.reset_zoom()
         self.plot_widget.resize()
 
         self.refresh()
@@ -195,8 +191,12 @@ class View(QtWidgets.QMainWindow):
         self.plot_widget.update()
     
     def hide_clip(self):
-        self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
-        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        if self.controller.data.plot_type not in ['SCC', 'DCC']:
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        else:
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.vertex_in)
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         
         self.plot_widget.update()
 
