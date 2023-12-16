@@ -197,9 +197,7 @@ class View(QtWidgets.QMainWindow):
         self.plot_widget.all_rect = []
 
         self.clipped_area_textbox.setText('')
-
-        self.rule_count = 0
-
+        
         self.plot_widget.update()
     
     def hide_clip(self):
@@ -209,6 +207,8 @@ class View(QtWidgets.QMainWindow):
         else:
             self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.vertex_in)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        self.rule_count += 1
+        self.rules_textbox.append('\nRule ' + str(self.rule_count) + ' : ' + str([[round(num, 2) for num in rect] for rect in self.plot_widget.all_rect]))
         self.plot_widget.update()
 
     def table_swap(self, event):

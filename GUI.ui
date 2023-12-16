@@ -207,7 +207,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Clip Analysis</string>
+           <string>Classification Rules</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -215,7 +215,7 @@
          </widget>
         </item>
         <item alignment="Qt::AlignHCenter">
-         <widget class="QTextBrowser" name="clipped_area_textbox">
+         <widget class="QTextBrowser" name="rules_textbox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -223,6 +223,38 @@
            </sizepolicy>
           </property>
          </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+              <kerning>true</kerning>
+             </font>
+            </property>
+            <property name="text">
+             <string>Clip Analysis</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item alignment="Qt::AlignHCenter">
+           <widget class="QTextBrowser" name="clipped_area_textbox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -248,7 +280,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Hide Clips</string>
+             <string>Add Rule</string>
             </property>
            </widget>
           </item>
