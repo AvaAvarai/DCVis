@@ -312,12 +312,18 @@ def draw_axes(dataset, axis_vao, color):
         angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
         for class_index in range(dataset.class_count):
+            base_radius = (dataset.attribute_count / (2 * np.pi))
+
             # Adjust the radius based on class index
             if class_index < 2:
+                # First two classes share the first axis
                 radius_factor = 1
             else:
-                radius_factor = class_index
-            radius = (dataset.attribute_count / np.pi) / 2 * radius_factor
+                # Subsequent classes each get their own axis, scaling geometrically
+                scale_factor = 2  # Adjust this factor to control the rate of radius increase
+                radius_factor = scale_factor ** (class_index-1)
+
+            radius = base_radius * radius_factor
 
             # Draw axis circle
             glBegin(GL_LINE_LOOP)
@@ -327,7 +333,7 @@ def draw_axes(dataset, axis_vao, color):
 
             if dataset.plot_type == 'SCC':
                 # Draw tick marks
-                tick_length = radius * 0.05  # Adjust the tick length as needed
+                tick_length = radius * 2  # Adjust the tick length as needed
                 for i in range(dataset.attribute_count):
                     angle_for_tick = i * angle_between_ticks - np.pi / 2
                     inner_x = (radius - tick_length / 2) * np.cos(angle_for_tick)

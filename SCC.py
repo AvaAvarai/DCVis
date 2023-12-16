@@ -2,14 +2,18 @@ import numpy as np
 import DATASET
 
 def compute_coordinates(data, df, class_index):
+    base_radius = (data.attribute_count / (2 * np.pi))
+
     # Adjust the radius based on class index
     if class_index < 2:
         # First two classes share the first axis
         radius_factor = 1
     else:
-        # Subsequent classes each get their own axis
-        radius_factor = class_index
-    radius = (data.attribute_count / (2 * np.pi)) * radius_factor
+        # Subsequent classes each get their own axis, scaling geometrically
+        scale_factor = 2  # Adjust this factor to control the rate of radius increase
+        radius_factor = scale_factor ** (class_index-1)
+
+    radius = base_radius * radius_factor
     section_array = np.linspace(0, 1, data.attribute_count)
     x_coord = np.tile(section_array, reps=len(df.index))
     y_coord = df.to_numpy().ravel()

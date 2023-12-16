@@ -27,11 +27,18 @@ class DCC:
         section_array = np.linspace(start=0, stop=1, num=dataset.vertex_count)
 
         for class_index, class_name in enumerate(dataset.class_names):
+            base_radius = (dataset.attribute_count / (2 * np.pi))
+
+            # Adjust the radius based on class index
             if class_index < 2:
+                # First two classes share the first axis
                 radius_factor = 1
             else:
-                radius_factor = class_index
-            radius = basic_radius * radius_factor
+                # Subsequent classes each get their own axis, scaling geometrically
+                scale_factor = 2  # Adjust this factor to control the rate of radius increase
+                radius_factor = scale_factor ** (class_index-1)
+
+            radius = base_radius * radius_factor
 
             df_name = working_df[working_df['class'] == class_name]
             df_name = df_name.drop(columns='class', axis=1)
