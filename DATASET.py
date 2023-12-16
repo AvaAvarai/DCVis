@@ -31,7 +31,7 @@ class Dataset:
         self.clear_samples: np.ndarray = np.array([], dtype=float)
         self.vertex_in: np.ndarray = np.array([], dtype=float)  # for vertex clip option
         self.last_vertex_in: np.ndarray = np.array([], dtype=float)  # for last vertex clip option
-        
+
         # plot information
         self.plot_type: str = ''
         self.positions: List[float] = []

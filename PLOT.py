@@ -200,11 +200,11 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     for i in dataset.class_order[::-1]:
         datapoint_cnt = 0
         color = dataset.class_colors[i]
-
+        size_index = 0
         # Draw polylines
         if dataset.active_classes[i]:
             glBindVertexArray(class_vao[i])
-            size_index = 0
+            
             for j in range(dataset.class_count):
                 if j < i:
                     size_index += dataset.count_per_class[j]

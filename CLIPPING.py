@@ -121,7 +121,6 @@ def compute_code(x, y, min_max):
 
     return code
 
-
 def cohen_sutherland_clip(x1, y1, x2, y2, min_max, class_num, sample_num):
     # Compute region codes for P1, P2
     code1 = compute_code(x1, y1, min_max)

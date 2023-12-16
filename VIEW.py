@@ -177,10 +177,11 @@ class View(QtWidgets.QMainWindow):
         if not self.plot_widget:
             WARNINGS.noDataWarning()
             return
-        
         self.plot_widget.all_rect.pop()
-        
-        self.clipped_area_textbox.setText('')
+        if self.rule_count > 0:
+            self.rule_count -= 1
+            CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
+
         self.plot_widget.update()
 
     def remove_clip(self):
@@ -192,6 +193,7 @@ class View(QtWidgets.QMainWindow):
         self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
         self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
         self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
+        
         self.plot_widget.all_rect = []
 
         self.clipped_area_textbox.setText('')
