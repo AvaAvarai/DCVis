@@ -112,3 +112,6 @@ class Dataset:
 
     def roll_clips(self, roll_dir: int):
         self.clipped_samples = list(np.roll(self.clipped_samples, roll_dir))
+    
+    def roll_vertex_in(self, roll_dir: int):
+        self.vertex_in = list(np.roll(self.vertex_in, roll_dir))

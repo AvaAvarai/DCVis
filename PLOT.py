@@ -88,7 +88,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
                         color = data.class_colors[class_index]
 
                     if any(data.vertex_in):
-                        sub_alpha = 200
+                        sub_alpha = 150
 
                     if data.active_attributes[h]:
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha)
@@ -137,8 +137,8 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
-    glColor3ub(255, 255, 0)  # Highlight color
-    glLineWidth(4)  # Highlight line width
+    glColor3ub(255, 255, 0)
+    glLineWidth(2)
 
     for class_index in range(dataset.class_count):
         color = dataset.class_colors[class_index]
@@ -219,7 +219,7 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
                 sub_alpha = 0
                 for m in range(1, dataset.vertex_count):
                     if any(dataset.clipped_samples):
-                        sub_alpha = 200
+                        sub_alpha = 150
                         
                     if dataset.active_attributes[m-1]:
                         glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha)
@@ -267,7 +267,7 @@ def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
     glColor3ub(255, 255, 0)
-    glLineWidth(4)
+    glLineWidth(2)
     
     # loop through classes in class order
     for i in dataset.class_order[::-1]:
@@ -316,26 +316,27 @@ def draw_axes(dataset, axis_vao, color):
         for i in range(lineSeg + 1):
             glVertex2f(radius * np.cos(i * 2 * np.pi / lineSeg), radius * np.sin(i * 2 * np.pi / lineSeg))
         glEnd()
+        
+        if dataset.plot_type == 'SCC':
+            # calculate angle between each tick mark
+            angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
-        # calculate angle between each tick mark
-        angle_between_ticks = 2 * np.pi / dataset.attribute_count
-
-        # draw tick marks
-        tick_length = radius * 2
-        for i in range(dataset.attribute_count):
-            # Adjusting the angle to start from the 12 o'clock position
-            angle_for_tick = i * angle_between_ticks - np.pi/2
-            # compute start and end position of the tick mark
-            inner_x = (radius - tick_length/2) * np.cos(angle_for_tick)
-            inner_y = (radius - tick_length/2) * np.sin(angle_for_tick)
-            outer_x = (radius + tick_length/2) * np.cos(angle_for_tick)
-            outer_y = (radius + tick_length/2) * np.sin(angle_for_tick)
-            
-            # draw tick mark
-            glBegin(GL_LINES)
-            glVertex2f(inner_x, inner_y)
-            glVertex2f(outer_x, outer_y)
-            glEnd()
+            # draw tick marks
+            tick_length = radius * 2
+            for i in range(dataset.attribute_count):
+                # Adjusting the angle to start from the 12 o'clock position
+                angle_for_tick = i * angle_between_ticks - np.pi/2
+                # compute start and end position of the tick mark
+                inner_x = (radius - tick_length/2) * np.cos(angle_for_tick)
+                inner_y = (radius - tick_length/2) * np.sin(angle_for_tick)
+                outer_x = (radius + tick_length/2) * np.cos(angle_for_tick)
+                outer_y = (radius + tick_length/2) * np.sin(angle_for_tick)
+                
+                # draw tick mark
+                glBegin(GL_LINES)
+                glVertex2f(inner_x, inner_y)
+                glVertex2f(outer_x, outer_y)
+                glEnd()
 
         glBindVertexArray(0)
         

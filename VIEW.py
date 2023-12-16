@@ -81,9 +81,16 @@ class View(QtWidgets.QMainWindow):
         key = event.key()
         
         if key == QtCore.Qt.Key.Key_Q:
-            self.controller.data.roll_clips(-1)
+            if self.controller.data.plot_type not in ['SCC', 'DCC']:
+                self.controller.data.roll_clips(-1)
+            else:
+                self.controller.data.roll_vertex_in(-1)
         elif key == QtCore.Qt.Key.Key_E:
-            self.controller.data.roll_clips(1)
+            if self.controller.data.plot_type not in ['SCC', 'DCC']:
+               self.controller.data.roll_clips(1)
+            else:
+                self.controller.data.roll_vertex_in(1)
+                
         self.refresh()
 
     # function to refresh plot
@@ -200,10 +207,6 @@ class View(QtWidgets.QMainWindow):
         else:
             self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.vertex_in)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-
-        print(f'Rule {self.rule_count + 1} {self.plot_widget.all_rect[self.rule_count]}')
-        self.rule_count += 1
-        
         self.plot_widget.update()
 
     def table_swap(self, event):
