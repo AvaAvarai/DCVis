@@ -14,25 +14,31 @@ from COLORS import getColors, shift_hue
 import GCA
 import CLIPPING
 
-def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner):
+def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner, class_index):
     # Calculate midpoint between start and end points
     midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
-    
-    if is_inner: # first class always inside axis
+
+    # Adjust the radius factor based on class index
+    if class_index < 2:
+        radius_factor = 1
+    else:
+        radius_factor = class_index
+
+    if is_inner:  # first class always inside axis
         factor = 0.1 * coef / 100
         distance = np.sqrt(midX**2 + midY**2)
         # Calculate scaled control points
-        scale = factor * radius / distance
+        scale = factor * radius * radius_factor / distance
 
         control1 = (midX * scale, midY * scale)
         control2 = (midX * scale, midY * scale)
 
         return control1, control2
-    
+
     factor = coef / 100 + 1
     
     # Calculate the new radius for control points
-    new_radius = radius * factor * 1.2
+    new_radius = radius * factor * 1.2 * radius_factor
     
     # Calculate the angle from the circle's center to the midpoint
     angle = np.arctan2(midY, midX)
@@ -99,7 +105,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     end = data.positions[class_index][j + h]
                     coef = 100  # Adjust this to control the curvature
 
-                    control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, data.attribute_count, is_inner)
+                    control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, data.attribute_count, is_inner, class_index)
                     
                     draw_cubic_bezier_curve(start, control1, control2, end)
                 datapoint_count += 1
@@ -165,7 +171,7 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
                         end = dataset.positions[class_index][j + h]
                         coef = 100  # Adjust to control curvature
 
-                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, dataset.attribute_count, is_inner)
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef, dataset.attribute_count, is_inner, class_index)
                         draw_cubic_bezier_curve(start, control1, control2, end)
                 datapoint_count += 1
 
@@ -294,53 +300,46 @@ def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
 
     glLineWidth(1)
 
-# draw axes
 def draw_axes(dataset, axis_vao, color):
-    # positions of the class
     glBindVertexArray(axis_vao)
-    # colors
     glColor4f(*color)
     
-    if dataset.plot_type not in ['SCC', 'DCC']: # draw a line axis
+    if dataset.plot_type not in ['SCC', 'DCC']:  # draw a line axis
         for j in range(0, dataset.axis_count * 2, 2):
             glDrawArrays(GL_LINES, j, dataset.vertex_count)
-            
-    else: # draw a circle axis
-        circumference = dataset.attribute_count
-        diameter = circumference / np.pi
-        radius = diameter / 2
-        
+    else:  # draw a circle axis
         lineSeg = 100
-        # draw axis
-        glBegin(GL_LINE_LOOP)
-        for i in range(lineSeg + 1):
-            glVertex2f(radius * np.cos(i * 2 * np.pi / lineSeg), radius * np.sin(i * 2 * np.pi / lineSeg))
-        glEnd()
-        
-        if dataset.plot_type == 'SCC':
-            # calculate angle between each tick mark
-            angle_between_ticks = 2 * np.pi / dataset.attribute_count
+        angle_between_ticks = 2 * np.pi / dataset.attribute_count
 
-            # draw tick marks
-            tick_length = radius * 2
-            for i in range(dataset.attribute_count):
-                # Adjusting the angle to start from the 12 o'clock position
-                angle_for_tick = i * angle_between_ticks - np.pi/2
-                # compute start and end position of the tick mark
-                inner_x = (radius - tick_length/2) * np.cos(angle_for_tick)
-                inner_y = (radius - tick_length/2) * np.sin(angle_for_tick)
-                outer_x = (radius + tick_length/2) * np.cos(angle_for_tick)
-                outer_y = (radius + tick_length/2) * np.sin(angle_for_tick)
-                
-                # draw tick mark
-                glBegin(GL_LINES)
-                glVertex2f(inner_x, inner_y)
-                glVertex2f(outer_x, outer_y)
-                glEnd()
+        for class_index in range(dataset.class_count):
+            # Adjust the radius based on class index
+            if class_index < 2:
+                radius_factor = 1
+            else:
+                radius_factor = class_index
+            radius = (dataset.attribute_count / np.pi) / 2 * radius_factor
 
-        glBindVertexArray(0)
-        
-    # unbind
+            # Draw axis circle
+            glBegin(GL_LINE_LOOP)
+            for i in range(lineSeg + 1):
+                glVertex2f(radius * np.cos(i * 2 * np.pi / lineSeg), radius * np.sin(i * 2 * np.pi / lineSeg))
+            glEnd()
+
+            if dataset.plot_type == 'SCC':
+                # Draw tick marks
+                tick_length = radius * 0.05  # Adjust the tick length as needed
+                for i in range(dataset.attribute_count):
+                    angle_for_tick = i * angle_between_ticks - np.pi / 2
+                    inner_x = (radius - tick_length / 2) * np.cos(angle_for_tick)
+                    inner_y = (radius - tick_length / 2) * np.sin(angle_for_tick)
+                    outer_x = (radius + tick_length / 2) * np.cos(angle_for_tick)
+                    outer_y = (radius + tick_length / 2) * np.sin(angle_for_tick)
+
+                    glBegin(GL_LINES)
+                    glVertex2f(inner_x, inner_y)
+                    glVertex2f(outer_x, outer_y)
+                    glEnd()
+
     glBindVertexArray(0)
 
 # draw box for box clipping
