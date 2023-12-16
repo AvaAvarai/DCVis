@@ -314,13 +314,11 @@ def draw_axes(dataset, axis_vao, color):
         for class_index in range(dataset.class_count):
             base_radius = (dataset.attribute_count / (2 * np.pi))
 
-            # Adjust the radius based on class index
             if class_index < 2:
                 # First two classes share the first axis
                 radius_factor = 1
             else:
-                # Subsequent classes each get their own axis, scaling geometrically
-                scale_factor = 2.1  # Adjust this factor to control the rate of radius increase
+                scale_factor = 2.1
                 radius_factor = scale_factor * (class_index-1)
 
             radius = base_radius * radius_factor

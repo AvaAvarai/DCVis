@@ -16,6 +16,10 @@ This visualization tool features multiple visualisation methods:
 - Static Circular Coordinates (SCC) ![SCC](/screenshots/SCC.png)
 - Dynamic Circular Coordinates (DCC) ![DCC](/screenshots/DCC.png)
 
+Attributes may be inverted to further engineer visualized features.
+Iris in SPC with X1, X2 inverted:
+![SPC inverted](/screenshots/SPC_INVERT_X1_X2.png)
+
 ## Datasets
 
 Dataset requirements:
@@ -50,7 +54,7 @@ Datasets included:
 - The cells in the class and attribute tables can be dragged and dropped to switch their orders.
 - The slider below the attribute table will change the transparency of the attribute markers that are not selected in the highlight column.
 
-Iris on PC with 4D Fisher Iris dataset of 150 data points with Setosa class highlighted.
+Iris in PC with Setosa class highlighted and alpha brushing effect:
 ![Classify Setosa](/screenshots/IRIS_SETOSA_CLASSIFY.png)
 
 ## Language and Libraries

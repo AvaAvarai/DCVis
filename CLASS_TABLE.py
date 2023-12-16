@@ -44,7 +44,7 @@ def table_swap(table, dataset, plot, event):
 
     plot.update()
 
-# main table class
+
 class ClassTable(QtWidgets.QTableWidget):
     refresh_GUI = pyqtSignal()
 
@@ -105,9 +105,10 @@ class Button(QtWidgets.QPushButton):
 
     def color_dialog(self):
         color = QtWidgets.QColorDialog.getColor()
-        rgb = color.getRgb()
-        self.cell.setForeground(QBrush(QColor(rgb[0], rgb[1], rgb[2])))
-        self.data.class_colors[self.index] = [rgb[0], rgb[1], rgb[2]]
+        if color.isValid():
+            rgb = color.getRgb()
+            self.cell.setForeground(QBrush(QColor(rgb[0], rgb[1], rgb[2])))
+            self.data.class_colors[self.index] = [rgb[0], rgb[1], rgb[2]]
 
 
 # class for checkbox in the class table
@@ -134,7 +135,3 @@ class CheckBox(QtWidgets.QCheckBox):
                 self.data.active_markers[self.index] = False
 
         self.r.emit()
-
-
-
-
