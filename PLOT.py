@@ -320,8 +320,8 @@ def draw_axes(dataset, axis_vao, color):
                 radius_factor = 1
             else:
                 # Subsequent classes each get their own axis, scaling geometrically
-                scale_factor = 2  # Adjust this factor to control the rate of radius increase
-                radius_factor = scale_factor ** (class_index-1)
+                scale_factor = 2.1  # Adjust this factor to control the rate of radius increase
+                radius_factor = scale_factor * (class_index-1)
 
             radius = base_radius * radius_factor
 
