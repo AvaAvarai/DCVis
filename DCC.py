@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
+
 class DCC:
     def __init__(self, dataset):
         basic_radius = (dataset.attribute_count / np.pi) / 2
@@ -36,7 +37,7 @@ class DCC:
             else:
                 # Subsequent classes each get their own axis, scaling geometrically
                 scale_factor = 2.1  # Adjust this factor to control the rate of radius increase
-                radius_factor = scale_factor * (class_index-1)
+                radius_factor = scale_factor * (class_index - 1)
 
             radius = base_radius * radius_factor
 
@@ -93,4 +94,5 @@ class DCC:
                     dataset.cr_end_y = radius * np.cos(maxCA)
                 overlaps.append(dataset.minmax_arc_lengths[j])
 
-        print(f"Overlapping Distances: {np.round(distances, decimals=2)}\nOverlapping Circumferences: {np.round(overlaps, decimals=2)}")
+        print(
+            f"Overlapping Distances: {np.round(distances, decimals=2)}\nOverlapping Circumferences: {np.round(overlaps, decimals=2)}")

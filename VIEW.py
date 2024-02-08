@@ -10,10 +10,11 @@ import PLOT
 import CLIPPING
 import WARNINGS
 
+
 class View(QtWidgets.QMainWindow):
     def __init__(self, controller=None):
         super(View, self).__init__()
-        
+
         self.controller: controller = controller
         loadUi('GUI.ui', self)  # load .ui file for GUI made in Qt Designer
 
@@ -21,7 +22,7 @@ class View(QtWidgets.QMainWindow):
 
         self.class_table = None
         self.attribute_table = None
-        
+
         self.class_pl_exists = True
         self.attribute_pl_exists = True
 
@@ -33,9 +34,9 @@ class View(QtWidgets.QMainWindow):
 
     def recenter_plot(self):
         if not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
-        
+
         self.plot_widget.reset_zoom()
         self.plot_widget.resize()
 
@@ -44,7 +45,7 @@ class View(QtWidgets.QMainWindow):
     # function to get alpha value for hidden attributes
     def attr_slider(self):
         if not self.controller.data or not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
         value = self.attribute_slide.value()
         self.controller.data.attribute_alpha = value
@@ -52,34 +53,36 @@ class View(QtWidgets.QMainWindow):
 
     def check_all_attr(self):
         if not self.controller.data:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
-        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
+        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count,
+                                         self.controller.data.plot_type)
 
     def check_all_class(self):
         if not self.controller.data:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
         CLASS_TABLE.reset_checkmarks(self.class_table, self.controller.data.class_count)
 
     def uncheck_all_attr(self):
         if not self.controller.data:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
-        ATTRIBUTE_TABLE.uncheck_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
+        ATTRIBUTE_TABLE.uncheck_checkmarks(self.attribute_table, self.controller.data.vertex_count,
+                                           self.controller.data.plot_type)
 
     def uncheck_all_class(self):
         if not self.controller.data:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
         CLASS_TABLE.uncheck_checkmarks(self.class_table, self.controller.data.class_count)
 
     def keyPressEvent(self, event) -> None:
         if self.plot_widget is None or self.controller.data is None:
             return
-        
+
         key = event.key()
-        
+
         if key == QtCore.Qt.Key.Key_Q:
             if self.controller.data.plot_type not in ['SCC', 'DCC']:
                 self.controller.data.roll_clips(-1)
@@ -87,10 +90,10 @@ class View(QtWidgets.QMainWindow):
                 self.controller.data.roll_vertex_in(-1)
         elif key == QtCore.Qt.Key.Key_E:
             if self.controller.data.plot_type not in ['SCC', 'DCC']:
-               self.controller.data.roll_clips(1)
+                self.controller.data.roll_clips(1)
             else:
                 self.controller.data.roll_vertex_in(1)
-                
+
         self.refresh()
 
     # function to refresh plot
@@ -100,7 +103,7 @@ class View(QtWidgets.QMainWindow):
 
     def axes_func(self):
         if not self.controller.data:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
 
         if self.show_axes.isChecked():
@@ -112,7 +115,7 @@ class View(QtWidgets.QMainWindow):
 
     def create_plot(self):
         if not self.controller.data:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
 
         # remove initial placeholder
@@ -126,9 +129,9 @@ class View(QtWidgets.QMainWindow):
         self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
         self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
         self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
-        
+
         selected_plot_type = self.plot_select.currentText()
-        
+
         if selected_plot_type == 'Parallel Coordinates':
             self.controller.data.plot_type = 'PC'
         elif selected_plot_type == 'Dynamic Scaffold Coordinates 1':
@@ -143,10 +146,10 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.plot_type = 'DCC'
         else:
             return
-        
+
         self.plot_widget = PLOT.MakePlot(self.controller.data, parent=self)
-        self.remove_clip() # remove previous clips if any
-        
+        self.remove_clip()  # remove previous clips if any
+
         # class table placeholder
         if self.class_pl_exists:
             self.class_table_layout.removeWidget(self.class_pl)
@@ -168,14 +171,14 @@ class View(QtWidgets.QMainWindow):
     # function to save clip files
     def analyze_clip(self):
         if not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
 
         CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
 
     def undo_clip(self):
         if not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
         self.plot_widget.all_rect.pop()
         if self.rule_count > 0:
@@ -186,32 +189,34 @@ class View(QtWidgets.QMainWindow):
 
     def remove_clip(self):
         if not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
-        
+
         self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
         self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
         self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
-        
+
         self.plot_widget.all_rect = []
 
         self.clipped_area_textbox.setText('')
-        
+
         self.plot_widget.update()
-    
+
     def hide_clip(self):
         if self.controller.data.plot_type not in ['SCC', 'DCC']:
-            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
-            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count) 
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples,
+                                                        self.controller.data.clipped_samples)
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         else:
-            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.vertex_in)
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples,
+                                                        self.controller.data.vertex_in)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         self.rule_count += 1
         current_rule_coords = self.plot_widget.all_rect[self.rule_count - 1]
         formatted_coords = [round(num, 2) for num in current_rule_coords]
         self.rules_textbox.append('\nRule ' + str(self.rule_count) + ' : ' + str(formatted_coords))
-        
+
         self.plot_widget.update()
 
     def table_swap(self, event):
@@ -226,22 +231,23 @@ class View(QtWidgets.QMainWindow):
 
     def replot_attributes(self):
         if not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
-        
+
         self.controller.data.attribute_names.append('class')
         self.controller.data.dataframe = self.controller.data.dataframe[self.controller.data.attribute_names]
 
         self.controller.data.attribute_names.pop()
         self.controller.data.positions = []
         self.controller.data.active_attributes = np.repeat(True, self.controller.data.attribute_count)
-        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
-        
+        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count,
+                                         self.controller.data.plot_type)
+
         self.create_plot()
 
     def open_background_color_picker(self):
         if not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
         color = QColorDialog.getColor()
         if color.isValid():
@@ -250,7 +256,7 @@ class View(QtWidgets.QMainWindow):
 
     def open_axes_color_picker(self):
         if not self.plot_widget:
-            WARNINGS.noDataWarning()
+            WARNINGS.no_data_warning()
             return
         color = QColorDialog.getColor()
         if color.isValid():

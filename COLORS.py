@@ -1,5 +1,6 @@
 import colorsys
 
+
 class getColors:
     def __init__(self, num_colors, bg_color, axis_color):
         self.bg_color = [x / 255.0 for x in bg_color]  # Normalize to [0, 1]
@@ -19,7 +20,8 @@ class getColors:
 
             self.colors_array.append([r, g, b])
             self.colors_names_array.append(f"color_{i}")
-    
+
+
 def shift_hue(rgb, amount):
     # Convert RGB to HSV
     r, g, b = rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0

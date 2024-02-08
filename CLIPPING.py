@@ -10,6 +10,7 @@ RIGHT = 2
 BOTTOM = 4
 TOP = 8
 
+
 def clip_display(textbox, total_sample):
     filenames = ['test_line.csv', 'test_vertex.csv', 'test_end.csv']
     clip_types = ['Line Clip', 'Vertex Clip', 'End Clip']
@@ -28,8 +29,9 @@ def clip_display(textbox, total_sample):
 
         # display class data
         info_string += (
-            'Clip Type: ' + clip_types[cnt] + '\n\n' + 'Number of Samples: ' + str(sample_count) + '\n' +
-            'Amount of Dataset: ' + '{:.2f}'.format(sample_count / total_sample * 100)) + '%'
+                               'Clip Type: ' + clip_types[cnt] + '\n\n' + 'Number of Samples: ' + str(
+                           sample_count) + '\n' +
+                               'Amount of Dataset: ' + '{:.2f}'.format(sample_count / total_sample * 100)) + '%'
 
         # loop through class names
         counter = 1
@@ -42,6 +44,7 @@ def clip_display(textbox, total_sample):
         cnt += 1
 
     textbox.setText(info_string)
+
 
 def clip_files(dataset, textbox):
     # for option 1 (lines clipped)
@@ -100,11 +103,13 @@ def clip_files(dataset, textbox):
     # build text box
     clip_display(textbox, dataset.sample_count)
 
+
 class MinAndMax(object):
     x_min = None
     x_max = None
     y_min = None
     y_max = None
+
 
 # Function to compute region code for a point(x, y)
 def compute_code(x, y, min_max):
@@ -120,6 +125,7 @@ def compute_code(x, y, min_max):
         code |= TOP
 
     return code
+
 
 def cohen_sutherland_clip(x1, y1, x2, y2, min_max, class_num, sample_num):
     # Compute region codes for P1, P2

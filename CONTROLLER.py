@@ -6,6 +6,7 @@ import sys
 
 import CLASS_TABLE
 
+
 class Controller:
     def __init__(self, view, dataset=None):
         self.data = dataset

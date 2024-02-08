@@ -1,6 +1,7 @@
 import numpy as np
 import DATASET
 
+
 def compute_coordinates(data, df, class_index):
     base_radius = (data.attribute_count / (2 * np.pi))
 
@@ -11,7 +12,7 @@ def compute_coordinates(data, df, class_index):
     else:
         # Subsequent classes each get their own axis, scaling geometrically
         scale_factor = 2.1  # Adjust this factor to control the rate of radius increase
-        radius_factor = scale_factor * (class_index-1)
+        radius_factor = scale_factor * (class_index - 1)
 
     radius = base_radius * radius_factor
     section_array = np.linspace(0, 1, data.attribute_count)
@@ -31,7 +32,7 @@ def compute_coordinates(data, df, class_index):
             arc_length += (1 - y_coord[i])
         else:
             arc_length += y_coord[i]
-        
+
         # Apply the radius factor to the angle calculation
         center_angle = arc_length * 360 / (2 * np.pi * radius) * radius_factor
         center_angle = np.pi * center_angle / 180
@@ -44,13 +45,16 @@ def compute_coordinates(data, df, class_index):
 
     return np.column_stack((x_coord, y_coord))
 
+
 class SCC:
     def __init__(self, data: DATASET.Dataset):
         data.vertex_count = data.attribute_count
         data.dataframe = data.normalize_data(range=(0, 1))
 
         # Compute coordinates for each class with adjusted radius
-        data.positions = [compute_coordinates(data, data.dataframe[data.dataframe['class'] == class_name].drop('class', axis=1), class_index)
-                          for class_index, class_name in enumerate(data.class_names)]
+        data.positions = [
+            compute_coordinates(data, data.dataframe[data.dataframe['class'] == class_name].drop('class', axis=1),
+                                class_index)
+            for class_index, class_name in enumerate(data.class_names)]
 
         data.axis_count = 0
