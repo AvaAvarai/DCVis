@@ -108,7 +108,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
 
                     start = data.positions[class_index][j + h - 1]
                     end = data.positions[class_index][j + h]
-                    coef = 100  # Adjust this to control the curvature
+                    coef = data.coefs[h-1]  # Adjust this to control the curvature
 
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef,
                                                                                data.attribute_count, is_inner,
