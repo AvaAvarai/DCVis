@@ -5,13 +5,13 @@ from PyQt6.QtCore import Qt
 def table_swap(table, dataset, event, replot_func):
     moved_from = table.currentRow()
     from_item = table.item(moved_from, 0)
-    if from_item == None:  # if no item is selected
+    if from_item is None:  # if no item is selected
         return
     from_item = from_item.text()
     moved_to = table.rowAt(round(event.position().y()))
 
     to_item = table.item(moved_to, 0)
-    if to_item == None:  # if no item is selected
+    if to_item is None:  # if no item is selected
         return
     to_item = to_item.text()
 
@@ -35,21 +35,19 @@ def table_swap(table, dataset, event, replot_func):
 
 def reset_checkmarks(table, count, plot_type):
     for idx in range(count):
-        if plot_type == 'SPC' or plot_type == 'DSC2':
-            cell = table.cellWidget(idx * 2, 1)
-            cell.setCheckState(Qt.CheckState.Checked)
-        else:
-            cell = table.cellWidget(idx, 1)
+        if plot_type in ['SPC', 'DSC2']:  # paired plots
+            idx *= 2
+        cell = table.cellWidget(idx, 1)
+        if isinstance(cell, QtWidgets.QCheckBox):  # Check if the widget is a QCheckBox
             cell.setCheckState(Qt.CheckState.Checked)
 
 
 def uncheck_checkmarks(table, count, plot_type):
     for idx in range(count):
-        if plot_type == 'SPC' or plot_type == 'DSC2':
-            cell = table.cellWidget(idx * 2, 1)
-            cell.setCheckState(Qt.CheckState.Unchecked)
-        else:
-            cell = table.cellWidget(idx, 1)
+        if plot_type in ['SPC', 'DSC2']:  # paired plots
+            idx *= 2
+        cell = table.cellWidget(idx, 1)
+        if isinstance(cell, QtWidgets.QCheckBox):  # Check if the widget is a QCheckBox
             cell.setCheckState(Qt.CheckState.Unchecked)
 
 
@@ -82,38 +80,43 @@ class AttributeTable(QtWidgets.QTableWidget):
 
         if self.dataset.plot_type == 'DCC':
             for idx in range(self.dataset.attribute_count):
-                self.initDccRow(idx)
+                self.init_dcc_row(idx)
         else:
             for idx, attribute_name in enumerate(self.dataset.attribute_names):
                 self.setItem(idx, 0, QtWidgets.QTableWidgetItem(attribute_name))
                 self.setCellWidget(idx, 1, CheckBox(idx, self.dataset, 'transparency', parent=self))
                 self.setCellWidget(idx, 2, InversionCheckBox(idx, self.dataset, self.replot_func, parent=self))
 
-    def initDccRow(self, idx):
+    def init_dcc_row(self, idx):
         # Initialize slider
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         slider.setMinimum(0)
         slider.setMaximum(100)
-        slider.setValue(int(self.dataset.coefs[idx]))  # Assuming coefs are initially set to 100
-        slider.valueChanged.connect(lambda value, x=idx: self.updateTextBox(x, value))
+        slider.setValue(int(self.dataset.coefs[idx]))  # coefs are initially set to 100
+        slider.valueChanged.connect(lambda value, x=idx: self.update_text_box(x, value, update_dataset=True))
 
         # Initialize textbox
         textbox = QtWidgets.QLineEdit()
         textbox.setText(str(int(self.dataset.coefs[idx])))
         textbox.setValidator(QtGui.QIntValidator(0, 100))
-        textbox.textChanged.connect(lambda value, x=idx: self.updateSlider(x, value))
+        textbox.textChanged.connect(lambda value, x=idx: self.update_slider(x, value, update_dataset=True))
 
         self.setCellWidget(idx, 0, slider)
         self.setCellWidget(idx, 1, textbox)
 
-    def updateSlider(self, idx, value):
+    def update_slider(self, idx, value, update_dataset=False):
         if value:
             self.cellWidget(idx, 0).setValue(int(value))
-            self.dataset.update_coef(idx, int(value))
+            if update_dataset:
+                self.dataset.update_coef(idx, int(value))
+                self.replot_func()
 
-    def updateTextBox(self, idx, value):
+    def update_text_box(self, idx, value, update_dataset=False):
         self.cellWidget(idx, 1).setText(str(value))
-        self.dataset.update_coef(idx, value)
+        if update_dataset:
+            self.dataset.update_coef(idx, int(value))
+            self.replot_func()
+
 
 class CheckBox(QtWidgets.QCheckBox):
     def __init__(self, row, dataset, option, parent=None):
