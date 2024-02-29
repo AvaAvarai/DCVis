@@ -15,7 +15,7 @@ import GCA
 import CLIPPING
 
 
-def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_count, is_inner, class_index):
+def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, is_inner, class_index):
     # Calculate midpoint between start and end points
     midX, midY = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
 
@@ -26,7 +26,7 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
         radius_factor = class_index
 
     if is_inner:  # first class always inside axis
-        factor = 0.1 * coef / 100
+        factor = 0.1
         distance = np.sqrt(midX ** 2 + midY ** 2)
         # Calculate scaled control points
         scale = factor * radius * radius_factor / distance
@@ -36,7 +36,7 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
 
         return control1, control2
 
-    factor = coef / 100 + 1
+    factor = 2
 
     # Calculate the new radius for control points
     new_radius = radius * factor * 1.2 * radius_factor
@@ -44,11 +44,49 @@ def calculate_cubic_bezier_control_points(start, end, radius, coef, attribute_co
     # Calculate the angle from the circle's center to the midpoint
     angle = np.arctan2(midY, midX)
     angle_adjustment = np.pi / attribute_count / 3
+    
     # Calculate control points using circle formula
     control1 = (new_radius * np.cos(angle + angle_adjustment), new_radius * np.sin(angle + angle_adjustment))
     control2 = (new_radius * np.cos(angle - angle_adjustment), new_radius * np.sin(angle - angle_adjustment))
 
     return control1, control2
+
+
+def adjust_endpoints(start, end, coef, radius):
+    # Assuming the center of the circle is at (0, 0)
+    center = np.array([0, 0])
+    
+    # Convert coef to an angle in radians. Here, assuming full range of coef maps to a full circle.
+    # Adjust this logic based on how you wish coef to influence the movement.
+    angle_adjustment = np.radians(coef)  # This is a simple linear mapping, adjust as necessary
+    
+    def rotate_point_around_center(point, center, angle):
+        """Rotate a point counterclockwise by a given angle around a given origin.
+        The angle should be given in radians."""
+        ox, oy = center
+        px, py = point
+
+        qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
+        qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
+        return qx, qy
+
+    # Adjust start and end points by rotating them around the center of the circle
+    adjusted_start = rotate_point_around_center(start, center, angle_adjustment)
+    adjusted_end = rotate_point_around_center(end, center, angle_adjustment)
+
+    return adjusted_start, adjusted_end
+
+
+def adjust_marker_position(position, coef, radius):
+    # Calculate the angle for the adjustment
+    angle = np.radians(coef)  # Convert coef to radians for simplicity; adjust as needed
+
+    # Calculate new position based on radius and angle
+    # This simplistic approach assumes coef directly influences the angle of adjustment
+    new_x = radius * np.cos(angle) + position[0]
+    new_y = radius * np.sin(angle) + position[1]
+
+    return (new_x, new_y)
 
 
 def draw_cubic_bezier_curve(start, control1, control2, end):
@@ -67,14 +105,10 @@ def draw_cubic_bezier_curve(start, control1, control2, end):
 
 
 def draw_curves(data, line_vao, marker_vao, radius):
-    # Create a rotated color map
     hue_shift_amount = 0.1
 
     for class_index in range(data.class_count):
-        # Use the original color for all but the last attribute
-        color = data.class_colors[class_index]
         if data.active_classes[class_index]:
-
             glBindVertexArray(line_vao[class_index])
             is_inner = (class_index == data.class_order[0])
 
@@ -87,62 +121,34 @@ def draw_curves(data, line_vao, marker_vao, radius):
             for j in range(0, len(data.positions[class_index]), data.vertex_count):
                 sub_alpha = 0
                 for h in range(1, data.vertex_count):
-                    if h > data.attribute_count:
-                        continue
-                    if data.clear_samples[size_index + datapoint_count]:
+                    if h > data.attribute_count or data.clear_samples[size_index + datapoint_count]:
                         continue
 
-                    # For the last attribute, use hue shift color
-                    if h == data.attribute_count - 1:
-                        color = shift_hue(data.class_colors[class_index], hue_shift_amount)
-                    else:
-                        color = data.class_colors[class_index]
+                    color = shift_hue(data.class_colors[class_index], hue_shift_amount) if h == data.attribute_count - 1 else data.class_colors[class_index]
+                    glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
 
-                    if any(data.vertex_in):
-                        sub_alpha = 150
+                    start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
+                    coef = data.coefs[h-1]  # Use coef to dynamically adjust the curve
+                    
+                    # Adjust start and end points based on coef
+                    adjusted_start, adjusted_end = adjust_endpoints(start, end, coef, radius)
 
-                    if data.active_attributes[h]:
-                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha)
-                    else:
-                        glColor4ub(color[0], color[1], color[2], 255 - sub_alpha)
-
-                    start = data.positions[class_index][j + h - 1]
-                    end = data.positions[class_index][j + h]
-                    coef = data.coefs[h-1]  # Adjust this to control the curvature
-
-                    control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef,
+                    control1, control2 = calculate_cubic_bezier_control_points(adjusted_start, adjusted_end, radius,
                                                                                data.attribute_count, is_inner,
                                                                                class_index)
-
-                    draw_cubic_bezier_curve(start, control1, control2, end)
+                    draw_cubic_bezier_curve(adjusted_start, control1, control2, adjusted_end)
                 datapoint_count += 1
 
             glBindVertexArray(0)
 
-        # draw markers
         if data.active_markers[class_index]:
-            # positions of the markers
             for j in range(data.vertex_count):
-                if j == data.vertex_count - 1:
-                    glPointSize(7)
-
                 glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
-
-                # For the last attribute, use hue shift color
-                if j == data.attribute_count - 1:
-                    color = shift_hue(data.class_colors[class_index], hue_shift_amount)
-                else:
-                    color = data.class_colors[class_index]
-
-                if data.active_attributes[j]:
-                    glColor4ub(color[0], color[1], color[2], data.attribute_alpha)
-                else:
-                    glColor4ub(color[0], color[1], color[2], 255)
-                # drawing
+                color = shift_hue(data.class_colors[class_index], hue_shift_amount) if j == data.attribute_count - 1 else data.class_colors[class_index]
+                glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
                 glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
-                # unbind
                 glBindVertexArray(0)
-                glPointSize(5)
+                glPointSize(5)  # Reset point size if necessary
 
     glDisable(GL_BLEND)
 
@@ -187,14 +193,6 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
 
             glBindVertexArray(0)
     glLineWidth(1)
-
-
-def draw_radials(dataset):
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-    glDisable(GL_BLEND)
-
 
 
 def draw_unhighlighted_curves(data, line_vao, marker_vao):
@@ -366,9 +364,6 @@ def draw_axes(dataset, axis_vao, color):
                     glVertex2f(inner_x, inner_y)
                     glVertex2f(outer_x, outer_y)
                     glEnd()
-
-    if dataset.plot_type in ['DCC']:
-        draw_radials(dataset)
 
     glBindVertexArray(0)
 

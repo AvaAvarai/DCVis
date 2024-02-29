@@ -79,7 +79,7 @@ class Dataset:
         self.attribute_count = len(df.columns) - 1
         self.attribute_order = np.arange(0, self.attribute_count)
 
-        self.coefs = np.ones(self.attribute_count) * 100
+        self.coefs = np.zeros(self.attribute_count)
 
         self.active_attributes = np.repeat(True, self.attribute_count)
         self.attribute_inversions = np.repeat(False, self.attribute_count)
