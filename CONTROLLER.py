@@ -69,3 +69,4 @@ class Controller:
         self.data.load_from_csv(filename[0])
         DATA_DISPLAY.DisplayData(self.data, self.view.dataset_textbox)
         self.view.class_table = CLASS_TABLE.ClassTable(self.data, parent=self.view)
+

@@ -242,7 +242,8 @@ class View(QtWidgets.QMainWindow):
         self.controller.data.active_attributes = np.repeat(True, self.controller.data.attribute_count)
         ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count,
                                          self.controller.data.plot_type)
-
+        if self.attribute_table:
+            self.attribute_table.clearTableWidgets()
         self.create_plot()
 
     def open_background_color_picker(self):

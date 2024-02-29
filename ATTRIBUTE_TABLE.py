@@ -116,6 +116,19 @@ class AttributeTable(QtWidgets.QTableWidget):
         if update_dataset:
             self.dataset.update_coef(idx, int(value))
             self.replot_func()
+    
+    def clearTableWidgets(self):
+        # Loop through each row and column to remove widgets and clear items
+        for row in range(self.rowCount()):
+            for col in range(self.columnCount()):
+                widget = self.cellWidget(row, col)
+                if widget is not None:
+                    # Remove the widget from the cell
+                    self.removeCellWidget(row, col)
+                    widget.deleteLater()  # Ensure the widget is deleted properly
+
+        # Clear all the contents of the table after removing widgets
+        self.clearContents()
 
 
 class CheckBox(QtWidgets.QCheckBox):
@@ -158,3 +171,4 @@ class InversionCheckBox(QtWidgets.QCheckBox):
         # We use `not state` because the inversion list is meant to be True when not inverted
         self.dataset.attribute_inversions[self.index] = not self.dataset.attribute_inversions[self.index]
         self.replot_func()
+

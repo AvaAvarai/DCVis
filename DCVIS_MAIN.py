@@ -5,6 +5,8 @@ import sys
 import VIEW
 import CONTROLLER
 
+
+# DCVis application entry point
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     
@@ -15,3 +17,4 @@ if __name__ == '__main__':
 
     view.show()
     app.exec()
+
