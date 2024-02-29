@@ -58,16 +58,16 @@ class AttributeTable(QtWidgets.QTableWidget):
         self.dataset = dataset
         self.replot_func = replot_func
 
-        if self.dataset.plot_type == 'DCC':
-            self.setColumnCount(2)  # Adjusted for coefficient slider and textbox
-            self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Coefficient Slider'))
-            self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Value'))
-        else:
-            self.setColumnCount(3)  # Original setup
-            self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Attribute Order'))
-            self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Transparency'))
+        if not self.dataset.plot_type == 'DCC':
+            self.setColumnCount(3)
             self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Invert'))
-
+        else:
+            self.setColumnCount(4)
+            self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Coefficient'))
+            self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Value'))
+        self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Order'))
+        self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Alpha'))
+            
         self.setRowCount(self.dataset.attribute_count)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
@@ -76,21 +76,24 @@ class AttributeTable(QtWidgets.QTableWidget):
 
         header = self.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        if not self.dataset.plot_type == 'DCC':
+            header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)    
+        else:
+            header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         if self.dataset.plot_type == 'DCC':
             for idx in range(self.dataset.attribute_count):
                 self.init_dcc_row(idx)
-        else:
-            for idx, attribute_name in enumerate(self.dataset.attribute_names):
-                self.setItem(idx, 0, QtWidgets.QTableWidgetItem(attribute_name))
-                self.setCellWidget(idx, 1, CheckBox(idx, self.dataset, 'transparency', parent=self))
+        for idx, attribute_name in enumerate(self.dataset.attribute_names):
+            self.setItem(idx, 0, QtWidgets.QTableWidgetItem(attribute_name))
+            self.setCellWidget(idx, 1, CheckBox(idx, self.dataset, 'Alpha', parent=self))
+            if not self.dataset.plot_type == 'DCC':    
                 self.setCellWidget(idx, 2, InversionCheckBox(idx, self.dataset, self.replot_func, parent=self))
 
     def init_dcc_row(self, idx):
         # Initialize slider
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        slider.setMinimum(0)
+        slider.setMinimum(-100)
         slider.setMaximum(100)
         slider.setValue(int(self.dataset.coefs[idx]))  # coefs are initially set to 100
         slider.valueChanged.connect(lambda value, x=idx: self.update_text_box(x, value, update_dataset=True))
@@ -101,18 +104,18 @@ class AttributeTable(QtWidgets.QTableWidget):
         textbox.setValidator(QtGui.QIntValidator(0, 100))
         textbox.textChanged.connect(lambda value, x=idx: self.update_slider(x, value, update_dataset=True))
 
-        self.setCellWidget(idx, 0, slider)
-        self.setCellWidget(idx, 1, textbox)
+        self.setCellWidget(idx, 2, slider)
+        self.setCellWidget(idx, 3, textbox)
 
     def update_slider(self, idx, value, update_dataset=False):
         if value:
-            self.cellWidget(idx, 0).setValue(int(value))
+            self.cellWidget(idx, 2).setValue(int(value))
             if update_dataset:
                 self.dataset.update_coef(idx, int(value))
                 self.replot_func()
 
     def update_text_box(self, idx, value, update_dataset=False):
-        self.cellWidget(idx, 1).setText(str(value))
+        self.cellWidget(idx, 3).setText(str(value))
         if update_dataset:
             self.dataset.update_coef(idx, int(value))
             self.replot_func()

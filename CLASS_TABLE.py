@@ -57,7 +57,7 @@ class ClassTable(QtWidgets.QTableWidget):
         self.setRowCount(dataset.class_count)
         self.setColumnCount(4)
 
-        self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Class Order'))
+        self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Order'))
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Lines'))
         self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Markers'))
         self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Color'))
