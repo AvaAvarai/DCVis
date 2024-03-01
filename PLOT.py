@@ -52,17 +52,17 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
     return control1, control2
 
 
-def adjust_endpoints(start, end, coef, radius):
+def adjust_endpoints(start, end, coef, radius, isFirstPoint=False):
+    # Check if the point is the first point, if so, return it unmodified
+
     # Assuming the center of the circle is at (0, 0)
     center = np.array([0, 0])
     
-    # Convert coef to an angle in radians. Here, assuming full range of coef maps to a full circle.
-    # Adjust this logic based on how you wish coef to influence the movement.
-    angle_adjustment = np.radians(coef)  # This is a simple linear mapping, adjust as necessary
+    # Convert coef to an angle in radians.
+    angle_adjustment = np.radians(-coef)
     
+    # Function to rotate a point around the center
     def rotate_point_around_center(point, center, angle):
-        """Rotate a point counterclockwise by a given angle around a given origin.
-        The angle should be given in radians."""
         ox, oy = center
         px, py = point
 
@@ -70,11 +70,12 @@ def adjust_endpoints(start, end, coef, radius):
         qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
         return qx, qy
 
-    # Adjust start and end points by rotating them around the center of the circle
-    adjusted_start = rotate_point_around_center(start, center, angle_adjustment)
+    # Adjust end points by rotating them around the center of the circle
     adjusted_end = rotate_point_around_center(end, center, angle_adjustment)
 
-    return adjusted_start, adjusted_end
+    if isFirstPoint:
+        return start, end
+    return start, adjusted_end
 
 
 def adjust_marker_position(position, coef, radius):
@@ -130,13 +131,29 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
                     coef = data.coefs[h-1]  # Use coef to dynamically adjust the curve
                     
+                    print(f"row: {j} for x{h-1} has {start}, {end}")
+                    
+                    
                     # Adjust start and end points based on coef
-                    adjusted_start, adjusted_end = adjust_endpoints(start, end, coef, radius)
+                    isFirstPoint = (h == 1)
+                    
+                    if data.plot_type == 'DONT':
+                        adjusted_start, adjusted_end = adjust_endpoints(start, end, coef, radius, isFirstPoint)
 
-                    control1, control2 = calculate_cubic_bezier_control_points(adjusted_start, adjusted_end, radius,
+
+                        # debug
+                        # print(f"with adj of {adjusted_start}, {adjusted_end}")
+
+                        control1, control2 = calculate_cubic_bezier_control_points(adjusted_start, adjusted_end, radius,
                                                                                data.attribute_count, is_inner,
                                                                                class_index)
-                    draw_cubic_bezier_curve(adjusted_start, control1, control2, adjusted_end)
+                        draw_cubic_bezier_curve(adjusted_start, control1, control2, adjusted_end)
+                    else:
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius,
+                                                                               data.attribute_count, is_inner,
+                                                                               class_index)
+                        draw_cubic_bezier_curve(start, control1, control2, end)
+                
                 datapoint_count += 1
 
             glBindVertexArray(0)
@@ -185,7 +202,7 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
                         end = dataset.positions[class_index][j + h]
                         coef = 100  # Adjust to control curvature
 
-                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, coef,
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius,
                                                                                    dataset.attribute_count, is_inner,
                                                                                    class_index)
                         draw_cubic_bezier_curve(start, control1, control2, end)
