@@ -4,9 +4,9 @@
 
 DCVis is an interactive visualization software package for building machine learning models by visual exploration.  
 
-This work is established by Dr. Boris Kovalerchuk and the Visual Knowledge Discovery and Imaging Lab of Central Washington University and we are greatly inspired by Dr. Alfred Inselberg who defined Parallel Coordinates.  
+This work is established by Dr. Boris Kovalerchuk and the Visual Knowledge Discovery and Imaging Lab of Central Washington University. We are greatly inspired by Dr. Alfred Inselberg who invented Parallel Coordinates.  
 
-This software applies Visual Knowledge Discovery techniques using dynamic tooling to improve resulting machine learning model explainability and interpretability using visual analytics which are more explicable for human understanding compared to standard black-box machine learning models.  
+This software applies Visual Knowledge Discovery techniques which use dynamic tools to build machine learning models which are inherently explainable and interpretable using visual analytics.  
 
 *This software is a rewrite of [DSCVis](https://github.com/Charles57-CWU/DSCVis) to support newly developed tooling features.*  
 
@@ -54,7 +54,7 @@ Datasets included:
 - Sinusoidal wave samplings -- 200 samples, 2 features, 2 classes
 - Wheat Seed variety measurements -- 210 samples, 7 features, 3 classes
 - Wine chemical analysis measurements -- 4,898 samples, 11 features, 7 classes
-- Artificial testing datasets
+- Artificial testing datasets which exhibit various properties of visualizations.
 
 ## Program Features
 
@@ -84,3 +84,6 @@ See `requirements.txt` for the development environment libraries listing.
 - Continuation of a [CS Masters Project at CWU](https://github.com/Charles57-CWU/DSCVis).
 - Rebuild of former research [lab project](https://github.com/CWU-VKD-LAB/DCVis).
 - Now built on a refactored MVC architecture with precise zoom & panning controls.
+
+Authors working on this project: Alice Williams, James Battistoni, and Charles Recaido.
+
