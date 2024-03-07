@@ -4,7 +4,7 @@ from PyQt6.uic.load_ui import loadUi
 
 import numpy as np
 
-import CLASS_TABLE, ATTRIBUTE_TABLE, PLOT, CLIPPING, WARNINGS
+import CLASS_TABLE, ATTRIBUTE_TABLE, PLOT, CLIPPING,WARNINGS
 
 
 class View(QtWidgets.QMainWindow):
@@ -179,12 +179,19 @@ class View(QtWidgets.QMainWindow):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
             return
-        self.plot_widget.all_rect.pop()
-        if self.rule_count > 0:
-            self.rule_count -= 1
-            CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
-
-        self.plot_widget.update()
+        
+        # Check if all_rect is not empty before popping
+        if self.plot_widget.all_rect:
+            self.plot_widget.all_rect.pop()
+            if self.rule_count > 0:
+                self.rule_count -= 1
+                # Assuming CLIPPING.clip_files might modify data based on the updated rule_count or other conditions
+                CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
+            self.plot_widget.update()
+        else:
+            # Optionally, handle the case where there's nothing to undo
+            # For example, display a message or perform some other action
+            print("No more rectangles to remove.")
 
     def remove_clip(self):
         if not self.plot_widget:
