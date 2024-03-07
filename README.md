@@ -1,8 +1,21 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
-## About
+## About DCVis
 
-This application displays multi-dimensional numerical data in 2D visualizations using OpenGL for GPU rendering. The plot can be interacted with, panning around, zooming in/out, configuring view, and exploring data interactively. Data may be highlighted with dual-right click clipping, analyzed, and exported or hidden for further analysis. For building visual machine learning models using visualization region rules-based classification. Combining and chaining rules to produce classifiers for unseen data.
+DCVis is an interactive visualization software package for building machine learning models by visual exploration.  
+
+This work is established by Dr. Boris Kovalerchuk and the Visual Knowledge Discovery and Imaging Lab of Central Washington University and we are greatly inspired by Dr. Alfred Inselberg who defined Parallel Coordinates.  
+
+This software applies Visual Knowledge Discovery techniques using dynamic tooling to improve resulting machine learning model explainability and interpretability using visual analytics which are more explicable for human understanding compared to standard black-box machine learning models.  
+
+*This software is a rewrite of [DSCVis](https://github.com/Charles57-CWU/DSCVis) to support newly developed tooling features.*  
+
+## DCVis Features
+
+- Visualize multi-dimensional numerical data (.csv or .txt file) in 2D visualizations using OpenGL for GPU rendering.  
+- Plot can be interacted with, panning around, zooming in/out, configuring view options, and exploring data interactively.  
+- Data may be highlighted with dual-right click clipping, analyzed, and exported or hidden for further analysis.  
+- For building visual machine learning models using rules-based classification. Combining and chaining rules to produce classifiers for future data.
 
 ## Visualization Methods
 
