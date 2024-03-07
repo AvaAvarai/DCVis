@@ -101,16 +101,13 @@ class Dataset:
             self.name = os.path.basename(filename)
             self.load_frame(df)
 
-        except FileNotFoundError:
+        except FileNotFoundError:  # TODO: use WARNINGS.py errors
             print(f"File {filename} not found.")
-            # Notify the controller to show a warning message
         except pd.errors.EmptyDataError:
             print("The file is empty.")
-            # Notify the controller to show a warning message
         except Exception as e:
             print(f"An error occurred: {e}")
-            # Notify the controller to show a warning message
-
+            
     def normalize_data(self, range: Tuple[float, float]):
         if self.dataframe is None or self.dataframe.empty:
             print("DataFrame is not loaded or is empty.")
@@ -129,3 +126,4 @@ class Dataset:
 
     def roll_vertex_in(self, roll_dir: int):
         self.vertex_in = list(np.roll(self.vertex_in, roll_dir))
+

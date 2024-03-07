@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1615</width>
+    <width>1664</width>
     <height>1000</height>
    </rect>
   </property>
@@ -170,7 +170,6 @@
           <property name="font">
            <font>
             <pointsize>11</pointsize>
-            <weight>50</weight>
             <bold>false</bold>
             <kerning>true</kerning>
            </font>
@@ -201,7 +200,6 @@
           <property name="font">
            <font>
             <pointsize>11</pointsize>
-            <weight>50</weight>
             <bold>false</bold>
             <kerning>true</kerning>
            </font>
@@ -231,7 +229,6 @@
             <property name="font">
              <font>
               <pointsize>11</pointsize>
-              <weight>50</weight>
               <bold>false</bold>
               <kerning>true</kerning>
              </font>
@@ -257,7 +254,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
           <item>
            <widget class="QPushButton" name="analyze_clip_button">
             <property name="sizePolicy">
@@ -268,19 +265,6 @@
             </property>
             <property name="text">
              <string>Analyze Clips</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="hide_clip_button">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Add Rule</string>
             </property>
            </widget>
           </item>
@@ -307,6 +291,36 @@
             </property>
             <property name="text">
              <string>Unselect Clips</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QPushButton" name="hide_clip_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Add Rule</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clear_rules_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Clear Rules</string>
             </property>
            </widget>
           </item>
@@ -361,7 +375,6 @@
                <property name="font">
                 <font>
                  <pointsize>11</pointsize>
-                 <weight>50</weight>
                  <bold>false</bold>
                  <kerning>true</kerning>
                 </font>
@@ -416,7 +429,6 @@
                <property name="font">
                 <font>
                  <pointsize>11</pointsize>
-                 <weight>50</weight>
                  <bold>false</bold>
                  <kerning>true</kerning>
                 </font>
@@ -480,7 +492,6 @@
                  <property name="font">
                   <font>
                    <pointsize>11</pointsize>
-                   <weight>50</weight>
                    <bold>false</bold>
                    <kerning>true</kerning>
                   </font>
@@ -631,8 +642,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1615</width>
-     <height>21</height>
+     <width>1664</width>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

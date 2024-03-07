@@ -28,16 +28,12 @@ def clip_display(textbox, total_sample):
         sample_count = len(df.index)
 
         # display class data
-        info_string += (
-                               'Clip Type: ' + clip_types[cnt] + '\n\n' + 'Number of Samples: ' + str(
-                           sample_count) + '\n' +
-                               'Amount of Dataset: ' + '{:.2f}'.format(sample_count / total_sample * 100)) + '%'
+        info_string += ('Clip Type: ' + clip_types[cnt] + '\n\n' + 'Number of Samples: ' + str(sample_count) + '\n' + 'Amount of Dataset: ' + '{:.2f}'.format(sample_count / total_sample * 100)) + '%'
 
         # loop through class names
         counter = 1
         for ele in class_names:
-            info_string += ('\n\n' + 'Class ' + str(counter) + ': ' + str(ele) +
-                            '\n' + '--Count: ' + str(count_per_class[counter - 1]))
+            info_string += ('\n\n' + 'Class ' + str(counter) + ': ' + str(ele) + '\n' + '--Count: ' + str(count_per_class[counter - 1]))
             counter += 1
 
         info_string += '\n\nDataset Name: ' + name + '\n===============\n\n'
@@ -211,8 +207,7 @@ def clip_samples(positions, rect, dataset):
             for i in range(dataset.vertex_count):
                 # line clip
                 if i < dataset.vertex_count - 1:
-                    is_clipped = cohen_sutherland_clip(sample[2 * i], sample[2 * i + 1], sample[2 * i + 2],
-                                                       sample[2 * i + 3], min_max, class_num, cnt)
+                    is_clipped = cohen_sutherland_clip(sample[2 * i], sample[2 * i + 1], sample[2 * i + 2], sample[2 * i + 3], min_max, class_num, cnt)
                     if is_clipped:
                         dataset.clipped_samples[cnt] = True
 
@@ -238,3 +233,4 @@ class Clipping:
             positions[i] = np.reshape(positions[i], (dataset.count_per_class[i], dataset.vertex_count * 2))
 
         clip_samples(positions, rect, dataset)
+
