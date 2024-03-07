@@ -2,7 +2,7 @@
 
 ## About DCVis
 
-DCVis is an interactive visualization software package for building machine learning models by visual exploration.  
+DCVis is an interactive visualization application for building machine learning models by visual exploration. Techniques being ported to C for improved performance with [CVis](https://github.com/CWU-VKD-LAB/CVis).  
 
 This work is established by Dr. Boris Kovalerchuk and the Visual Knowledge Discovery and Imaging Lab of Central Washington University. We are greatly inspired by Dr. Alfred Inselberg who invented Parallel Coordinates.  
 
@@ -15,6 +15,8 @@ This software applies Visual Knowledge Discovery techniques which use dynamic to
 - Visualize multi-dimensional numerical data (.csv or .txt file) in 2D visualizations using OpenGL for GPU rendering.  
 - Plot can be interacted with, panning around, zooming in/out, configuring view options, and exploring data interactively.  
 - Data may be highlighted with dual-right click clipping, analyzed, and exported or hidden for further analysis.  
+- Classification rules can be built from clipped samples.
+- Axes can be inverted to find improved n-D data patterns.
 - For building visual machine learning models using rules-based classification. Combining and chaining rules to produce classifiers for future data.
 
 ## Visualization Methods
