@@ -2,8 +2,7 @@ from PyQt6 import QtWidgets
 
 import sys
 
-import VIEW
-import CONTROLLER
+import VIEW, CONTROLLER
 
 
 # DCVis application entry point

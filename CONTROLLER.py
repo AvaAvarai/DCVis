@@ -1,10 +1,9 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
-import DATA_DISPLAY
-import DATASET
+
 import sys
 
-import CLASS_TABLE
+import DATA_DISPLAY, DATASET, CLASS_TABLE
 
 
 class Controller:
@@ -15,19 +14,16 @@ class Controller:
             self.setup_connections()
 
     def setup_connections(self):
+        # Bind buttons to functions
         self.view.load_button.clicked.connect(self.load_dataset)
-        self.view.load_button.setShortcut(Qt.Key.Key_F1)
-        self.view.plot_button.clicked.connect(self.view.create_plot)
-        self.view.plot_button.setShortcut(Qt.Key.Key_F3)
+        self.view.plot_button.clicked.connect(self.view.create_plot) 
         self.view.exit_button.clicked.connect(lambda: sys.exit())
-        self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
         self.view.actionExit.triggered.connect(lambda: sys.exit())
         self.view.analyze_clip_button.clicked.connect(self.view.analyze_clip)
         self.view.hide_clip_button.clicked.connect(self.view.hide_clip)
         self.view.undo_clip_button.clicked.connect(self.view.undo_clip)
         self.view.remove_clip_button.clicked.connect(self.view.remove_clip)
         self.view.recenter_button.clicked.connect(self.view.recenter_plot)
-        self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
         self.view.show_axes.stateChanged.connect(self.view.axes_func)
         self.view.attribute_slide.valueChanged.connect(self.view.attr_slider)
         self.view.check_classes.clicked.connect(self.view.check_all_class)
@@ -37,6 +33,12 @@ class Controller:
         self.view.cell_swap.__class__.dropEvent = self.view.table_swap
         self.view.background_button.clicked.connect(self.view.open_background_color_picker)
         self.view.axes_button.clicked.connect(self.view.open_axes_color_picker)
+        
+        # Set keyboard shortcuts
+        self.view.load_button.setShortcut(Qt.Key.Key_F1)
+        self.view.plot_button.setShortcut(Qt.Key.Key_F3)
+        self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
+        self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
 
     def load_dataset(self):
         if self.data:

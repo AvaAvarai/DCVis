@@ -4,11 +4,7 @@ from PyQt6.uic.load_ui import loadUi
 
 import numpy as np
 
-import CLASS_TABLE
-import ATTRIBUTE_TABLE
-import PLOT
-import CLIPPING
-import WARNINGS
+import CLASS_TABLE, ATTRIBUTE_TABLE, PLOT, CLIPPING, WARNINGS
 
 
 class View(QtWidgets.QMainWindow):
@@ -55,8 +51,7 @@ class View(QtWidgets.QMainWindow):
         if not self.controller.data:
             WARNINGS.no_data_warning()
             return
-        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count,
-                                         self.controller.data.plot_type)
+        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
 
     def check_all_class(self):
         if not self.controller.data:
@@ -68,8 +63,7 @@ class View(QtWidgets.QMainWindow):
         if not self.controller.data:
             WARNINGS.no_data_warning()
             return
-        ATTRIBUTE_TABLE.uncheck_checkmarks(self.attribute_table, self.controller.data.vertex_count,
-                                           self.controller.data.plot_type)
+        ATTRIBUTE_TABLE.uncheck_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
 
     def uncheck_all_class(self):
         if not self.controller.data:
@@ -210,12 +204,10 @@ class View(QtWidgets.QMainWindow):
 
     def hide_clip(self):
         if self.controller.data.plot_type not in ['SCC', 'DCC']:
-            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples,
-                                                        self.controller.data.clipped_samples)
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         else:
-            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples,
-                                                        self.controller.data.vertex_in)
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.vertex_in)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         self.rule_count += 1
         current_rule_coords = self.plot_widget.all_rect[self.rule_count - 1]
@@ -245,8 +237,7 @@ class View(QtWidgets.QMainWindow):
         self.controller.data.attribute_names.pop()
         self.controller.data.positions = []
         self.controller.data.active_attributes = np.repeat(True, self.controller.data.attribute_count)
-        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count,
-                                         self.controller.data.plot_type)
+        ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
         if self.attribute_table:
             self.attribute_table.clearTableWidgets()
         self.create_plot()

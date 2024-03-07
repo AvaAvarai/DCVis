@@ -1,5 +1,3 @@
-import typing
-from typing import List, Optional, Tuple
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as glvbo
 from PyQt6 import QtGui
@@ -8,11 +6,13 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
+
+import typing
+from typing import List, Optional, Tuple
 import numpy as np
 
+import GCA, CLIPPING
 from COLORS import getColors, shift_hue
-import GCA
-import CLIPPING
 
 
 def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, is_inner, class_index):
