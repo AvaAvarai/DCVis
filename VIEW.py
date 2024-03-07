@@ -114,8 +114,13 @@ class View(QtWidgets.QMainWindow):
         self.refresh()
 
     def create_plot(self):
-        if not self.controller.data:
+        # Check if data not loaded
+        if not (hasattr(self, 'controller') and self.controller is not None and self.controller.data is not None):
             WARNINGS.no_data_warning()
+            return
+        # Check if data load was cancelled
+        if not (self.controller.data and self.controller.data.class_count > 0):
+            print("No class data available to display in ClassTable.")
             return
 
         # remove initial placeholder

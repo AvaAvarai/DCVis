@@ -112,6 +112,9 @@ class Dataset:
             # Notify the controller to show a warning message
 
     def normalize_data(self, range: Tuple[float, float]):
+        if self.dataframe is None or self.dataframe.empty:
+            print("DataFrame is not loaded or is empty.")
+            return
         scaler = MinMaxScaler(range)
         self.dataframe[self.attribute_names] = scaler.fit_transform(self.dataframe[self.attribute_names])
         return self.dataframe
