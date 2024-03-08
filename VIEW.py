@@ -147,7 +147,7 @@ class View(QtWidgets.QMainWindow):
             return
 
         self.plot_widget = PLOT.MakePlot(self.controller.data, parent=self)
-        self.remove_clip()  # remove previous clips if any
+        self.remove_clips()  # remove previous clips if any
 
         # class table placeholder
         if self.class_pl_exists:
@@ -167,7 +167,6 @@ class View(QtWidgets.QMainWindow):
 
         self.plot_layout.addWidget(self.plot_widget)
 
-    # function to save clip files
     def analyze_clip(self):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
@@ -179,21 +178,33 @@ class View(QtWidgets.QMainWindow):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
             return
-        
-        # Check if all_rect is not empty before popping
+
+        # Ensure there is at least one rectangle to remove
         if self.plot_widget.all_rect:
+            # Remove the last rectangle
             self.plot_widget.all_rect.pop()
+
+            # Reset the clipping-related attributes before recalculating
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+            self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
+            self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
+
+            # Recalculate clipping for the remaining rectangles
+            for rect in self.plot_widget.all_rect:
+                # Ensure 'positions' is correctly structured for your dataset
+                positions = self.controller.data.positions  # This might need adjustment
+                CLIPPING.clip_samples(positions, rect, self.controller.data)
+
+            # Update rule count if necessary
             if self.rule_count > 0:
                 self.rule_count -= 1
-                # Assuming CLIPPING.clip_files might modify data based on the updated rule_count or other conditions
-                CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
+
+            # Update the plot to reflect changes
             self.plot_widget.update()
         else:
-            # Optionally, handle the case where there's nothing to undo
-            # For example, display a message or perform some other action
-            print("No more rectangles to remove.")
+            print("No rectangles to remove.")
 
-    def remove_clip(self):
+    def remove_clips(self):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
             return
@@ -216,6 +227,20 @@ class View(QtWidgets.QMainWindow):
         else:
             self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.vertex_in)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+
+    def remove_rules(self):
+        self.rule_count = 0
+        self.rules_textbox.setText('')
+        
+        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
+        self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
+        
+        self.plot_widget.all_rect = []
+        self.plot_widget.update()
+
+    def add_clip(self):
         self.rule_count += 1
         current_rule_coords = self.plot_widget.all_rect[self.rule_count - 1]
         formatted_coords = [round(num, 2) for num in current_rule_coords]
@@ -266,3 +291,4 @@ class View(QtWidgets.QMainWindow):
         if color.isValid():
             self.axes_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
             self.plot_widget.redraw_plot(axes_color=self.axes_color)
+

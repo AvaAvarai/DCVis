@@ -256,7 +256,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_14">
           <item>
-           <widget class="QPushButton" name="analyze_clip_button">
+           <widget class="QPushButton" name="analyze_clips_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -269,7 +269,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="undo_clip_button">
+           <widget class="QPushButton" name="clear_last_clip_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -277,12 +277,12 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Undo Last Clip</string>
+             <string>Clear Last Clip</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="remove_clip_button">
+           <widget class="QPushButton" name="clear_all_clips_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -290,7 +290,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Unselect Clips</string>
+             <string>Clear All Clips</string>
             </property>
            </widget>
           </item>
@@ -299,7 +299,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QPushButton" name="hide_clip_button">
+           <widget class="QPushButton" name="add_class_rule_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -307,12 +307,12 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Add Rule</string>
+             <string>Add Classification Rule</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="clear_rules_button">
+           <widget class="QPushButton" name="clear_class_rules_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -320,7 +320,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Clear Rules</string>
+             <string>Clear Classification Rules</string>
             </property>
            </widget>
           </item>

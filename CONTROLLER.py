@@ -16,14 +16,16 @@ class Controller:
     def setup_connections(self):
         # Bind buttons to functions
         self.view.load_button.clicked.connect(self.load_dataset)
-        self.view.plot_button.clicked.connect(self.view.create_plot) 
+        self.view.plot_button.clicked.connect(self.view.create_plot)
         self.view.exit_button.clicked.connect(lambda: sys.exit())
         self.view.actionExit.triggered.connect(lambda: sys.exit())
-        self.view.analyze_clip_button.clicked.connect(self.view.analyze_clip)
-        self.view.hide_clip_button.clicked.connect(self.view.hide_clip)
-        self.view.undo_clip_button.clicked.connect(self.view.undo_clip)
-        self.view.remove_clip_button.clicked.connect(self.view.remove_clip)
+        
+        self.view.analyze_clips_btn.clicked.connect(self.view.analyze_clip)
+        self.view.clear_last_clip_btn.clicked.connect(self.view.undo_clip)
+        self.view.clear_all_clips_btn.clicked.connect(self.view.remove_clips)
         self.view.recenter_button.clicked.connect(self.view.recenter_plot)
+        self.view.add_class_rule_btn.clicked.connect(self.view.add_clip)
+        self.view.clear_class_rules_btn.clicked.connect(self.view.remove_rules)
         self.view.show_axes.stateChanged.connect(self.view.axes_func)
         self.view.attribute_slide.valueChanged.connect(self.view.attr_slider)
         self.view.check_classes.clicked.connect(self.view.check_all_class)

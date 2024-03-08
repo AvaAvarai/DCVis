@@ -187,7 +187,6 @@ def vertex_check(vertex_x, vertex_y, min_max):
     else:
         return False
 
-
 def clip_samples(positions, rect, dataset):
     min_max = MinAndMax()
     min_max.x_min = min(rect[0], rect[2])
@@ -199,28 +198,27 @@ def clip_samples(positions, rect, dataset):
     class_num = 1
     # check each class
     for data_class in positions:
-
         # check each sample in the class
         for sample in data_class:
-
             # check each polyline in the line
-            for i in range(dataset.vertex_count):
-                # line clip
-                if i < dataset.vertex_count - 1:
+            for i in range(dataset.vertex_count - 1):  # Adjusted loop to avoid out-of-bounds on the last index
+                # Ensure the next point in the polyline exists before attempting to clip
+                if 2 * i + 3 < len(sample):
                     is_clipped = cohen_sutherland_clip(sample[2 * i], sample[2 * i + 1], sample[2 * i + 2], sample[2 * i + 3], min_max, class_num, cnt)
                     if is_clipped:
                         dataset.clipped_samples[cnt] = True
-
-                    # vertex clip
+                # Regardless of clipping, check if the current vertex is inside
+                if 2 * i + 1 < len(sample):
                     is_inside = vertex_check(sample[2 * i], sample[2 * i + 1], min_max)
                     if is_inside:
                         dataset.vertex_in[cnt] = True
-                else:
-                    # last vertex clip (also checks generic vertex clip on last vertex)
-                    is_inside = vertex_check(sample[2 * i], sample[2 * i + 1], min_max)
-                    if is_inside:
-                        dataset.vertex_in[cnt] = True
-                        dataset.last_vertex_in[cnt] = True
+                # Special case for the last vertex
+                if 2 * i + 3 < len(sample):
+                    if i == dataset.vertex_count - 2:
+                        last_is_inside = vertex_check(sample[2 * i + 2], sample[2 * i + 3], min_max)
+                        if last_is_inside:
+                            dataset.vertex_in[cnt] = True
+                            dataset.last_vertex_in[cnt] = True
             cnt += 1
         class_num += 1
 

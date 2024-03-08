@@ -12,3 +12,4 @@ class DisplayData:
             counter += 1
 
         textbox.setText(data_info_string)
+
