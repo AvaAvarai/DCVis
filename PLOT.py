@@ -25,7 +25,7 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
         radius_factor = class_index
 
     if is_inner:  # first class always inside axis
-        factor = 0.1
+        factor = 0.01
         distance = np.sqrt(midX ** 2 + midY ** 2)
         # Calculate scaled control points
         scale = factor * radius * radius_factor / distance
@@ -88,17 +88,34 @@ def adjust_marker_position(position, coef, radius):
     return (new_x, new_y)
 
 
-def draw_cubic_bezier_curve(start, control1, control2, end):
+def adjust_point_towards_center(point):
+    # Calculate direction vector from point towards the center (assumed to be at (0, 0))
+    direction = [-point[0], -point[1]]
+    # Normalize the direction vector
+    norm = (direction[0]**2 + direction[1]**2)**0.5
+    direction_normalized = [direction[0]/norm, direction[1]/norm]
+    # Adjust point to move 0.025 units towards the center
+    return [point[0] + 0.025 * direction_normalized[0], point[1] + 0.025 * direction_normalized[1]]
+
+
+def draw_cubic_bezier_curve(start, control1, control2, end, inner):
     # Draw a cubic Bezier curve using OpenGL's immediate mode.
     segments = 20  # The number of line segments to use
 
+    if inner:
+        # Adjust both start and end points for inner curves
+        start_adjusted = adjust_point_towards_center(start)
+        end_adjusted = adjust_point_towards_center(end)
+    else:
+        # Use original points if not inner
+        start_adjusted = start
+        end_adjusted = end
+
     glBegin(GL_LINE_STRIP)
     for t in np.linspace(0, 1, segments):
-        # Cubic Bezier curve equation
-        x = (1 - t) ** 3 * start[0] + 3 * (1 - t) ** 2 * t * control1[0] + 3 * (1 - t) * t ** 2 * control2[0] + t ** 3 * \
-            end[0]
-        y = (1 - t) ** 3 * start[1] + 3 * (1 - t) ** 2 * t * control1[1] + 3 * (1 - t) * t ** 2 * control2[1] + t ** 3 * \
-            end[1]
+        # Cubic Bezier curve equation with adjusted start and end points
+        x = (1 - t) ** 3 * start_adjusted[0] + 3 * (1 - t) ** 2 * t * control1[0] + 3 * (1 - t) * t ** 2 * control2[0] + t ** 3 * end_adjusted[0]
+        y = (1 - t) ** 3 * start_adjusted[1] + 3 * (1 - t) ** 2 * t * control1[1] + 3 * (1 - t) * t ** 2 * control2[1] + t ** 3 * end_adjusted[1]
         glVertex2f(x, y)
     glEnd()
 
@@ -120,9 +137,10 @@ def draw_curves(data, line_vao, marker_vao, radius):
         
         max_angle = -np.inf
         endest = None
+        is_inner = (class_index == data.class_order[0])
+
         if data.active_classes[class_index]:
             glBindVertexArray(line_vao[class_index])
-            is_inner = (class_index == data.class_order[0])
 
             datapoint_count = 0
             size_index = 0
@@ -144,12 +162,8 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
 
                     start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
-                    
-                    #coef = data.coefs[h-1]  # Use coef to dynamically adjust the curve
-                    #adjusted_start, adjusted_end = adjust_endpoints(start, end, coef, radius, isFirstPoint)
-
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
-                    draw_cubic_bezier_curve(start, control1, control2, end)
+                    draw_cubic_bezier_curve(start, control1, control2, end, is_inner)
                     
                     angle = calculate_angle_from_top(end[0], end[1])
                     if angle > max_angle:
@@ -166,13 +180,26 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     mult = 2.5
                 extended_endest = (endest[0] * mult, endest[1] * mult)
                 draw_radial_line((0, 0), extended_endest)
-        
+
         if data.active_markers[class_index]:
             for j in range(data.vertex_count):
                 glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
                 color = shift_hue(data.class_colors[class_index], 0)
                 glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
-                glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
+                
+                # Adjust marker positions for inner classes
+                if is_inner:
+                    for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
+                        position = data.positions[class_index][pos_index + j]
+                        adjusted_position = adjust_point_towards_center(position)
+                        # Draw each adjusted marker
+                        glBegin(GL_POINTS)
+                        glVertex2f(*adjusted_position)
+                        glEnd()
+                else:
+                    # Draw all markers without adjustment
+                    glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
+                    
                 glBindVertexArray(0)
                 glPointSize(5)
 
