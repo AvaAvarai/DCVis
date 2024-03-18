@@ -249,7 +249,7 @@ def clip_samples(positions, rect, dataset):
                 # Regardless of clipping, check if the current vertex is inside
                 if 2 * i + 1 < len(sample):
                     is_inside = vertex_check(sample[2 * i], sample[2 * i + 1], min_max)
-                    if is_inside:
+                    if is_inside and cnt < len(dataset.vertex_in):
                         dataset.vertex_in[cnt] = True
                 # Special case for the last vertex
                 if 2 * i + 3 < len(sample):

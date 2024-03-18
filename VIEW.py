@@ -193,6 +193,7 @@ class View(QtWidgets.QMainWindow):
             for rect in self.plot_widget.all_rect:
                 # Ensure 'positions' is correctly structured for your dataset
                 positions = self.controller.data.positions  # This might need adjustment
+                CLIPPING.Clipping(rect, self.controller.data)
                 CLIPPING.clip_samples(positions, rect, self.controller.data)
 
             # Update rule count if necessary
