@@ -50,7 +50,6 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
 
     return control1, control2
 
-
 def adjust_endpoints(start, end, coef, radius, isFirstPoint=False):
     # Check if the point is the first point, if so, return it unmodified
 
@@ -76,7 +75,6 @@ def adjust_endpoints(start, end, coef, radius, isFirstPoint=False):
         return start, end
     return start, adjusted_end
 
-
 def adjust_marker_position(position, coef, radius):
     # Calculate the angle for the adjustment
     angle = np.radians(coef)  # Convert coef to radians for simplicity
@@ -87,25 +85,25 @@ def adjust_marker_position(position, coef, radius):
 
     return (new_x, new_y)
 
-
-def adjust_point_towards_center(point):
+def adjust_point_towards_center(point, atts=1):
     # Calculate direction vector from point towards the center (assumed to be at (0, 0))
     direction = [-point[0], -point[1]]
+    scale = 0.00625
+    adjust = atts * scale
     # Normalize the direction vector
     norm = (direction[0]**2 + direction[1]**2)**0.5
     direction_normalized = [direction[0]/norm, direction[1]/norm]
     # Adjust point to move 0.025 units towards the center
-    return [point[0] + 0.025 * direction_normalized[0], point[1] + 0.025 * direction_normalized[1]]
+    return [point[0] + adjust * direction_normalized[0], point[1] + adjust * direction_normalized[1]]
 
-
-def draw_cubic_bezier_curve(start, control1, control2, end, inner):
+def draw_cubic_bezier_curve(start, control1, control2, end, inner, atts):
     # Draw a cubic Bezier curve using OpenGL's immediate mode.
     segments = 20  # The number of line segments to use
 
     if inner:
         # Adjust both start and end points for inner curves
-        start_adjusted = adjust_point_towards_center(start)
-        end_adjusted = adjust_point_towards_center(end)
+        start_adjusted = adjust_point_towards_center(start, atts)
+        end_adjusted = adjust_point_towards_center(end, atts)
     else:
         # Use original points if not inner
         start_adjusted = start
@@ -158,7 +156,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
 
                     start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
-                    draw_cubic_bezier_curve(start, control1, control2, end, is_inner)
+                    draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
                     
                     angle = calculate_angle(end[0], end[1])
                     if angle > max_angle:
@@ -186,7 +184,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
                 if is_inner:
                     for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
                         position = data.positions[class_index][pos_index + j]
-                        adjusted_position = adjust_point_towards_center(position)
+                        adjusted_position = adjust_point_towards_center(position, data.attribute_count)
                         # Draw each adjusted marker
                         glBegin(GL_POINTS)
                         glVertex2f(*adjusted_position)
