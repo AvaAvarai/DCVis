@@ -109,16 +109,16 @@ class Dataset:
         except Exception as e:
             print(f"An error occurred: {e}")
             
-    def normalize_data(self, range: Tuple[float, float]):
+    def normalize_data(self, our_range: Tuple[float, float]):
         if self.dataframe is None or self.dataframe.empty:
             print("DataFrame is not loaded or is empty.")
             return
-        scaler = MinMaxScaler(range)
+        scaler = MinMaxScaler(our_range)
         self.dataframe[self.attribute_names] = scaler.fit_transform(self.dataframe[self.attribute_names])
         return self.dataframe
 
-    def normalize_col(self, col: int, range: Tuple[float, float]):
-        scaler = MinMaxScaler(range)
+    def normalize_col(self, col: int, our_range: Tuple[float, float]):
+        scaler = MinMaxScaler(our_range)
         self.dataframe[self.attribute_names[col]] = scaler.fit_transform(self.dataframe[[self.attribute_names[col]]])
         return self.dataframe
 

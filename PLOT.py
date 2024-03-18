@@ -119,16 +119,11 @@ def draw_cubic_bezier_curve(start, control1, control2, end, inner):
         glVertex2f(x, y)
     glEnd()
 
-
-def calculate_angle_from_top(x, y):
-    """
-    Calculate the angle in radians from the top (12 o'clock), moving clockwise.
-    """
+def calculate_angle(x, y):
     angle = np.arctan2(x, y)
     if angle < 0:
         angle += 2 * np.pi
     return angle
-
 
 def draw_curves(data, line_vao, marker_vao, radius):
     hue_shift_amount = 0.02
@@ -165,7 +160,7 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
                     draw_cubic_bezier_curve(start, control1, control2, end, is_inner)
                     
-                    angle = calculate_angle_from_top(end[0], end[1])
+                    angle = calculate_angle(end[0], end[1])
                     if angle > max_angle:
                         max_angle = angle
                         endest = end
@@ -204,7 +199,6 @@ def draw_curves(data, line_vao, marker_vao, radius):
                 glPointSize(5)
 
     glDisable(GL_BLEND)
-
 
 def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
     glEnable(GL_BLEND)
@@ -247,13 +241,11 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
             glBindVertexArray(0)
     glLineWidth(1)
 
-
 def draw_radial_line(start, end):
     glBegin(GL_LINES)
     glVertex2f(*start)
     glVertex2f(*end)
     glEnd()
-
 
 def draw_unhighlighted_curves(data, line_vao, marker_vao):
     glEnable(GL_BLEND)
@@ -263,13 +255,11 @@ def draw_unhighlighted_curves(data, line_vao, marker_vao):
 
     glDisable(GL_BLEND)
 
-
 def calculate_radius(data):
     circumference = data.attribute_count
     # Calculate the radius from the circumference
     radius = circumference / ((2 + data.attribute_count / 100) * np.pi)
     return radius
-
 
 def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     glEnable(GL_BLEND)
@@ -278,71 +268,62 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glLineWidth(1)
 
+    hue_shift_amount = 0.02
+
     # Loop through classes in class order
     for i in dataset.class_order[::-1]:
         datapoint_cnt = 0
-        color = dataset.class_colors[i]
         size_index = 0
-        # Draw polylines
+
+        # Draw polylines and markers
         if dataset.active_classes[i]:
+            # Adjust color based on trace mode
+            color = dataset.class_colors[i]
+            class_color = color
             glBindVertexArray(class_vao[i])
 
             for j in range(dataset.class_count):
                 if j < i:
                     size_index += dataset.count_per_class[j]
 
-            # Iterate over positions
+            # Iterate over positions for polylines
             for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
+                
+                if dataset.trace_mode:
+                    color = shift_hue(color, hue_shift_amount)
+                    hue_shift_amount += 0.02
+                
                 if dataset.clear_samples[size_index + datapoint_cnt]:
                     datapoint_cnt += 1
                     continue
 
-                # Set color based on attributes
                 sub_alpha = 0
+                if any(dataset.clipped_samples):
+                    sub_alpha = 150
+
+                glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha if dataset.active_attributes[0] else 255 - sub_alpha)
+                
+                glBegin(GL_LINES)
                 for m in range(1, dataset.vertex_count):
-                    if any(dataset.clipped_samples):
-                        sub_alpha = 150
-
-                    if dataset.active_attributes[m - 1]:
-                        glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha)
-                    else:
-                        glColor4ub(color[0], color[1], color[2], 255 - sub_alpha)
-
-                    glBegin(GL_LINES)
-                    glVertex2f(dataset.positions[i][l + m][0], dataset.positions[i][l + m][1])
                     glVertex2f(dataset.positions[i][l + m - 1][0], dataset.positions[i][l + m - 1][1])
-                    glEnd()
+                    glVertex2f(dataset.positions[i][l + m][0], dataset.positions[i][l + m][1])
+                glEnd()
 
                 datapoint_cnt += 1
             glBindVertexArray(0)
+            if dataset.active_markers[i]:
+                # Draw markers
+                for j in range(dataset.vertex_count):
+                    glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
+                    glPointSize(5 if j < dataset.vertex_count - 1 else 7)  # Different size for the last marker
 
-        # Draw markers
-        if dataset.active_markers[i]:
-            datapoint_cnt = 0
-            for j in range(dataset.vertex_count):
-                if dataset.clear_samples[size_index + datapoint_cnt]:
-                    datapoint_cnt += 1
-                    continue
+                    # Apply adjusted color for each marker
+                    glColor4ub(class_color[0], class_color[1], class_color[2], dataset.attribute_alpha if dataset.active_attributes[j] else 255)
+                    glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
 
-                if j == dataset.vertex_count - 1:
-                    glPointSize(7)
-                else:
-                    glPointSize(5)
-
-                glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
-
-                if dataset.active_attributes[j]:
-                    glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha)
-                else:
-                    glColor4ub(color[0], color[1], color[2], 255)
-
-                glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
-                glPointSize(5)
-            glBindVertexArray(0)
-            datapoint_cnt += 1
+                    glBindVertexArray(0)
 
     glDisable(GL_BLEND)
-
 
 def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
     # highlight color and width
@@ -376,7 +357,6 @@ def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
             glBindVertexArray(0)
 
     glLineWidth(1)
-
 
 def draw_axes(dataset, axis_vao, color):
     glBindVertexArray(axis_vao)
@@ -424,7 +404,6 @@ def draw_axes(dataset, axis_vao, color):
 
     glBindVertexArray(0)
 
-
 # draw box for box clipping
 def draw_box(all_rect):
     if all_rect:
@@ -439,7 +418,6 @@ def draw_box(all_rect):
             glVertex2f(r[2], r[1])
             glEnd()
             glDisable(GL_BLEND)
-
 
 def set_view_frustrum(m_left, m_right, m_bottom, m_top):
     if m_left == m_right or m_bottom == m_top:

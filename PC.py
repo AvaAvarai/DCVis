@@ -26,7 +26,7 @@ def compute_axis_positions(data, section_array):
 class PC:
     def __init__(self, data: DATASET.Dataset):
         # Normalization using the DATASET class function
-        data.dataframe = data.normalize_data(range=(0, 1))
+        data.dataframe = data.normalize_data(our_range=(0, 1))
 
         # Create section_array based on vertex_count
         section_array = np.linspace(start=0, stop=1, num=data.vertex_count)

@@ -49,7 +49,7 @@ def compute_coordinates(data, df, class_index):
 class SCC:
     def __init__(self, data: DATASET.Dataset):
         data.vertex_count = data.attribute_count
-        data.dataframe = data.normalize_data(range=(0, 1))
+        data.dataframe = data.normalize_data(our_range=(0, 1))
 
         # Compute coordinates for each class with adjusted radius
         data.positions = [

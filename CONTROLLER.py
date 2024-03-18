@@ -19,7 +19,6 @@ class Controller:
         self.view.plot_button.clicked.connect(self.view.create_plot)
         self.view.exit_button.clicked.connect(lambda: sys.exit())
         self.view.actionExit.triggered.connect(lambda: sys.exit())
-        
         self.view.analyze_clips_btn.clicked.connect(self.view.analyze_clip)
         self.view.clear_last_clip_btn.clicked.connect(self.view.undo_clip)
         self.view.clear_all_clips_btn.clicked.connect(self.view.remove_clips)
@@ -54,7 +53,7 @@ class Controller:
         if filename[0] == '':
             return
 
-        # GUI changes for changing datasets
+        # GUI changes for changing datasets without restarting the application
         if self.data and self.view.plot_widget and self.view.class_table and self.view.plot_layout:
             self.view.plot_layout.removeWidget(self.view.plot_widget)
             del self.view.plot_widget
@@ -76,4 +75,3 @@ class Controller:
         self.data.load_from_csv(filename[0])
         DATA_DISPLAY.DisplayData(self.data, self.view.dataset_textbox)
         self.view.class_table = CLASS_TABLE.ClassTable(self.data, parent=self.view)
-
