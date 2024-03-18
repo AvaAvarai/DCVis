@@ -7,8 +7,7 @@ from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
-import typing
-from typing import List, Optional, Tuple
+from typing import List
 import numpy as np
 
 import GCA, CLIPPING
@@ -115,7 +114,7 @@ def calculate_angle_from_top(x, y):
 
 
 def draw_curves(data, line_vao, marker_vao, radius):
-    hue_shift_amount = 0.1
+    hue_shift_amount = 0.02
 
     for class_index in range(data.class_count):
         
@@ -137,7 +136,11 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     if h > data.attribute_count or data.clear_samples[size_index + datapoint_count]:
                         continue
 
-                    color = shift_hue(data.class_colors[class_index], hue_shift_amount) if h == data.attribute_count - 1 else data.class_colors[class_index]
+                    if not data.trace_mode:
+                        color = shift_hue(data.class_colors[class_index], hue_shift_amount) if (h == data.class_count - 1) else shift_hue(data.class_colors[class_index], 0)
+                    else:
+                        color = shift_hue(data.class_colors[class_index], hue_shift_amount)
+                        hue_shift_amount += 0.02
                     glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
 
                     start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
@@ -163,12 +166,11 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     mult = 2.5
                 extended_endest = (endest[0] * mult, endest[1] * mult)
                 draw_radial_line((0, 0), extended_endest)
-
-
+        
         if data.active_markers[class_index]:
             for j in range(data.vertex_count):
                 glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
-                color = shift_hue(data.class_colors[class_index], hue_shift_amount) if j == data.attribute_count - 1 else data.class_colors[class_index]
+                color = shift_hue(data.class_colors[class_index], 0)
                 glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
                 glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
                 glBindVertexArray(0)

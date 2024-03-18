@@ -35,12 +35,14 @@ class Controller:
         self.view.cell_swap.__class__.dropEvent = self.view.table_swap
         self.view.background_button.clicked.connect(self.view.open_background_color_picker)
         self.view.axes_button.clicked.connect(self.view.open_axes_color_picker)
+        self.view.trace_mode.clicked.connect(self.view.trace_mode_func)
         
         # Set keyboard shortcuts
         self.view.load_button.setShortcut(Qt.Key.Key_F1)
         self.view.plot_button.setShortcut(Qt.Key.Key_F3)
         self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
         self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
+        self.view.trace_mode.setShortcut(Qt.Key.Key_T)
 
     def load_dataset(self):
         if self.data:

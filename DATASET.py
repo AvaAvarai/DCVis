@@ -17,8 +17,7 @@ class Dataset:
         self.class_count: int = 0
         self.count_per_class: List[int] = []
         self.class_names: List[str] = []
-        self.class_colors: List[Tuple[
-            int, int, int]] = []  # RGB colors TODO: change to using RGBA for individualized attribute alpha slider control
+        self.class_colors: List[Tuple[int, int, int]] = []  # RGB colors TODO: change to using RGBA for individualized attribute alpha slider control
 
         # attribute information
         self.attribute_count: int = 0
@@ -41,6 +40,8 @@ class Dataset:
         self.axis_on: bool = True
         self.axis_count: int = 0
         self.vertex_count: int = 0  # number of vertices depends on plot type
+
+        self.trace_mode: bool = False
 
         self.coefs = []
 

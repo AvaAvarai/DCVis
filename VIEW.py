@@ -23,7 +23,7 @@ class View(QtWidgets.QMainWindow):
         self.attribute_pl_exists = True
 
         self.rule_count = 0
-
+        
         # for swapping cells
         self.cell_swap = QtWidgets.QTableWidget()
         self.plot_layout = self.findChild(QtWidgets.QVBoxLayout, 'plotDisplay')
@@ -232,21 +232,39 @@ class View(QtWidgets.QMainWindow):
         self.rule_count = 0
         self.rules_textbox.setText('')
         
-        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
-        self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
-        self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
-        
-        self.plot_widget.all_rect = []
+        self.plot_widget.update()
+
+    def trace_mode_func(self):
+        self.controller.data.trace_mode = not self.controller.data.trace_mode
         self.plot_widget.update()
 
     def add_clip(self):
-        self.rule_count += 1
-        current_rule_coords = self.plot_widget.all_rect[self.rule_count - 1]
-        formatted_coords = [round(num, 2) for num in current_rule_coords]
-        self.rules_textbox.append('\nRule ' + str(self.rule_count) + ' : ' + str(formatted_coords))
+        if not self.plot_widget.all_rect:
+            print("No clipping area selected.")
+            return
 
+        current_rule_coords = self.plot_widget.all_rect[-1]
+
+        # Check if the current rule is the same as the last one added
+        if self.rule_count > 0:
+            last_rule_coords = self.rules_textbox.toPlainText().split('\n')[-1]
+            last_rule_coords_parsed = last_rule_coords.split(': ')[-1]
+            if str(current_rule_coords) == last_rule_coords_parsed:
+                print("This rule is the same as the last one. Not adding it again.")
+                return
+
+        class_name_or_false = CLIPPING.clip_region_and_count_classes(current_rule_coords, self.controller.data)
+
+        if not class_name_or_false:
+            rule_description = f"Rule {self.rule_count + 1}: {current_rule_coords} is not pure"
+        else:
+            rule_description = f"Rule {self.rule_count + 1}: {current_rule_coords} contains only {class_name_or_false}"
+            
+        
+        self.rule_count += 1
+        self.rules_textbox.append(rule_description)
         self.plot_widget.update()
+
 
     def table_swap(self, event):
         table = event.source()

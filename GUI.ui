@@ -760,7 +760,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QWidget" name="widget_4" native="true">
+           <widget class="QWidget" name="widget_2" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_16">
              <item>
               <widget class="QCheckBox" name="show_axes">
@@ -769,6 +769,19 @@
                </property>
                <property name="checked">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="trace_mode">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="text">
+                <string>Trace Mode</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
                </property>
               </widget>
              </item>
