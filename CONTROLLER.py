@@ -43,6 +43,7 @@ class Controller:
         self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
         self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
         self.view.trace_mode.setShortcut(Qt.Key.Key_T)
+        self.view.show_axes.setShortcut(Qt.Key.Key_A)
 
     def load_dataset(self):
         if self.data:

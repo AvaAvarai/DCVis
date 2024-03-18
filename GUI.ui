@@ -570,7 +570,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Attribute Transparency</string>
+             <string>Attribute Alpha</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -731,6 +731,26 @@
            <widget class="QWidget" name="widget" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
+              <widget class="QLabel" name="label_8">
+               <property name="font">
+                <font>
+                 <family>Georgia</family>
+                 <pointsize>12</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                 <underline>false</underline>
+                 <kerning>true</kerning>
+                </font>
+               </property>
+               <property name="text">
+                <string>Colors</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="background_button">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -765,7 +785,7 @@
              <item>
               <widget class="QCheckBox" name="show_axes">
                <property name="text">
-                <string>Show Axes</string>
+                <string>Axes (A)</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -778,7 +798,7 @@
                 <bool>true</bool>
                </property>
                <property name="text">
-                <string>Trace Mode (T)</string>
+                <string>Trace (T)</string>
                </property>
                <property name="checked">
                 <bool>false</bool>
