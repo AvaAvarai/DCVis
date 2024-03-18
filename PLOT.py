@@ -147,15 +147,20 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     if h > data.attribute_count or data.clear_samples[size_index + datapoint_count]:
                         continue
 
-                    if not data.trace_mode:
-                        color = shift_hue(data.class_colors[class_index], hue_shift_amount) if (h == data.class_count - 1) else shift_hue(data.class_colors[class_index], 0)
-                    else:
+                    # Apply hue shift, especially for the last attribute of each sample
+                    if data.trace_mode:
                         color = shift_hue(data.class_colors[class_index], hue_shift_amount)
-                        hue_shift_amount += 0.02
+                        hue_shift_amount += 0.02  # Increase hue shift for each attribute or sample
+                    elif h == data.attribute_count - 1:
+                        color = shift_hue(data.class_colors[class_index], 0.1)  # Apply a hue shift for the last attribute
+                    else:
+                        color = shift_hue(data.class_colors[class_index], 0)  # No hue shift if not the last attribute or not in trace mode
+                        
                     glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
 
                     start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
+                    # Pass the adjusted hue color as a parameter if your drawing function supports it
                     draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
                     
                     angle = calculate_angle(end[0], end[1])
@@ -174,23 +179,23 @@ def draw_curves(data, line_vao, marker_vao, radius):
                 extended_endest = (endest[0] * mult, endest[1] * mult)
                 draw_radial_line((0, 0), extended_endest)
 
+        # Draw markers with adjusted positions and hue for inner classes
         if data.active_markers[class_index]:
             for j in range(data.vertex_count):
                 glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
-                color = shift_hue(data.class_colors[class_index], 0)
+                color = shift_hue(data.class_colors[class_index], 0)  # Adjust if needed for markers
+                
                 glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
                 
-                # Adjust marker positions for inner classes
                 if is_inner:
+                    # Adjust marker positions for inner classes, potentially using last attribute for hue shift
                     for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
                         position = data.positions[class_index][pos_index + j]
                         adjusted_position = adjust_point_towards_center(position, data.attribute_count)
-                        # Draw each adjusted marker
                         glBegin(GL_POINTS)
                         glVertex2f(*adjusted_position)
                         glEnd()
                 else:
-                    # Draw all markers without adjustment
                     glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
                     
                 glBindVertexArray(0)
@@ -233,7 +238,7 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
                             end = adjust_point_towards_center(end)
 
                         control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, dataset.attribute_count, is_inner, class_index)
-                        draw_cubic_bezier_curve(start, control1, control2, end, False)  # False to not pull inwards twice, hacky fix
+                        draw_cubic_bezier_curve(start, control1, control2, end, False, dataset.attribute_count)  # False to not pull inwards twice, hacky fix
                 datapoint_count += 1
             
             glBindVertexArray(0)
