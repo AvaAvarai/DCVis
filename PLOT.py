@@ -222,8 +222,7 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
                 if j < class_index:
                     size_index += dataset.count_per_class[j]
 
-            is_inner = (class_index == dataset.class_order[0])  # Determine if this is the inner class
-
+            is_inner = (class_index == dataset.class_order[0])
             for j in range(0, len(dataset.positions[class_index]), dataset.vertex_count):
                 if dataset.vertex_in[size_index + datapoint_count]:
                     if dataset.clear_samples[size_index + datapoint_count]:
@@ -236,8 +235,13 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
                         start = dataset.positions[class_index][j + h - 1]
                         end = dataset.positions[class_index][j + h]
 
+                        # Adjust start and end for inner classes
+                        if is_inner:
+                            start = adjust_point_towards_center(start)
+                            end = adjust_point_towards_center(end)
+
                         control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, dataset.attribute_count, is_inner, class_index)
-                        draw_cubic_bezier_curve(start, control1, control2, end)
+                        draw_cubic_bezier_curve(start, control1, control2, end, False)  # False to not pull inwards twice, hacky fix
                 datapoint_count += 1
             
             glBindVertexArray(0)
