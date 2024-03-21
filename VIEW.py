@@ -191,8 +191,7 @@ class View(QtWidgets.QMainWindow):
 
             # Recalculate clipping for the remaining rectangles
             for rect in self.plot_widget.all_rect:
-                # Ensure 'positions' is correctly structured for your dataset
-                positions = self.controller.data.positions  # This might need adjustment
+                positions = self.controller.data.positions
                 CLIPPING.Clipping(rect, self.controller.data)
                 CLIPPING.clip_samples(positions, rect, self.controller.data)
 

@@ -88,7 +88,7 @@ def calculate_angle(x, y):
         angle += 2 * np.pi
     return angle
 
-def draw_unhighlighted_curves_vertices(data, line_vao, marker_vao):
+def draw_unhighlighted_curves_vertices(data, marker_vao):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
@@ -119,7 +119,7 @@ def draw_unhighlighted_curves_vertices(data, line_vao, marker_vao):
 
     glDisable(GL_BLEND)
 
-def draw_unhighlighted_curves(data, line_vao, marker_vao):
+def draw_unhighlighted_curves(data, line_vao):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     radius = calculate_radius(data)
@@ -196,12 +196,13 @@ def draw_unhighlighted_curves(data, line_vao, marker_vao):
 
     glDisable(GL_BLEND)
 
-def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
+def draw_highlighted_curves(dataset, line_vao):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
     glColor3ub(255, 255, 0)
     glLineWidth(2)
+    radius = calculate_radius(dataset)
 
     for class_index in range(dataset.class_count):
         if dataset.active_classes[class_index]:
@@ -246,11 +247,11 @@ def draw_radial_line(start, end):
 
 def calculate_radius(data):
     circumference = data.attribute_count
-    # Calculate the radius from the circumference
+    # Calculate the radius from the circumference which is the number of attributes
     radius = circumference / ((2 + data.attribute_count / 100) * np.pi)
     return radius
 
-def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
+def draw_unhighlighted_nd_points(dataset, class_vao):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
@@ -303,7 +304,7 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
 
     glDisable(GL_BLEND)
 
-def draw_unhighlighted_nd_point_vertices(dataset, marker_vao, class_vao):
+def draw_unhighlighted_nd_point_vertices(dataset, marker_vao):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
@@ -319,7 +320,6 @@ def draw_unhighlighted_nd_point_vertices(dataset, marker_vao, class_vao):
             # Adjust color based on trace mode
             color = dataset.class_colors[i]
             class_color = color
-            glBindVertexArray(class_vao[i])
 
             for j in range(dataset.class_count):
                 if j < i:
@@ -339,7 +339,7 @@ def draw_unhighlighted_nd_point_vertices(dataset, marker_vao, class_vao):
 
     glDisable(GL_BLEND)
 
-def draw_highlighted_nd_points(dataset, marker_vao, class_vao):
+def draw_highlighted_nd_points(dataset, class_vao):
     # highlight color and width
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
@@ -472,8 +472,8 @@ class MakePlot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [50 / 255, 50 / 255, 50 / 255, 1]  # Default gray in RGBA
-        self.axes_color = [1, 1, 1, 1]  # Default black in RGBA
+        self.background_color = [125 / 255, 125 / 255, 125 / 255, 1]  # Default gray
+        self.axes_color = [1, 1, 1, 1]  # Default white
 
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         self.data.class_colors = self.color_instance.colors_array
@@ -485,17 +485,18 @@ class MakePlot(QOpenGLWidget):
         self.m_top = 1.125
 
     def resize(self):
-        if self.data.plot_type == 'PC':
+        if self.data.plot_type == 'PC':  # fit PC to window
             self.m_left = -0.05
             self.m_right = 1.05
             self.m_bottom = -0.05
             self.m_top = 1.05
 
-        if self.data.plot_type in ['SCC', 'DCC']:  # fit CC to window
-            self.m_left = -self.data.attribute_count * 0.35
-            self.m_right = self.data.attribute_count * 0.35
-            self.m_bottom = -self.data.attribute_count * 0.35
-            self.m_top = self.data.attribute_count * 0.35
+        elif self.data.plot_type in ['SCC', 'DCC']:  # fit CC to window
+            class_mult = self.data.class_count - 1 if self.data.class_count > 1 else 1
+            self.m_left = -self.data.attribute_count * 0.35 * class_mult
+            self.m_right = self.data.attribute_count * 0.35 * class_mult
+            self.m_bottom = -self.data.attribute_count * 0.35 * class_mult
+            self.m_top = self.data.attribute_count * 0.35 * class_mult
 
     def redraw_plot(self, background_color=None, axes_color=None):
         if background_color:
@@ -513,7 +514,6 @@ class MakePlot(QOpenGLWidget):
         QApplication.instance().restoreOverrideCursor()
         # push dataset to GPU memory
         for i in range(self.data.class_count):
-            # grab the class positions
             positions = np.asarray(self.data.positions[i], dtype='float32')
             # put them into a VBO
             vbo = glvbo.VBO(positions)
@@ -525,7 +525,6 @@ class MakePlot(QOpenGLWidget):
             glBindVertexArray(self.line_vao[i])
             glEnableClientState(GL_VERTEX_ARRAY)
             glVertexPointer(2, GL_FLOAT, 0, None)
-            # unbind
             glBindVertexArray(0)
 
             for j in range(self.data.vertex_count):
@@ -549,7 +548,6 @@ class MakePlot(QOpenGLWidget):
         glEnableClientState(GL_VERTEX_ARRAY)
         glVertexPointer(2, GL_FLOAT, 0, None)
 
-        # unbind
         glBindVertexArray(0)
 
     def resizeGL(self, width, height):
@@ -567,13 +565,13 @@ class MakePlot(QOpenGLWidget):
 
         # draw n-D points
         if self.data.plot_type in ['SCC', 'DCC']:  # Bezier curves
-            draw_unhighlighted_curves(self.data, self.line_vao, self.marker_vao)
-            draw_highlighted_curves(self.data, self.line_vao, self.marker_vao, calculate_radius(self.data))
-            draw_unhighlighted_curves_vertices(self.data, self.line_vao, self.marker_vao)
+            draw_unhighlighted_curves(self.data, self.line_vao)
+            draw_highlighted_curves(self.data, self.line_vao)
+            draw_unhighlighted_curves_vertices(self.data, self.marker_vao)
         else:  # Polylines
-            draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
-            draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
-            draw_unhighlighted_nd_point_vertices(self.data, self.marker_vao, self.line_vao)
+            draw_unhighlighted_nd_points(self.data, self.line_vao)
+            draw_highlighted_nd_points(self.data, self.line_vao)
+            draw_unhighlighted_nd_point_vertices(self.data, self.marker_vao)
 
         draw_box(self.all_rect)  # draw clip box
 
