@@ -35,10 +35,9 @@ class View(QtWidgets.QMainWindow):
 
         self.plot_widget.reset_zoom()
         self.plot_widget.resize()
-
+        
         self.refresh()
 
-    # function to get alpha value for hidden attributes
     def attr_slider(self):
         if not self.controller.data or not self.plot_widget:
             WARNINGS.no_data_warning()
@@ -146,7 +145,7 @@ class View(QtWidgets.QMainWindow):
         else:
             return
 
-        self.plot_widget = PLOT.MakePlot(self.controller.data, parent=self)
+        self.plot_widget = PLOT.MakePlot(self.controller.data, self.overlaps_textbox, parent=self)
         self.remove_clips()  # remove previous clips if any
 
         # class table placeholder
@@ -166,7 +165,7 @@ class View(QtWidgets.QMainWindow):
         self.attribute_table_layout.addWidget(self.attribute_table)
 
         self.plot_layout.addWidget(self.plot_widget)
-
+        
     def analyze_clip(self):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
@@ -265,7 +264,6 @@ class View(QtWidgets.QMainWindow):
         self.rules_textbox.append(rule_description)
         self.plot_widget.update()
 
-
     def table_swap(self, event):
         table = event.source()
 
@@ -309,4 +307,3 @@ class View(QtWidgets.QMainWindow):
         if color.isValid():
             self.axes_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
             self.plot_widget.redraw_plot(axes_color=self.axes_color)
-

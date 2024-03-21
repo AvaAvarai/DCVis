@@ -9,7 +9,6 @@ from PyQt6.QtCore import *
 
 from typing import List
 import numpy as np
-
 import GCA, CLIPPING
 from COLORS import getColors, shift_hue
 
@@ -355,7 +354,7 @@ def set_view_frustrum(m_left, m_right, m_bottom, m_top):
 
 
 class MakePlot(QOpenGLWidget):
-    def __init__(self, dataset, parent=None):
+    def __init__(self, dataset, overlaps_textbox, parent=None):
         super(MakePlot, self).__init__(parent)
 
         self.data = dataset
@@ -371,6 +370,8 @@ class MakePlot(QOpenGLWidget):
         self.all_rect = []  # holds all clip boxes
         self.rect = []  # working clip box
         self.attribute_inversions: List[bool] = []  # for attribute inversion option
+
+        self.overlaps_textbox = overlaps_textbox
 
         self.reset_zoom()
         self.resize()
@@ -635,7 +636,7 @@ class MakePlot(QOpenGLWidget):
         hue_shift = 0.08
         
         for class_index in range(data.class_count):
-
+            data.overlap_points[class_index] = 0
             if data.active_markers[class_index]:
                 for j in range(data.vertex_count):
                     glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
@@ -655,15 +656,16 @@ class MakePlot(QOpenGLWidget):
                             position = adjust_point_towards_center(position, -data.attribute_count)
                             
                         if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
-                            # Marker is in an overlapping sector, draw with a highlighted style
-                            glPointSize(10)  # Increased size for highlighting
+                            data.overlap_points[class_index] += 1
+                            
+                            glPointSize(10)
                             glColor4ub(255, 0, 0, 255)  # Red color for highlighting
                             
                         glBegin(GL_POINTS)
                         glVertex2f(*position)
                         glEnd()
                         
-                        glPointSize(5)  # Normal size
+                        glPointSize(5)
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)  # Normal color
                         
                         glBegin(GL_POINTS)
@@ -671,7 +673,12 @@ class MakePlot(QOpenGLWidget):
                         glEnd()
 
                     glBindVertexArray(0)
-
+        
+        # iterate and list class names with each overlap count
+        overlap = ""
+        for i in range(data.class_count):
+            overlap += f"Class {data.class_names[i]}: {data.overlap_points[i]}\n"
+        self.overlaps_textbox.setText(overlap)
         glDisable(GL_BLEND)
 
     def draw_unhighlighted_curves(self, data, line_vao):

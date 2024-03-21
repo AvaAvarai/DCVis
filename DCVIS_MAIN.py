@@ -14,7 +14,6 @@ at Central Washington University Visual Knowledge Discovery Lab, project during 
 Available under the MIT License, allowing for both personal and commercial use.
 """
 
-
 from PyQt6 import QtWidgets
 import sys
 import VIEW, CONTROLLER
@@ -22,10 +21,8 @@ import VIEW, CONTROLLER
 
 # DCVis application entry point
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    
+    app = QtWidgets.QApplication(sys.argv)  
     view = VIEW.View()
-    
     controller = CONTROLLER.Controller(view)
     view.controller = controller
 

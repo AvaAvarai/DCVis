@@ -25,6 +25,7 @@ class Dataset:
         self.attribute_alpha: int = 255  # for attribute slider
 
         self.attribute_inversions: List[bool] = []  # for attribute inversion option
+        self.overlap_points = {}
 
         # sample information
         self.sample_count: int = 0
