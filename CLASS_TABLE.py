@@ -59,7 +59,7 @@ class ClassTable(QtWidgets.QTableWidget):
 
         self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Order'))
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Lines'))
-        self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Markers'))
+        self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Points'))
         self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Color'))
 
         self.setDragEnabled(True)
@@ -119,6 +119,7 @@ class CheckBox(QtWidgets.QCheckBox):
         self.option = option
         self.setCheckState(Qt.CheckState.Checked)
         self.stateChanged.connect(self.show_hide_classes)
+        self.setStyleSheet("margin-left: 12px;")
 
     def show_hide_classes(self):
         if self.isChecked():

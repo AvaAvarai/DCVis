@@ -142,6 +142,7 @@ class CheckBox(QtWidgets.QCheckBox):
         self.option = option
         self.setCheckState(Qt.CheckState.Checked)
         self.stateChanged.connect(self.show_hide_classes)
+        self.setStyleSheet("margin-left: 12px;")
 
     def show_hide_classes(self):
         if self.isChecked():

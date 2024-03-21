@@ -53,7 +53,7 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
 def adjust_point_towards_center(point, atts=1):
     # Calculate direction vector from point towards the center (assumed to be at (0, 0))
     direction = [-point[0], -point[1]]
-    scale = 0.00625
+    scale = 0.0025
     adjust = atts * scale
     # Normalize the direction vector
     norm = (direction[0]**2 + direction[1]**2)**0.5
@@ -127,9 +127,10 @@ def draw_unhighlighted_curves(data, line_vao):
     hue_shift_amount = 0.02
 
     for class_index in range(data.class_count):
-        
+        min_angle = np.inf
         max_angle = -np.inf
-        endest = None
+        closest = None
+        furthest = None
         is_inner = (class_index == data.class_order[0])
 
         if data.active_classes[class_index]:
@@ -179,19 +180,27 @@ def draw_unhighlighted_curves(data, line_vao):
                     draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
                     
                     angle = calculate_angle(end[0], end[1])
+                    
+                    if angle < min_angle and h == data.attribute_count - 1:
+                        min_angle = angle
+                        closest = end
                     if angle > max_angle:
                         max_angle = angle
-                        endest = end
-
+                        furthest = end
+                        
                 datapoint_count += 1
 
             glBindVertexArray(0)
+
+            mult = 5
+            if class_index == data.class_count-1:
+                mult = 2.5
             
-            if endest is not None:
-                mult = 5
-                if class_index == data.class_count-1:
-                    mult = 2.5
-                extended_endest = (endest[0] * mult, endest[1] * mult)
+            if closest is not None:
+                extended_closest = (closest[0] * mult, closest[1] * mult)
+                draw_radial_line((0, 0), extended_closest)
+            if furthest is not None:
+                extended_endest = (furthest[0] * mult, furthest[1] * mult)
                 draw_radial_line((0, 0), extended_endest)
 
     glDisable(GL_BLEND)
