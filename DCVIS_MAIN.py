@@ -8,18 +8,16 @@ Requirements:
 Usage:
 Execute this script to launch the DCVis application: python DCVIS_MAIN.py
 
-Contributors: Alice Williams, James Battistoni, Charles Recaido
-at Central Washington University Visual Knowledge Discovery Lab
-on projects by Dr. Boris Kovalerchuk during years 2022 to 2024.
+Contributors: Alice Williams, James Battistoni, Charles Recaido, and Dr. Boris Kovalerchuk
+at Central Washington University Visual Knowledge Discovery Lab,
+projects led by Dr. Boris Kovalerchuk during years 2022 to 2024.
 
-Available for use under MIT License.
+Available under the MIT License, allowing for both personal and commercial use.
 """
 
 
 from PyQt6 import QtWidgets
-
 import sys
-
 import VIEW, CONTROLLER
 
 

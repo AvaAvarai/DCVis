@@ -50,41 +50,6 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
 
     return control1, control2
 
-def adjust_endpoints(start, end, coef, radius, isFirstPoint=False):
-    # Check if the point is the first point, if so, return it unmodified
-
-    # Assuming the center of the circle is at (0, 0)
-    center = np.array([0, 0])
-    
-    # Convert coef to an angle in radians.
-    angle_adjustment = np.radians(-coef)
-    
-    # Function to rotate a point around the center
-    def rotate_point_around_center(point, center, angle):
-        ox, oy = center
-        px, py = point
-
-        qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
-        qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
-        return qx, qy
-
-    # Adjust end points by rotating them around the center of the circle
-    adjusted_end = rotate_point_around_center(end, center, angle_adjustment)
-
-    if isFirstPoint:
-        return start, end
-    return start, adjusted_end
-
-def adjust_marker_position(position, coef, radius):
-    # Calculate the angle for the adjustment
-    angle = np.radians(coef)  # Convert coef to radians for simplicity
-
-    # Calculate new position based on radius and angle
-    new_x = radius * np.cos(angle) + position[0]
-    new_y = radius * np.sin(angle) + position[1]
-
-    return (new_x, new_y)
-
 def adjust_point_towards_center(point, atts=1):
     # Calculate direction vector from point towards the center (assumed to be at (0, 0))
     direction = [-point[0], -point[1]]
@@ -123,7 +88,42 @@ def calculate_angle(x, y):
         angle += 2 * np.pi
     return angle
 
-def draw_curves(data, line_vao, marker_vao, radius):
+def draw_unhighlighted_curves_vertices(data, line_vao, marker_vao):
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    for class_index in range(data.class_count):
+        is_inner = (class_index == data.class_order[0])
+
+        # Draw markers with adjusted positions and hue for inner classes
+        if data.active_markers[class_index]:
+            for j in range(data.vertex_count):
+                glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
+                color = shift_hue(data.class_colors[class_index], 0)  # Adjust if needed for markers
+                
+                glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
+                
+                if is_inner:
+                    # Adjust marker positions for inner classes, potentially using last attribute for hue shift
+                    for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
+                        position = data.positions[class_index][pos_index + j]
+                        adjusted_position = adjust_point_towards_center(position, data.attribute_count)
+                        glBegin(GL_POINTS)
+                        glVertex2f(*adjusted_position)
+                        glEnd()
+                else:
+                    glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
+                    
+                glBindVertexArray(0)
+                glPointSize(5)
+
+    glDisable(GL_BLEND)
+
+def draw_unhighlighted_curves(data, line_vao, marker_vao):
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    radius = calculate_radius(data)
+    
     hue_shift_amount = 0.02
 
     for class_index in range(data.class_count):
@@ -158,9 +158,24 @@ def draw_curves(data, line_vao, marker_vao, radius):
                         
                     glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
 
-                    start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
+                    def rotate_point_around_center(point, center, angle):
+                        ox, oy = center
+                        px, py = point
+
+                        qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
+                        qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
+                        return qx, qy
+
+                    if data.plot_type == 'DCC':
+                        start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
+                        if h != 1:
+                            start = rotate_point_around_center(start, (0, 0), data.coefs[h - 1])
+                        end = rotate_point_around_center(end, (0, 0), data.coefs[h - 1])
+                    else:
+                        start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
+                    
                     control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
-                    # Pass the adjusted hue color as a parameter if your drawing function supports it
+
                     draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
                     
                     angle = calculate_angle(end[0], end[1])
@@ -178,28 +193,6 @@ def draw_curves(data, line_vao, marker_vao, radius):
                     mult = 2.5
                 extended_endest = (endest[0] * mult, endest[1] * mult)
                 draw_radial_line((0, 0), extended_endest)
-
-        # Draw markers with adjusted positions and hue for inner classes
-        if data.active_markers[class_index]:
-            for j in range(data.vertex_count):
-                glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
-                color = shift_hue(data.class_colors[class_index], 0)  # Adjust if needed for markers
-                
-                glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
-                
-                if is_inner:
-                    # Adjust marker positions for inner classes, potentially using last attribute for hue shift
-                    for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
-                        position = data.positions[class_index][pos_index + j]
-                        adjusted_position = adjust_point_towards_center(position, data.attribute_count)
-                        glBegin(GL_POINTS)
-                        glVertex2f(*adjusted_position)
-                        glEnd()
-                else:
-                    glDrawArrays(GL_POINTS, 0, int(len(data.positions[class_index]) / data.vertex_count))
-                    
-                glBindVertexArray(0)
-                glPointSize(5)
 
     glDisable(GL_BLEND)
 
@@ -243,20 +236,13 @@ def draw_highlighted_curves(dataset, line_vao, marker_vao, radius):
             
             glBindVertexArray(0)
     glLineWidth(1)
+    glDisable(GL_BLEND)
 
 def draw_radial_line(start, end):
     glBegin(GL_LINES)
     glVertex2f(*start)
     glVertex2f(*end)
     glEnd()
-
-def draw_unhighlighted_curves(data, line_vao, marker_vao):
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    radius = calculate_radius(data)
-    draw_curves(data, line_vao, marker_vao, radius)
-
-    glDisable(GL_BLEND)
 
 def calculate_radius(data):
     circumference = data.attribute_count
@@ -302,7 +288,7 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
 
                 sub_alpha = 0
                 if any(dataset.clipped_samples):
-                    sub_alpha = 150
+                    sub_alpha = 100  # TODO: Make this a scrollable option
 
                 glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha if dataset.active_attributes[0] else 255 - sub_alpha)
                 
@@ -314,6 +300,31 @@ def draw_unhighlighted_nd_points(dataset, marker_vao, class_vao):
 
                 datapoint_cnt += 1
             glBindVertexArray(0)
+
+    glDisable(GL_BLEND)
+
+def draw_unhighlighted_nd_point_vertices(dataset, marker_vao, class_vao):
+    glEnable(GL_BLEND)
+    glEnable(GL_LINE_SMOOTH)
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glLineWidth(1)
+
+    # Loop through classes in class order
+    for i in dataset.class_order[::-1]:
+        size_index = 0
+
+        # Draw polylines and markers
+        if dataset.active_classes[i]:
+            # Adjust color based on trace mode
+            color = dataset.class_colors[i]
+            class_color = color
+            glBindVertexArray(class_vao[i])
+
+            for j in range(dataset.class_count):
+                if j < i:
+                    size_index += dataset.count_per_class[j]
+                    
             if dataset.active_markers[i]:
                 # Draw markers
                 for j in range(dataset.vertex_count):
@@ -413,7 +424,7 @@ def draw_box(all_rect):
         for r in all_rect:
             glEnable(GL_BLEND)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-            glColor4f(1.0, 0.0, 0.0, 0.5)
+            glColor4f(1.0, 0.0, 0.0, 1/3)
             glBegin(GL_QUADS)
             glVertex2f(r[0], r[1])
             glVertex2f(r[0], r[3])
@@ -461,8 +472,8 @@ class MakePlot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [0.9375, 0.9375, 0.9375, 1]  # Default gray in RGBA
-        self.axes_color = [0, 0, 0, 1]  # Default black in RGBA
+        self.background_color = [50 / 255, 50 / 255, 50 / 255, 1]  # Default gray in RGBA
+        self.axes_color = [1, 1, 1, 1]  # Default black in RGBA
 
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         self.data.class_colors = self.color_instance.colors_array
@@ -550,16 +561,19 @@ class MakePlot(QOpenGLWidget):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         set_view_frustrum(self.m_left, self.m_right, self.m_bottom, self.m_top)
 
-        # draw points
-        if self.data.plot_type in ['SCC', 'DCC']:
-            draw_unhighlighted_curves(self.data, self.line_vao, self.marker_vao)
-            draw_highlighted_curves(self.data, self.line_vao, self.marker_vao, calculate_radius(self.data))
-        else:
-            draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
-            draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
-
+        # draw axes
         if self.data.axis_on:
             draw_axes(self.data, self.axis_vao, self.axes_color)
+
+        # draw n-D points
+        if self.data.plot_type in ['SCC', 'DCC']:  # Bezier curves
+            draw_unhighlighted_curves(self.data, self.line_vao, self.marker_vao)
+            draw_highlighted_curves(self.data, self.line_vao, self.marker_vao, calculate_radius(self.data))
+            draw_unhighlighted_curves_vertices(self.data, self.line_vao, self.marker_vao)
+        else:  # Polylines
+            draw_unhighlighted_nd_points(self.data, self.marker_vao, self.line_vao)
+            draw_highlighted_nd_points(self.data, self.marker_vao, self.line_vao)
+            draw_unhighlighted_nd_point_vertices(self.data, self.marker_vao, self.line_vao)
 
         draw_box(self.all_rect)  # draw clip box
 
@@ -580,11 +594,7 @@ class MakePlot(QOpenGLWidget):
                 self.left_rect = [x - precision, y - precision, x + precision, y + precision]
                 CLIPPING.Clipping(self.left_rect, self.data)
 
-                # Break immediately when a sample is found
-                if self.data.clipped_count > 0:
-                    break
-
-                precision_exp += 0.05  # Adjust the increment as needed
+                precision_exp += 0.05
                 precision = 10 ** precision_exp
 
             # Cull selection to single closest sample
@@ -602,12 +612,15 @@ class MakePlot(QOpenGLWidget):
 
                 # Reset all samples except the closest one
                 for index in range(self.data.sample_count):
-                    self.data.clipped_samples[index] = index == closest_sample_index
+                    self.data.clipped_samples[index] = 1.0 if index == closest_sample_index else 0.0
 
+                self.data.clipped_count = 1
+            
             self.update()
             event.accept()
+            
             return super().mousePressEvent(event)
-
+        
         if event.button() == Qt.MouseButton.RightButton:
             self.rect.append(x)
             self.rect.append(y)

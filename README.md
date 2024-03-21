@@ -1,7 +1,6 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
 DCVis is a research project to build visual machine learning models with multidimensional visualizations and interactive classification tools.  
-Techniques being ported to C for improved performance with [CVis](https://github.com/CWU-VKD-LAB/CVis).  
 
 Contributors: Alice Williams, James Battistoni, Charles Recaido  
 at Central Washington University Visual Knowledge Discovery Lab  
