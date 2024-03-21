@@ -140,8 +140,8 @@ def draw_unhighlighted_curves(data, line_vao):
     for class_index in range(data.class_count):
         min_angle = np.inf
         max_angle = -np.inf
-        closest = None
-        furthest = None
+        closest = furthest = None
+        
         is_inner = (class_index == data.class_order[0])
 
         if data.active_classes[class_index]:
@@ -308,7 +308,6 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
         if dataset.active_classes[i]:
             # Adjust color based on trace mode
             color = dataset.class_colors[i]
-            class_color = color
             glBindVertexArray(class_vao[i])
 
             for j in range(dataset.class_count):
@@ -330,10 +329,9 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
                 if any(dataset.clipped_samples):
                     sub_alpha = 100  # TODO: Make this a scrollable option
 
-                glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha if dataset.active_attributes[0] else 255 - sub_alpha)
-                
                 glBegin(GL_LINES)
                 for m in range(1, dataset.vertex_count):
+                    glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha if dataset.active_attributes[m - 1] else 255 - sub_alpha)
                     glVertex2f(dataset.positions[i][l + m - 1][0], dataset.positions[i][l + m - 1][1])
                     glVertex2f(dataset.positions[i][l + m][0], dataset.positions[i][l + m][1])
                 glEnd()

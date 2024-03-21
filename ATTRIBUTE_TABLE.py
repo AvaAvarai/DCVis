@@ -163,6 +163,7 @@ class InversionCheckBox(QtWidgets.QCheckBox):
         self.index = index
         self.dataset = dataset
         self.replot_func = replot_func
+        self.setStyleSheet("margin-left: 12px;")
 
         # Initialize the checkbox state based on the attribute_inversions list
         self.setChecked(self.dataset.attribute_inversions[self.index])
@@ -170,9 +171,7 @@ class InversionCheckBox(QtWidgets.QCheckBox):
         # Connect the stateChanged signal to the toggle_inversion method
         self.stateChanged.connect(self.toggle_inversion)
 
-    def toggle_inversion(self, state):
-        # Update the attribute_inversions list with the new state
-        # We use `not state` because the inversion list is meant to be True when not inverted
+    def toggle_inversion(self):
         self.dataset.attribute_inversions[self.index] = not self.dataset.attribute_inversions[self.index]
         self.replot_func()
 
