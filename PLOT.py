@@ -119,6 +119,17 @@ def draw_unhighlighted_curves_vertices(data, marker_vao):
 
     glDisable(GL_BLEND)
 
+def draw_filled_sector(center, start_angle, end_angle, radius, segments=100):
+    """
+    Draws a filled sector (part of a circle) between two angles with a specified radius.
+    """
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex2f(*center)  # Center point
+    for segment in range(segments + 1):
+        angle = start_angle + (end_angle - start_angle) * segment / segments
+        glVertex2f(center[0] + np.cos(angle) * radius, center[1] + np.sin(angle) * radius)
+    glEnd()
+
 def draw_unhighlighted_curves(data, line_vao):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -202,6 +213,25 @@ def draw_unhighlighted_curves(data, line_vao):
             if furthest is not None:
                 extended_endest = (furthest[0] * mult, furthest[1] * mult)
                 draw_radial_line((0, 0), extended_endest)
+            
+            if closest is not None and furthest is not None:
+                glColor4ub(color[0], color[1], color[2], 50)
+                closest_angle = np.arctan2(closest[1], closest[0])
+                furthest_angle = np.arctan2(furthest[1], furthest[0])
+
+                # Adjust angles to be positive
+                closest_angle = closest_angle if closest_angle >= 0 else closest_angle + 2 * np.pi
+                furthest_angle = furthest_angle if furthest_angle >= 0 else furthest_angle + 2 * np.pi
+
+                # Ensure start_angle < end_angle for drawing the sector correctly
+                if closest_angle > furthest_angle:
+                    closest_angle, furthest_angle = furthest_angle, closest_angle
+                
+                # Define the outer radius of the sector. Adjust according to your needs.
+                sector_radius = radius * (data.class_count + 1)
+
+                # Draw the filled sector
+                draw_filled_sector((0, 0), closest_angle, furthest_angle, sector_radius, segments=50)
 
     glDisable(GL_BLEND)
 
