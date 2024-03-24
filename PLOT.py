@@ -115,6 +115,8 @@ def draw_highlighted_curves(dataset, line_vao):
     glColor3ub(255, 255, 0)
     glLineWidth(2)
     radius = calculate_radius(dataset)
+    
+    class_count_one = dataset.class_count == 1
 
     for class_index in range(dataset.class_count):
         if dataset.active_classes[class_index]:
@@ -125,7 +127,7 @@ def draw_highlighted_curves(dataset, line_vao):
                 if j < class_index:
                     size_index += dataset.count_per_class[j]
 
-            is_inner = (class_index == dataset.class_order[0])
+            is_inner = (class_index == dataset.class_order[0]) and not class_count_one
             for j in range(0, len(dataset.positions[class_index]), dataset.vertex_count):
                 if dataset.vertex_in[size_index + datapoint_count]:
                     if dataset.clear_samples[size_index + datapoint_count]:
@@ -642,6 +644,8 @@ class MakePlot(QOpenGLWidget):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         hue_shift = 0.08
         
+        class_count_one = data.class_count == 1
+        
         for class_index in range(data.class_count):
             data.overlap_points[class_index] = 0
             if data.active_markers[class_index]:
@@ -652,8 +656,10 @@ class MakePlot(QOpenGLWidget):
                     if j == data.vertex_count - 1:
                         color = shift_hue(color, hue_shift)
 
-                    is_inner = (class_index == data.class_order[0])
-                    was_inner = (class_index == data.class_order[1])
+                    was_inner = False
+                    is_inner = class_index == data.class_order[0] and not class_count_one
+                    if len(data.class_order) > 1:
+                        was_inner = (class_index == data.class_order[1])
                     for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
                         position = data.positions[class_index][pos_index + j]
                         
@@ -695,12 +701,14 @@ class MakePlot(QOpenGLWidget):
         self.sectors = []
         hue_shift_amount = 0.02
 
+        class_count_one = data.class_count == 1
+
         for class_index in range(data.class_count):
             min_angle = np.inf
             max_angle = -np.inf
             closest = furthest = None
             
-            is_inner = (class_index == data.class_order[0])
+            is_inner = (class_index == data.class_order[0]) and not class_count_one
 
             if data.active_classes[class_index]:
                 glBindVertexArray(line_vao[class_index])
