@@ -53,15 +53,20 @@ class ClassTable(QtWidgets.QTableWidget):
 
         self.data = dataset
         self.refresh_GUI.connect(self.parent().refresh)
-
-        self.setRowCount(dataset.class_count)
-        self.setColumnCount(4)
+        
+        if not self.data.plot_type == 'SCC' or self.data.plot_type == 'DCC':
+            self.setColumnCount(4)
+            self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Color'))
+        else:
+            self.setColumnCount(5)
+            self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Sector'))
+            self.setHorizontalHeaderItem(4, QtWidgets.QTableWidgetItem('Color'))
+            print(self.columnCount())
 
         self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Order'))
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Lines'))
         self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Points'))
-        self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Color'))
-
+        self.setRowCount(dataset.class_count)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.setDropIndicatorShown(True)
@@ -77,14 +82,20 @@ class ClassTable(QtWidgets.QTableWidget):
             class_name.setForeground(QBrush(QColor(dataset.class_colors[counter][0], dataset.class_colors[counter][1], dataset.class_colors[counter][2])))
             self.setItem(counter, 0, class_name)
 
-            class_checkbox = CheckBox(counter, self.data, self.refresh_GUI, 'class', parent=self)
+            class_checkbox = CheckBox(counter, dataset, self.refresh_GUI, 'class', parent=self)
             self.setCellWidget(counter, 1, class_checkbox)
 
-            marker_checkbox = CheckBox(counter, self.data, self.refresh_GUI, 'marker', parent=self)
+            marker_checkbox = CheckBox(counter, dataset, self.refresh_GUI, 'marker', parent=self)
             self.setCellWidget(counter, 2, marker_checkbox)
 
-            button = Button(counter, self.data, self.refresh_GUI, parent=self)
-            self.setCellWidget(counter, 3, button)
+            if dataset.plot_type == 'SCC' or dataset.plot_type == 'DCC':
+                sector_checkbox = CheckBox(counter, dataset, self.refresh_GUI, 'sector', parent=self)
+                self.setCellWidget(counter, 3, sector_checkbox)
+                button = Button(counter, dataset, self.refresh_GUI, parent=self)
+                self.setCellWidget(counter, 4, button)
+            else:
+                button = Button(counter, dataset, self.refresh_GUI, parent=self)
+                self.setCellWidget(counter, 3, button)
 
             counter += 1
 
@@ -99,6 +110,7 @@ class Button(QtWidgets.QPushButton):
         self.cell = self.parent().item(self.index, 0)
         self.data = dataset
         self.r = refresh
+        self.setMaximumWidth(50)
         self.clicked.connect(self.color_dialog)
 
     def color_dialog(self):
@@ -125,12 +137,16 @@ class CheckBox(QtWidgets.QCheckBox):
         if self.isChecked():
             if self.option == 'class':
                 self.data.active_classes[self.index] = True
-            else:
+            elif self.option == 'marker':
                 self.data.active_markers[self.index] = True
+            elif self.option == 'sector':
+                self.data.active_sectors[self.index] = True
         else:
             if self.option == 'class':
                 self.data.active_classes[self.index] = False
-            else:
+            elif self.option == 'marker':
                 self.data.active_markers[self.index] = False
+            elif self.option == 'sector':
+                self.data.active_sectors[self.index] = False
 
         self.r.emit()

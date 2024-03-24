@@ -4,8 +4,6 @@ from sklearn.preprocessing import MinMaxScaler
 
 class DCC:
     def __init__(self, dataset):
-        basic_radius = (dataset.attribute_count / np.pi) / 2
-
         dataset.minmax_arc_lengths = []
 
         working_df = dataset.dataframe.copy()
@@ -76,23 +74,3 @@ class DCC:
             dataset.positions.append(pos_array)
 
         dataset.axis_count = 0
-
-        overlaps = []
-        distances = []
-
-        for j in range(len(dataset.minmax_arc_lengths)):
-            if j % 2 == 0 and j != 0:
-                if dataset.minmax_arc_lengths[j] < dataset.minmax_arc_lengths[j - 1]:
-                    distances.append(dataset.minmax_arc_lengths[j - 1] - dataset.minmax_arc_lengths[j])
-                    minCA = dataset.minmax_arc_lengths[j] * 360 / (2 * np.pi * radius)
-                    minCA = np.pi * minCA / 180
-                    dataset.cr_start_x = radius * np.sin(minCA)
-                    dataset.cr_start_y = radius * np.cos(minCA)
-                    maxCA = dataset.minmax_arc_lengths[j - 1] * 360 / (2 * np.pi * radius)
-                    maxCA = np.pi * maxCA / 180
-                    dataset.cr_end_x = radius * np.sin(maxCA)
-                    dataset.cr_end_y = radius * np.cos(maxCA)
-                overlaps.append(dataset.minmax_arc_lengths[j])
-
-        print(
-            f"Overlapping Distances: {np.round(distances, decimals=2)}\nOverlapping Circumferences: {np.round(overlaps, decimals=2)}")

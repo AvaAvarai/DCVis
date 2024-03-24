@@ -19,6 +19,8 @@ class Dataset:
         self.class_names: List[str] = []
         self.class_colors: List[Tuple[int, int, int]] = []  # RGB colors TODO: change to using RGBA for individualized attribute alpha slider control
 
+        self.rule_regions = []
+
         # attribute information
         self.attribute_count: int = 0
         self.attribute_names: List[str] = []
@@ -40,19 +42,19 @@ class Dataset:
         self.axis_positions: List[float] = []
         self.axis_on: bool = True
         self.axis_count: int = 0
-        self.vertex_count: int = 0  # number of vertices depends on plot type
+        self.vertex_count: int = 0
 
         self.trace_mode: bool = False
 
         self.coefs = []
 
-        self.active_attributes: np.ndarray = np.array([], dtype=bool)  # show/hide markers by attribute
-        self.active_classes: List[bool] = []  # show/hide classes
-        self.active_markers: List[bool] = []  # show/hide markers by class
-
-        self.class_order: List[int] = []  # choose which class is on top
-        self.attribute_order: List[
-            int] = []  # choose attribute order (requires running graph construction algorithm again)
+        self.active_attributes: np.ndarray = np.array([], dtype=bool)
+        self.active_classes: List[bool] = []
+        self.active_markers: List[bool] = []
+        self.active_sectors: List[bool] = []
+        
+        self.class_order: List[int] = []
+        self.attribute_order: List[int] = []
         self.all_arc_lengths: List[int] = []
 
     def update_coef(self, attribute_index, new_coef_value):
@@ -75,6 +77,7 @@ class Dataset:
         # initialize arrays for class options
         self.active_markers = np.repeat(True, self.class_count)
         self.active_classes = np.repeat(True, self.class_count)
+        self.active_sectors = np.repeat(True, self.class_count)
 
         # get attribute information
         self.attribute_names = df.columns.tolist()[:-1]

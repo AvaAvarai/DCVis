@@ -116,6 +116,9 @@ class View(QtWidgets.QMainWindow):
             print("No class data available to display in ClassTable.")
             return
 
+        self.rules_textbox.setText('')
+        self.overlaps_textbox.setText('')
+
         # remove initial placeholder
         if self.pl:
             self.plot_layout.removeWidget(self.pl)
@@ -165,6 +168,12 @@ class View(QtWidgets.QMainWindow):
         self.attribute_table_layout.addWidget(self.attribute_table)
 
         self.plot_layout.addWidget(self.plot_widget)
+        
+        if self.class_table:
+            self.class_table_layout.removeWidget(self.class_table)
+        
+        self.controller.view.class_table = CLASS_TABLE.ClassTable(self.controller.data, parent=self)
+        self.class_table_layout.addWidget(self.controller.view.class_table)
         
     def analyze_clip(self):
         if not self.plot_widget:
@@ -218,6 +227,8 @@ class View(QtWidgets.QMainWindow):
         self.clipped_area_textbox.setText('')
 
         self.plot_widget.update()
+        
+        return
 
     def hide_clip(self):
         if self.controller.data.plot_type not in ['SCC', 'DCC']:
@@ -229,6 +240,8 @@ class View(QtWidgets.QMainWindow):
 
     def remove_rules(self):
         self.rule_count = 0
+        
+        self.controller.data.rule_regions = []
         self.rules_textbox.setText('')
         
         self.plot_widget.update()
@@ -237,28 +250,20 @@ class View(QtWidgets.QMainWindow):
         self.controller.data.trace_mode = not self.controller.data.trace_mode
         self.plot_widget.update()
 
-    def add_clip(self):
+    def add_rule(self):
         if not self.plot_widget.all_rect:
             print("No clipping area selected.")
             return
 
-        current_rule_coords = self.plot_widget.all_rect[-1]
-
-        # Check if the current rule is the same as the last one added
-        if self.rule_count > 0:
-            last_rule_coords = self.rules_textbox.toPlainText().split('\n')[-1]
-            last_rule_coords_parsed = last_rule_coords.split(': ')[-1]
-            if str(current_rule_coords) == last_rule_coords_parsed:
-                print("This rule is the same as the last one. Not adding it again.")
-                return
-
-        class_name_or_false = CLIPPING.clip_region_and_count_classes(current_rule_coords, self.controller.data)
+        rules = self.plot_widget.all_rect
+        self.controller.data.rule_regions.append(rules)
+                
+        class_name_or_false = CLIPPING.count_clipped_classes(self.controller.data)
 
         if not class_name_or_false:
-            rule_description = f"Rule {self.rule_count + 1}: {current_rule_coords} is not pure"
+            rule_description = f"Rule {self.rule_count + 1}: {rules} is not pure"
         else:
-            rule_description = f"Rule {self.rule_count + 1}: {current_rule_coords} contains only {class_name_or_false}"
-            
+            rule_description = f"Rule {self.rule_count + 1}: {rules} contains only {class_name_or_false}"
         
         self.rule_count += 1
         self.rules_textbox.append(rule_description)

@@ -178,53 +178,20 @@ def cohen_sutherland_clip(x1, y1, x2, y2, min_max):
     else:
         return False
 
-def clip_region_and_count_classes(rect, dataset):
-    min_max = MinAndMax()
-    min_max.x_min, min_max.y_min, min_max.x_max, min_max.y_max = rect
-
-    classes_found = set()
-
-    for class_index, data_class in enumerate(dataset.positions):
-        class_name = dataset.class_names[class_index]
-
-        for sample in data_class:
-            sample_clipped = False
-
-            # Adjust the iteration to prevent out-of-bounds access
-            for i in range(0, len(sample) - 1, 2):  # Step by 2 to move point by point
-                if i + 2 < len(sample) - 1:  # Ensure the next point exists
-                    if cohen_sutherland_clip(sample[i], sample[i+1], sample[i+2], sample[i+3], min_max):
-                        classes_found.add(class_name)
-                        sample_clipped = True
-                        break
-
-                # Check the current vertex against the clipping region
-                if not sample_clipped and vertex_check(sample[i], sample[i+1], min_max):
-                    classes_found.add(class_name)
-                    break
-
-            # Last vertex check needs to be outside the loop to avoid repeated checks
-            # No need to check if sample is already marked as clipped
-            if not sample_clipped:
-                last_vertex_index = len(sample) - 2  # Adjust for zero-based indexing
-                if vertex_check(sample[last_vertex_index], sample[last_vertex_index + 1], min_max):
-                    classes_found.add(class_name)
-
-            if len(classes_found) > 1:
-                return False  # Region is not pure if more than one class is found
-
-    if len(classes_found) == 1:
-        return classes_found.pop()  # Return the name of the single class found
-    else:
-        return False  # Return False if no classes or more than one class are found
-
+def count_clipped_classes(dataset):
+    clipped_classes = set()
+    
+    for i in range(dataset.sample_count):
+        if dataset.clipped_samples[i]:
+            clipped_classes.add(dataset.dataframe['class'][i])
+    
+    return clipped_classes
 
 def vertex_check(vertex_x, vertex_y, min_max):
     if (min_max.x_min <= vertex_x <= min_max.x_max) and (min_max.y_min <= vertex_y <= min_max.y_max):
         return True
     else:
         return False
-
 
 def clip_samples(positions, rect, dataset):
     min_max = MinAndMax()

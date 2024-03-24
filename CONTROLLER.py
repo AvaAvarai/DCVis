@@ -23,7 +23,7 @@ class Controller:
         self.view.clear_last_clip_btn.clicked.connect(self.view.undo_clip)
         self.view.clear_all_clips_btn.clicked.connect(self.view.remove_clips)
         self.view.recenter_button.clicked.connect(self.view.recenter_plot)
-        self.view.add_class_rule_btn.clicked.connect(self.view.add_clip)
+        self.view.add_class_rule_btn.clicked.connect(self.view.add_rule)
         self.view.clear_class_rules_btn.clicked.connect(self.view.remove_rules)
         self.view.show_axes.stateChanged.connect(self.view.axes_func)
         self.view.attribute_slide.valueChanged.connect(self.view.attr_slider)

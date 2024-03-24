@@ -11,7 +11,7 @@ from typing import List
 import numpy as np
 import GCA, CLIPPING
 from COLORS import getColors, shift_hue
-
+import CLASS_TABLE
 
 def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, is_inner, class_index):
     # Calculate midpoint between start and end points
@@ -486,8 +486,15 @@ class MakePlot(QOpenGLWidget):
             draw_unhighlighted_nd_points(self.data, self.line_vao)
             draw_highlighted_nd_points(self.data, self.line_vao)
             draw_unhighlighted_nd_point_vertices(self.data, self.marker_vao)
-
-        draw_box(self.all_rect)  # draw clip box
+        
+        glColor3f(1, 0, 0)
+        draw_box(self.all_rect)
+        
+        if self.data.rule_regions:
+            glColor3f(1, 1, 0)
+            for box in self.data.rule_regions:
+                print(box)
+                draw_box(box)
 
     # === Mouse Events ===
     def mousePressEvent(self, event):
@@ -709,8 +716,7 @@ class MakePlot(QOpenGLWidget):
                     for h in range(1, data.vertex_count):
                         if h > data.attribute_count or data.clear_samples[size_index + datapoint_count]:
                             continue
-
-                        # Apply hue shift, especially for the last attribute of each sample
+                        
                         if data.trace_mode:
                             color = shift_hue(data.class_colors[class_index], hue_shift_amount)
                             hue_shift_amount += 0.02  # Increase hue shift for each attribute or sample
@@ -721,26 +727,52 @@ class MakePlot(QOpenGLWidget):
                             
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
 
-                        def rotate_point_around_center(point, center, angle):
+                        def rotate_point_around_center(point, center, coef):
                             ox, oy = center
                             px, py = point
 
-                            qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
-                            qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
+                            # Calculate the angle from the center to the point
+                            initial_angle = np.arctan2(py - oy, px - ox)
+
+                            # Normalize angle to a positive range [0, 2π]
+                            if initial_angle < 0:
+                                initial_angle += 2 * np.pi
+
+                            # Define the target angle as the top of the circle (12 o'clock position, which is π/2 radians in this context)
+                            target_angle = np.pi / 2
+
+                            # Calculate how much we need to adjust the angle based on the coef
+                            # Coef of 1 means no adjustment; coef of 0 aims directly upwards
+                            angle_adjustment = (initial_angle - target_angle) * (1 - coef)
+                            
+                            # Calculate the new angle
+                            new_angle = initial_angle - angle_adjustment
+
+                            # Calculate the distance from the center to the point
+                            distance = np.sqrt((px - ox) ** 2 + (py - oy) ** 2)
+
+                            # Apply the coefficient to the distance if needed to bring the point closer to the top
+                            # This is only applied when the coef is towards 0 to simulate the movement towards the circle's top
+                            adjusted_distance = distance * coef if coef < 1 else distance
+
+                            # Calculate the new position using the adjusted angle and distance
+                            qx = ox + adjusted_distance * np.cos(new_angle)
+                            qy = oy + adjusted_distance * np.sin(new_angle)
+
                             return qx, qy
 
                         if data.plot_type == 'DCC':
                             start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
-                            if h != 1:
-                                start = rotate_point_around_center(start, (0, 0), data.coefs[h - 1])
+                            # Rotate end point around the start point by attribute angle
                             end = rotate_point_around_center(end, (0, 0), data.coefs[h - 1])
                         else:
                             start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
+
                         
                         control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
 
                         draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
-                        
+
                         angle = calculate_angle(end[0], end[1])
                         
                         if angle < min_angle and h == data.attribute_count - 1:
@@ -760,10 +792,12 @@ class MakePlot(QOpenGLWidget):
                 
                 if closest is not None:
                     extended_closest = (closest[0] * mult, closest[1] * mult)
-                    draw_radial_line((0, 0), extended_closest)
+                    if self.data.active_sectors[class_index]:
+                        draw_radial_line((0, 0), extended_closest)
                 if furthest is not None:
                     extended_endest = (furthest[0] * mult, furthest[1] * mult)
-                    draw_radial_line((0, 0), extended_endest)
+                    if self.data.active_sectors[class_index]:
+                        draw_radial_line((0, 0), extended_endest)
                 
                 if closest is not None and furthest is not None:
                     glColor4ub(color[0], color[1], color[2], 50)
@@ -782,7 +816,8 @@ class MakePlot(QOpenGLWidget):
                     sector_radius = radius * (data.class_count + 1)
 
                     # Draw the filled sector
-                    draw_filled_sector((0, 0), closest_angle, furthest_angle, sector_radius, segments=50)
+                    if self.data.active_sectors[class_index]:
+                        draw_filled_sector((0, 0), closest_angle, furthest_angle, sector_radius, segments=50)
 
                 sector_info = {
                     'start_angle': closest_angle,
