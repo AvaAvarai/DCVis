@@ -212,7 +212,6 @@ class View(QtWidgets.QMainWindow):
 
             self.clipped_area_textbox.setText('')
 
-            # Update the plot to reflect changes
             self.plot_widget.update()
         else:
             print("No rectangles to remove.")

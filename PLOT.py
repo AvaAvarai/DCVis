@@ -128,6 +128,8 @@ def draw_highlighted_curves(dataset, line_vao):
                     size_index += dataset.count_per_class[j]
 
             is_inner = (class_index == dataset.class_order[0]) and not class_count_one
+            if len(dataset.class_order) > 1:
+                was_inner = (class_index == dataset.class_order[1])
             for j in range(0, len(dataset.positions[class_index]), dataset.vertex_count):
                 if dataset.vertex_in[size_index + datapoint_count]:
                     if dataset.clear_samples[size_index + datapoint_count]:
@@ -144,9 +146,12 @@ def draw_highlighted_curves(dataset, line_vao):
                         if is_inner:
                             start = adjust_point_towards_center(start)
                             end = adjust_point_towards_center(end)
+                        if was_inner:
+                            start = adjust_point_towards_center(start, -dataset.attribute_count)
+                            end = adjust_point_towards_center(end, -dataset.attribute_count)
 
                         control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, dataset.attribute_count, is_inner, class_index)
-                        draw_cubic_bezier_curve(start, control1, control2, end, False, dataset.attribute_count)  # False to not pull inwards twice, hacky fix
+                        draw_cubic_bezier_curve(start, control1, control2, end, is_inner, dataset.attribute_count)
                 datapoint_count += 1
             
             glBindVertexArray(0)
@@ -366,7 +371,7 @@ class MakePlot(QOpenGLWidget):
         self.axis_vao = None
 
         self.sectors = []
-        self.data.active_sectors = [False for _ in range(self.data.class_count)]
+        self.data.active_sectors = [True for _ in range(self.data.class_count)]
 
         # for clipping
         self.all_rect = []  # holds all clip boxes
@@ -700,10 +705,14 @@ class MakePlot(QOpenGLWidget):
 
                     glBindVertexArray(0)
         
+        # TODO: Move this to a non drawing function
         # iterate and list class names with each overlap count
         overlap = ""
+        count = 0
         for i in range(data.class_count):
             overlap += f"Class {data.class_names[i]}: {data.overlap_points[i]}\n"
+            count += data.overlap_points[i]
+        overlap += f"Total Overlaps: {count} / {data.sample_count} samples\n= {round(100 * (count / data.sample_count), 2)}% overlap for {round(100 * (1 - (count / data.sample_count)), 2)}% accuracy.\n"
         self.overlaps_textbox.setText(overlap)
         glDisable(GL_BLEND)
 
@@ -721,8 +730,10 @@ class MakePlot(QOpenGLWidget):
             max_angle = -np.inf
             closest = furthest = None
             
+            was_inner = False
             is_inner = (class_index == data.class_order[0]) and not class_count_one
-
+            if len(data.class_order) > 1:
+                was_inner = (class_index == data.class_order[1])
             if data.active_classes[class_index]:
                 glBindVertexArray(line_vao[class_index])
 
@@ -790,7 +801,15 @@ class MakePlot(QOpenGLWidget):
                             start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
 
                         
-                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)       
+
+                        # Adjust start and end for inner classes
+                        if is_inner:
+                            start = adjust_point_towards_center(start)
+                            end = adjust_point_towards_center(end)
+                        if was_inner:
+                            start = adjust_point_towards_center(start, -data.attribute_count)
+                            end = adjust_point_towards_center(end, -data.attribute_count)
 
                         draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
 
