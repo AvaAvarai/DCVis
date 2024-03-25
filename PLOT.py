@@ -330,13 +330,12 @@ def draw_axes(dataset, axis_vao, color):
 
     glBindVertexArray(0)
 
-# draw box for box clipping
-def draw_box(all_rect):
+def draw_box(all_rect, color):
     if all_rect:
         for r in all_rect:
             glEnable(GL_BLEND)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-            glColor4f(1.0, 0.0, 0.0, 1/3)
+            glColor4f(*color)
             glBegin(GL_QUADS)
             glVertex2f(r[0], r[1])
             glVertex2f(r[0], r[3])
@@ -367,6 +366,7 @@ class MakePlot(QOpenGLWidget):
         self.axis_vao = None
 
         self.sectors = []
+        self.data.active_sectors = [False for _ in range(self.data.class_count)]
 
         # for clipping
         self.all_rect = []  # holds all clip boxes
@@ -489,14 +489,25 @@ class MakePlot(QOpenGLWidget):
             draw_highlighted_nd_points(self.data, self.line_vao)
             draw_unhighlighted_nd_point_vertices(self.data, self.marker_vao)
         
-        glColor3f(1, 0, 0)
-        draw_box(self.all_rect)
+        draw_box(self.all_rect, [1.0, 0.0, 0.0, 0.5])
         
         if self.data.rule_regions:
-            glColor3f(1, 1, 0)
-            for box in self.data.rule_regions:
-                print(box)
-                draw_box(box)
+            for key, box in self.data.rule_regions.items():
+                # draw box for each rule region pure class color
+                if key:
+                    if key.endswith('(pure)'):
+                        class_name = key[:-7]
+                        class_index = self.data.class_names.index(class_name)
+                        c = self.data.class_colors[class_index].copy()
+                        for i, _c in enumerate(c):
+                            c[i] = _c / 255
+                        if len(c) == 3:
+                            c.append(1/3)
+                        draw_box(box, c)
+                    else:
+                        draw_box(box, [1.0, 1.0, 1.0, 1/3])
+                else:
+                    draw_box(box, [1.0, 0.0, 0.0, 1/3])
 
     # === Mouse Events ===
     def mousePressEvent(self, event):

@@ -241,7 +241,7 @@ class View(QtWidgets.QMainWindow):
     def remove_rules(self):
         self.rule_count = 0
         
-        self.controller.data.rule_regions = []
+        self.controller.data.rule_regions = {}
         self.rules_textbox.setText('')
         
         self.plot_widget.update()
@@ -256,14 +256,20 @@ class View(QtWidgets.QMainWindow):
             return
 
         rules = self.plot_widget.all_rect
-        self.controller.data.rule_regions.append(rules)
-                
+        
+        primary_class = CLIPPING.primary_clipped_class(self.controller.data)
+        if CLIPPING.is_pure_class(self.controller.data):
+            primary_class += " (pure)"
+        if primary_class in self.controller.data.rule_regions:
+            self.controller.data.rule_regions[primary_class] += rules
+        else:
+            self.controller.data.rule_regions[primary_class] = rules      
         class_name_or_false = CLIPPING.count_clipped_classes(self.controller.data)
 
         if not class_name_or_false:
             rule_description = f"Rule {self.rule_count + 1}: {rules} is not pure"
         else:
-            rule_description = f"Rule {self.rule_count + 1}: {rules} contains only {class_name_or_false}"
+            rule_description = f"Rule {self.rule_count + 1}: {rules} contains classes: {class_name_or_false}"
         
         self.rule_count += 1
         self.rules_textbox.append(rule_description)

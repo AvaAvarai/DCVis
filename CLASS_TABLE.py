@@ -61,7 +61,6 @@ class ClassTable(QtWidgets.QTableWidget):
             self.setColumnCount(5)
             self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Sector'))
             self.setHorizontalHeaderItem(4, QtWidgets.QTableWidgetItem('Color'))
-            print(self.columnCount())
 
         self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Order'))
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Lines'))

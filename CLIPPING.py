@@ -187,6 +187,29 @@ def count_clipped_classes(dataset):
     
     return clipped_classes
 
+def primary_clipped_class(dataset):
+    clipped_classes = count_clipped_classes(dataset)
+    
+    if len(clipped_classes) == 0:
+        return None
+    
+    primary_class = None
+    primary_class_count = 0
+    
+    for c in clipped_classes:
+        class_count = len(dataset.dataframe[dataset.dataframe['class'] == c])
+        
+        if class_count > primary_class_count:
+            primary_class = c
+            primary_class_count = class_count
+    
+    return primary_class
+
+def is_pure_class(dataset):
+    clipped_classes = count_clipped_classes(dataset)
+    
+    return len(clipped_classes) == 1
+
 def vertex_check(vertex_x, vertex_y, min_max):
     if (min_max.x_min <= vertex_x <= min_max.x_max) and (min_max.y_min <= vertex_y <= min_max.y_max):
         return True
