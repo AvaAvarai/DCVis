@@ -1,12 +1,8 @@
 class DisplayData:
     def __init__(self, dataset, textbox):
-        data_info_string = ('Dataset Name: ' + dataset.name +
-                            '\n' + 'Number of classes: ' + str(dataset.class_count) + ' attributes: ' + str(dataset.attribute_count) + ' samples: ' + str(dataset.sample_count))
+        data_info_string = f'Dataset Name: {dataset.name} \nNumber of classes: {dataset.class_count} attributes: {dataset.attribute_count} samples: {dataset.sample_count}'
 
-        counter = 1
-        for ele in dataset.class_names:
-            data_info_string += ('\n' + 'Class ' + str(counter) + ': ' + str(ele) + ' sample Count: ' + str(dataset.count_per_class[counter - 1]))
-            counter += 1
+        for index, ele in enumerate(dataset.class_names):
+            data_info_string += f'\nClass {index + 1}: {ele} sample count: {dataset.count_per_class[index]}'
 
         textbox.setText(data_info_string)
-
