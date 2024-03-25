@@ -3,7 +3,7 @@ from PyQt6.QtCore import Qt
 
 import sys
 
-import DATA_DISPLAY, DATASET, CLASS_TABLE
+import DATASET, CLASS_TABLE
 
 
 class Controller:
@@ -44,6 +44,14 @@ class Controller:
         self.view.trace_mode.setShortcut(Qt.Key.Key_T)
         self.view.show_axes.setShortcut(Qt.Key.Key_A)
 
+    def display_data(self):
+        data_info_string = f'Dataset Name: {self.data.name} \nNumber of classes: {self.data.class_count} attributes: {self.data.attribute_count} samples: {self.data.sample_count}'
+
+        for index, ele in enumerate(self.data.class_names):
+            data_info_string += f'\nClass {index + 1}: {ele} sample count: {self.data.count_per_class[index]}'
+
+        self.view.dataset_textbox.setText(data_info_string)
+
     def load_dataset(self):
         if self.data:
             del self.data
@@ -73,5 +81,5 @@ class Controller:
             self.view.attribute_pl_exists = True
 
         self.data.load_from_csv(filename[0])
-        DATA_DISPLAY.DisplayData(self.data, self.view.dataset_textbox)
+        self.display_data()
         self.view.class_table = CLASS_TABLE.ClassTable(self.data, parent=self.view)
