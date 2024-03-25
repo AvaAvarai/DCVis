@@ -374,7 +374,9 @@ class MakePlot(QOpenGLWidget):
         self.attribute_inversions: List[bool] = []  # for attribute inversion option
 
         self.overlaps_textbox = overlaps_textbox
-
+        
+        self.overlaps_textbox.setText('Requires Circular Coordinates\n\nSelect SCC or DCC to view overlaps.')
+        
         self.reset_zoom()
         self.resize()
 

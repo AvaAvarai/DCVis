@@ -179,7 +179,10 @@ class View(QtWidgets.QMainWindow):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
             return
-
+        
+        if len(self.plot_widget.all_rect) == 0:
+            self.clipped_area_textbox.setText('No clipping area selected.')
+            return
         CLIPPING.clip_files(self.controller.data, self.clipped_area_textbox)
 
     def undo_clip(self):
@@ -206,6 +209,8 @@ class View(QtWidgets.QMainWindow):
             # Update rule count if necessary
             if self.rule_count > 0:
                 self.rule_count -= 1
+
+            self.clipped_area_textbox.setText('')
 
             # Update the plot to reflect changes
             self.plot_widget.update()
