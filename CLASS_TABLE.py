@@ -54,7 +54,7 @@ class ClassTable(QtWidgets.QTableWidget):
         self.data = dataset
         self.refresh_GUI.connect(self.parent().refresh)
         
-        if not self.data.plot_type == 'SCC' or self.data.plot_type == 'DCC':
+        if not (self.data.plot_type == 'SCC' or self.data.plot_type == 'DCC'):
             self.setColumnCount(4)
             self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Color'))
         else:
