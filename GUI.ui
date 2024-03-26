@@ -259,24 +259,41 @@
             <item>
              <layout class="QVBoxLayout" name="classFrameLayout_6">
               <item>
-               <widget class="QLabel" name="label_10">
-                <property name="font">
-                 <font>
-                  <family>Georgia</family>
-                  <pointsize>12</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                  <underline>false</underline>
-                  <kerning>true</kerning>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Overlaps</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <item>
+                 <widget class="QLabel" name="label_10">
+                  <property name="font">
+                   <font>
+                    <family>Georgia</family>
+                    <pointsize>12</pointsize>
+                    <weight>50</weight>
+                    <bold>false</bold>
+                    <underline>false</underline>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Overlaps</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="replot_overlaps_btn">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Replot Overlaps</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
                <widget class="QTextBrowser" name="overlaps_textbox">

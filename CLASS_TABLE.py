@@ -10,14 +10,12 @@ def reset_checkmarks(table, count):
         cell2 = table.cellWidget(idx, 2)
         cell2.setCheckState(Qt.CheckState.Checked)
 
-
 def uncheck_checkmarks(table, count):
     for idx in range(count):
         cell1 = table.cellWidget(idx, 1)
         cell1.setCheckState(Qt.CheckState.Unchecked)
         cell2 = table.cellWidget(idx, 2)
         cell2.setCheckState(Qt.CheckState.Unchecked)
-
 
 def table_swap(table, dataset, plot, event):
     moved_from = table.currentRow()

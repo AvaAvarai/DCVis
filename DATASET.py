@@ -39,6 +39,10 @@ class Dataset:
         # plot information
         self.plot_type: str = ''
         self.positions: List[float] = []
+        
+        self.old_positions: List[float] = []
+        self.overlap_indices = []
+        
         self.axis_positions: List[float] = []
         self.axis_on: bool = True
         self.axis_count: int = 0
@@ -131,4 +135,3 @@ class Dataset:
 
     def roll_vertex_in(self, roll_dir: int):
         self.vertex_in = list(np.roll(self.vertex_in, roll_dir))
-

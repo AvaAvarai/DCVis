@@ -35,6 +35,8 @@ class Controller:
         self.view.background_button.clicked.connect(self.view.open_background_color_picker)
         self.view.axes_button.clicked.connect(self.view.open_axes_color_picker)
         self.view.trace_mode.clicked.connect(self.view.trace_mode_func)
+        self.view.replot_overlaps_btn.clicked.connect(self.view.replot_overlaps)
+        self.view.replot_overlaps_btn.setEnabled(False)
         
         # Set keyboard shortcuts
         self.view.load_button.setShortcut(Qt.Key.Key_F1)

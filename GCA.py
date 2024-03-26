@@ -46,4 +46,4 @@ class GCA:
             DCC.DCC(dataset)
 
         else:
-            print('No type selected')
+            print('No type selected')    

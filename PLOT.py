@@ -11,7 +11,7 @@ from typing import List
 import numpy as np
 import GCA, CLIPPING
 from COLORS import getColors, shift_hue
-import CLASS_TABLE
+
 
 def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, is_inner, class_index):
     # Calculate midpoint between start and end points
@@ -131,27 +131,28 @@ def draw_highlighted_curves(dataset, line_vao):
             if len(dataset.class_order) > 1:
                 was_inner = (class_index == dataset.class_order[1])
             for j in range(0, len(dataset.positions[class_index]), dataset.vertex_count):
-                if dataset.vertex_in[size_index + datapoint_count]:
-                    if dataset.clear_samples[size_index + datapoint_count]:
-                        datapoint_count += 1
-                        continue
-                    for h in range(1, dataset.vertex_count):
-                        if h > dataset.attribute_count:
+                if size_index + datapoint_count < len(dataset.vertex_in):
+                    if dataset.vertex_in[size_index + datapoint_count]:
+                        if dataset.clear_samples[size_index + datapoint_count]:
+                            datapoint_count += 1
                             continue
+                        for h in range(1, dataset.vertex_count):
+                            if h > dataset.attribute_count:
+                                continue
 
-                        start = dataset.positions[class_index][j + h - 1]
-                        end = dataset.positions[class_index][j + h]
+                            start = dataset.positions[class_index][j + h - 1]
+                            end = dataset.positions[class_index][j + h]
 
-                        # Adjust start and end for inner classes
-                        if is_inner:
-                            start = adjust_point_towards_center(start)
-                            end = adjust_point_towards_center(end)
-                        if was_inner:
-                            start = adjust_point_towards_center(start, -dataset.attribute_count)
-                            end = adjust_point_towards_center(end, -dataset.attribute_count)
+                            # Adjust start and end for inner classes
+                            if is_inner:
+                                start = adjust_point_towards_center(start)
+                                end = adjust_point_towards_center(end)
+                            if was_inner:
+                                start = adjust_point_towards_center(start, -dataset.attribute_count)
+                                end = adjust_point_towards_center(end, -dataset.attribute_count)
 
-                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, dataset.attribute_count, is_inner, class_index)
-                        draw_cubic_bezier_curve(start, control1, control2, end, is_inner, dataset.attribute_count)
+                            control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, dataset.attribute_count, is_inner, class_index)
+                            draw_cubic_bezier_curve(start, control1, control2, end, is_inner, dataset.attribute_count)
                 datapoint_count += 1
             
             glBindVertexArray(0)
@@ -359,9 +360,9 @@ def set_view_frustrum(m_left, m_right, m_bottom, m_top):
     glLoadIdentity()
 
 
-class MakePlot(QOpenGLWidget):
-    def __init__(self, dataset, overlaps_textbox, parent=None):
-        super(MakePlot, self).__init__(parent)
+class Plot(QOpenGLWidget):
+    def __init__(self, dataset, overlaps_textbox, replot_overlaps_btn, parent=None):
+        super(Plot, self).__init__(parent)
 
         self.data = dataset
 
@@ -372,7 +373,9 @@ class MakePlot(QOpenGLWidget):
 
         self.sectors = []
         self.data.active_sectors = [True for _ in range(self.data.class_count)]
-
+        self.replot_overlaps_btn = replot_overlaps_btn
+        self.replot_overlaps_btn.setEnabled(False)
+        
         # for clipping
         self.all_rect = []  # holds all clip boxes
         self.rect = []  # working clip box
@@ -685,12 +688,15 @@ class MakePlot(QOpenGLWidget):
                             position = adjust_point_towards_center(position, data.attribute_count)
                         if was_inner:
                             position = adjust_point_towards_center(position, -data.attribute_count)
-                            
+                        
+                        
                         if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
                             data.overlap_points[class_index] += 1
-                            
+                            # append index to overlap indices
+                            data.overlap_indices.append(pos_index // data.vertex_count)
+
                             glPointSize(10)
-                            glColor4ub(255, 0, 0, 255)  # Red color for highlighting
+                            glColor4ub(255, 0, 0, 255)
                             
                         glBegin(GL_POINTS)
                         glVertex2f(*position)
@@ -710,10 +716,12 @@ class MakePlot(QOpenGLWidget):
         overlap = ""
         count = 0
         for i in range(data.class_count):
-            overlap += f"Class {data.class_names[i]}: {data.overlap_points[i]}\n"
+            overlap += f"Class {i + 1} {data.class_names[i]}: {data.overlap_points[i]}\n"
             count += data.overlap_points[i]
         overlap += f"Total Overlaps: {count} / {data.sample_count} samples\n= {round(100 * (count / data.sample_count), 2)}% overlap for {round(100 * (1 - (count / data.sample_count)), 2)}% accuracy.\n"
         self.overlaps_textbox.setText(overlap)
+        if count > 0:
+            self.replot_overlaps_btn.setEnabled(True)
         glDisable(GL_BLEND)
 
     def draw_unhighlighted_curves(self, data, line_vao):
@@ -746,7 +754,8 @@ class MakePlot(QOpenGLWidget):
                 for j in range(0, len(data.positions[class_index]), data.vertex_count):
                     sub_alpha = 0
                     for h in range(1, data.vertex_count):
-                        if h > data.attribute_count or data.clear_samples[size_index + datapoint_count]:
+                        index = size_index + datapoint_count
+                        if index < len(data.clear_samples) and (h > data.attribute_count or data.clear_samples[index]):
                             continue
                         
                         if data.trace_mode:
@@ -867,3 +876,12 @@ class MakePlot(QOpenGLWidget):
                 self.sectors.append(sector_info)
 
         glDisable(GL_BLEND)
+  
+    def replot_overlaps(self):
+        self.data.old_positions += self.data.positions
+
+        filtered_df = self.data.dataframe.iloc[self.data.overlap_indices]
+        self.data.load_frame(filtered_df)
+
+        self.update()
+    

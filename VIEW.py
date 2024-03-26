@@ -115,9 +115,10 @@ class View(QtWidgets.QMainWindow):
         if not (self.controller.data and self.controller.data.class_count > 0):
             print("No class data available to display in ClassTable.")
             return
-
+        
         self.rules_textbox.setText('')
         self.overlaps_textbox.setText('')
+        self.controller.data.overlap_count = 0
 
         # remove initial placeholder
         if self.pl:
@@ -148,8 +149,8 @@ class View(QtWidgets.QMainWindow):
         else:
             return
 
-        self.plot_widget = PLOT.MakePlot(self.controller.data, self.overlaps_textbox, parent=self)
-        self.remove_clips()  # remove previous clips if any
+        self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+        self.remove_clips()
 
         # class table placeholder
         if self.class_pl_exists:
@@ -322,3 +323,9 @@ class View(QtWidgets.QMainWindow):
         if color.isValid():
             self.axes_color = [color.redF(), color.greenF(), color.blueF(), color.alphaF()]
             self.plot_widget.redraw_plot(axes_color=self.axes_color)
+
+    def replot_overlaps(self):
+        if not self.plot_widget:
+            WARNINGS.no_data_warning()
+            return
+        self.plot_widget.replot_overlaps()
