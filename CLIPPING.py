@@ -178,6 +178,15 @@ def cohen_sutherland_clip(x1, y1, x2, y2, min_max):
     else:
         return False
 
+def count_clipped_samples(dataset):
+    clipped_count = 0
+    
+    for i in range(dataset.sample_count):
+        if dataset.clipped_samples[i]:
+            clipped_count += 1
+    
+    return clipped_count
+
 def count_clipped_classes(dataset):
     clipped_classes = set()
     

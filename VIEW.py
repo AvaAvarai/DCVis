@@ -116,8 +116,8 @@ class View(QtWidgets.QMainWindow):
             print("No class data available to display in ClassTable.")
             return
         
-        self.rules_textbox.setText('')
-        self.overlaps_textbox.setText('')
+        self.rulesListWidget.clear()
+        self.controller.data.rule_regions = {}
         self.controller.data.overlap_count = 0
 
         # remove initial placeholder
@@ -211,7 +211,7 @@ class View(QtWidgets.QMainWindow):
             if self.rule_count > 0:
                 self.rule_count -= 1
 
-            self.clipped_area_textbox.setText('')
+            self.clipped_area_textbox.clear()
 
             self.plot_widget.update()
         else:
@@ -223,7 +223,6 @@ class View(QtWidgets.QMainWindow):
             return
 
         self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
         self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
         self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
 
@@ -247,7 +246,7 @@ class View(QtWidgets.QMainWindow):
         self.rule_count = 0
         
         self.controller.data.rule_regions = {}
-        self.rules_textbox.setText('')
+        self.rulesListWidget.clear()
         
         self.plot_widget.update()
 
@@ -270,15 +269,43 @@ class View(QtWidgets.QMainWindow):
         else:
             self.controller.data.rule_regions[primary_class] = rules      
         class_name_or_false = CLIPPING.count_clipped_classes(self.controller.data)
+        case_count = CLIPPING.count_clipped_samples(self.controller.data)
 
         if not class_name_or_false:
-            rule_description = f"Rule {self.rule_count + 1}: {rules} is not pure"
+            rule_description = f"Rule {self.rule_count + 1} with {case_count} samples is not pure"
         else:
-            rule_description = f"Rule {self.rule_count + 1}: {rules} contains classes: {class_name_or_false}"
+            rule_description = f"Rule {self.rule_count + 1} with {case_count} samples has classes: {class_name_or_false}"
         
+        item = QtWidgets.QListWidgetItem(rule_description)
+        item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsUserCheckable)
+        item.setCheckState(QtCore.Qt.CheckState.Checked)
+
+        self.rulesListWidget.addItem(item)
+        self.rulesListWidget.itemChanged.connect(self.onRuleItemChanged)
+
         self.rule_count += 1
-        self.rules_textbox.append(rule_description)
+        
         self.plot_widget.update()
+
+    def onRuleItemChanged(self, item):
+        # Check if the item's checkbox is checked
+        if item.checkState() == QtCore.Qt.CheckState.Checked:
+            print(f"Item '{item.text()}' is checked.")
+            # hide the samples that are in the rule
+            rule_num = item.text().split()[1]
+            rule_num = int(rule_num) - 1
+            rules = self.controller.data.rule_regions
+            rule = rules[list(rules.keys())[rule_num]]
+            for rect in rule:
+                positions = self.controller.data.positions
+                CLIPPING.Clipping(rect, self.controller.data)
+                CLIPPING.clip_samples(positions, rect, self.controller.data)
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+            
+        else:
+            print(f"Item '{item.text()}' is unchecked.")
+            # Implement logic for when the item is unchecked
 
     def table_swap(self, event):
         table = event.source()

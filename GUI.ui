@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1664</width>
+    <width>1663</width>
     <height>1000</height>
    </rect>
   </property>
@@ -453,14 +453,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QTextBrowser" name="rules_textbox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
+               <widget class="QListWidget" name="rulesListWidget"/>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -950,7 +943,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1664</width>
+     <width>1663</width>
      <height>21</height>
     </rect>
    </property>
