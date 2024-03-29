@@ -118,6 +118,8 @@ class View(QtWidgets.QMainWindow):
         
         self.rulesListWidget.clear()
         self.controller.data.rule_regions = {}
+        self.rule_count = 0
+        self.controller.data.rule_count = 0
         self.controller.data.overlap_count = 0
 
         # remove initial placeholder
