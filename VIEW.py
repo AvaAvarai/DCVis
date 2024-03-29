@@ -267,16 +267,14 @@ class View(QtWidgets.QMainWindow):
         if CLIPPING.is_pure_class(self.controller.data):
             primary_class += " (pure)"
         if primary_class in self.controller.data.rule_regions:
-            self.controller.data.rule_regions[primary_class] += rules
+            primary_class += f" ({self.controller.data.rule_count})"
+            self.controller.data.rule_regions[primary_class] = rules
         else:
             self.controller.data.rule_regions[primary_class] = rules      
-        class_name_or_false = CLIPPING.count_clipped_classes(self.controller.data)
+        class_set = CLIPPING.count_clipped_classes(self.controller.data)
         case_count = CLIPPING.count_clipped_samples(self.controller.data)
 
-        if not class_name_or_false:
-            rule_description = f"Rule {self.rule_count + 1} with {case_count} samples is not pure"
-        else:
-            rule_description = f"Rule {self.rule_count + 1} with {case_count} samples has classes: {class_name_or_false}"
+        rule_description = f"Rule {self.rule_count + 1} samples: {case_count} classes: {class_set} Regions: {len(rules)}"
         
         item = QtWidgets.QListWidgetItem(rule_description)
         item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsUserCheckable)
@@ -307,13 +305,14 @@ class View(QtWidgets.QMainWindow):
             rule_num = item.text().split()[1]
             rule_num = int(rule_num) - 1
             rules = self.controller.data.rule_regions
-            rule = rules[list(rules.keys())[rule_num]]
-            for rect in rule:
-                positions = self.controller.data.positions
-                CLIPPING.Clipping(rect, self.controller.data)
-                CLIPPING.clip_samples(positions, rect, self.controller.data)
-            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
-            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+            if len(rules) > rule_num:
+                rule = rules[list(rules.keys())[rule_num]]
+                for rect in rule:
+                    positions = self.controller.data.positions
+                    CLIPPING.Clipping(rect, self.controller.data)
+                    CLIPPING.clip_samples(positions, rect, self.controller.data)
+                self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+                self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         self.plot_widget.update()
 
     def table_swap(self, event):
