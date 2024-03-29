@@ -292,8 +292,18 @@ class View(QtWidgets.QMainWindow):
     def onRuleItemChanged(self, item):
         # Check if the item's checkbox is checked
         if item.checkState() == QtCore.Qt.CheckState.Checked:
-            print(f"Item '{item.text()}' is checked.")
-            # hide the samples that are in the rule
+            rule_num = item.text().split()[1]
+            rule_num = int(rule_num) - 1
+            rules = self.controller.data.rule_regions
+            rule = rules[list(rules.keys())[rule_num]]
+            for rect in rule:
+                positions = self.controller.data.positions
+                CLIPPING.Clipping(rect, self.controller.data)
+                CLIPPING.clip_samples(positions, rect, self.controller.data)
+            
+            self.controller.data.clear_samples = np.subtract(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        else:
             rule_num = item.text().split()[1]
             rule_num = int(rule_num) - 1
             rules = self.controller.data.rule_regions
@@ -304,10 +314,7 @@ class View(QtWidgets.QMainWindow):
                 CLIPPING.clip_samples(positions, rect, self.controller.data)
             self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-            
-        else:
-            print(f"Item '{item.text()}' is unchecked.")
-            # Implement logic for when the item is unchecked
+        self.plot_widget.update()
 
     def table_swap(self, event):
         table = event.source()
