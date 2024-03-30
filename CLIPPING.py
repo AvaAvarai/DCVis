@@ -239,7 +239,7 @@ def clip_samples(positions, rect, dataset):
         # check each sample in the class
         for sample in data_class:
             # check each polyline in the line
-            for i in range(dataset.vertex_count - 1):  # Adjusted loop to avoid out-of-bounds on the last index
+            for i in range(dataset.vertex_count - 1):
                 # Ensure the next point in the polyline exists before attempting to clip
                 if 2 * i + 3 < len(sample):
                     is_clipped = cohen_sutherland_clip(sample[2 * i], sample[2 * i + 1], sample[2 * i + 2], sample[2 * i + 3], min_max)

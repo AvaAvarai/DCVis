@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1663</width>
+    <width>1800</width>
     <height>1000</height>
    </rect>
   </property>
@@ -35,10 +35,16 @@
       <item>
        <widget class="QFrame" name="attributeframe_2">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="frameShape">
          <enum>QFrame::Panel</enum>
@@ -53,7 +59,7 @@
          <item>
           <widget class="QFrame" name="attributeFrame_2">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -498,21 +504,21 @@
         <item>
          <widget class="QWidget" name="pl" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>900</width>
+            <width>1050</width>
             <height>900</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>16777215</width>
-            <height>16777215</height>
+            <width>900</width>
+            <height>900</height>
            </size>
           </property>
          </widget>
@@ -943,7 +949,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1663</width>
+     <width>1800</width>
      <height>21</height>
     </rect>
    </property>

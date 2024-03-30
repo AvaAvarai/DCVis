@@ -315,9 +315,39 @@ class View(QtWidgets.QMainWindow):
         else:
             self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
         class_set = CLIPPING.count_clipped_classes(self.controller.data)
+        
+        class_str = ""
+        for index, c in enumerate(class_set):
+            class_str += c
+            if index < len(class_set) - 1:
+                class_str += ", "
+        
+        # count number of samples clipped by rule which are in clear_samples
+        overcounts = np.count_nonzero(np.logical_and(self.controller.data.clipped_samples, self.controller.data.clear_samples))
+        
         case_count = CLIPPING.count_clipped_samples(self.controller.data)
 
-        rule_description = f"Rule {self.rule_count + 1} samples: {case_count} classes: {class_set} Regions: {len(rules)}"
+        case_count -= overcounts
+        class_count = len(class_set)
+
+        if class_count == 1:
+            class_str += " class"
+        else:
+            class_str += " classes"
+        
+        cases_str = ""
+        if case_count == 1:
+            cases_str = "case"
+        else:
+            cases_str = "cases"
+        
+        region_str = ""
+        if len(rules) == 1:
+            region_str = "region"
+        else:
+            region_str = "regions"
+        
+        rule_description = f"Rule {self.rule_count + 1}) {case_count} {cases_str} {class_str} {len(rules)} {region_str}"
         
         item = QtWidgets.QListWidgetItem(rule_description)
         item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsUserCheckable)
@@ -333,7 +363,7 @@ class View(QtWidgets.QMainWindow):
     def onRuleItemChanged(self, item):
         # Check if the item's checkbox is checked
         if item.checkState() == QtCore.Qt.CheckState.Checked:
-            rule_num = item.text().split()[1]
+            rule_num = item.text().split()[1][:-1]
             rule_num = int(rule_num) - 1
             rules = self.controller.data.rule_regions
             rule = rules[list(rules.keys())[rule_num]]
@@ -345,7 +375,7 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.clear_samples = np.subtract(self.controller.data.clear_samples, self.controller.data.clipped_samples)
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         else:
-            rule_num = item.text().split()[1]
+            rule_num = item.text().split()[1][:-1]
             rule_num = int(rule_num) - 1
             rules = self.controller.data.rule_regions
             if len(rules) > rule_num:
