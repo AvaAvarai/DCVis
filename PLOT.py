@@ -505,8 +505,14 @@ class Plot(QOpenGLWidget):
             for key, box in self.data.rule_regions.items():
                 # draw box for each rule region pure class color
                 key = box[0]
+                highlight = False
+                if key.endswith('(highlighted)'):
+                    key = key[:-13]
+                    highlight = True
                 box = box[1]
-                if key:
+                if highlight:
+                    draw_box(box, [1.0, 1.0, 0.0, 1/2])
+                elif key:
                     if key.endswith('(pure)'):
                         class_name = key[:-7]
                         class_index = self.data.class_names.index(class_name)

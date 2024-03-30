@@ -26,7 +26,29 @@ class View(QtWidgets.QMainWindow):
         # Setup context menu for rulesListWidget
         self.rulesListWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.rulesListWidget.customContextMenuRequested.connect(self.openContextMenu)
-
+        
+        self.rulesListWidget.itemClicked.connect(self.highlightAssociatedRegions)
+    
+    def highlightAssociatedRegions(self, item):
+        rule_num = item.text().split()[1][:-1]
+        rule_num = int(rule_num) - 1
+        rules = self.controller.data.rule_regions
+        if rule_num in rules:
+            rule = rules[rule_num]
+            primary_class, rects = rule
+            
+            # Check if it's already highlighted or not
+            if not primary_class.endswith(" (highlighted)"):
+                # Mark as highlighted
+                new_primary_class = primary_class + " (highlighted)"
+            else:
+                # Remove "(highlighted)" to toggle off the highlight
+                new_primary_class = primary_class[:-14]
+            
+            # Update the rule with the new primary class name
+            self.controller.data.rule_regions[rule_num] = (new_primary_class, rects)
+            self.plot_widget.update()
+                
     def removeSelectedRule(self):
         currentItem = self.rulesListWidget.currentItem()
         if currentItem:
@@ -36,6 +58,9 @@ class View(QtWidgets.QMainWindow):
             item_text = item.text()
             item_num = int(item_text.split()[1][:-1]) - 1
 
+            if not item_num in self.controller.data.rule_regions:
+                return
+            
             self.controller.data.rule_regions.pop(item_num)
 
             
@@ -51,8 +76,7 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
             self.controller.data.clipped_samples = old_clip
             self.rule_count -= 1
-            # If you have additional data structures that track rules, update them here
-            del item  # Ensure the item is deleted to free up resources
+            del item
             self.plot_widget.update()
             
     def openContextMenu(self, position):
@@ -281,9 +305,6 @@ class View(QtWidgets.QMainWindow):
     def remove_rules(self):
         self.rule_count = 0
         
-        self.controller.data.positions = self.controller.data.original_positions.copy()
-        self.controller.data.original_dataframe = self.controller.data.dataframe.copy()
-        
         self.controller.data.rule_regions = {}
         self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
         
@@ -302,24 +323,22 @@ class View(QtWidgets.QMainWindow):
 
         rules = self.plot_widget.all_rect
         
-        if self.rule_count == 0:
-            self.controller.data.original_positions = self.controller.data.positions.copy()
-            self.controller.data.original_dataframe = self.controller.data.dataframe.copy()
-        
-        primary_class = CLIPPING.primary_clipped_class(self.controller.data)
-        if CLIPPING.is_pure_class(self.controller.data):
-            primary_class += " (pure)"
-        if primary_class in self.controller.data.rule_regions:
-            primary_class += f" ({self.controller.data.rule_count})"
-            self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
-        else:
-            self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
-        
         skips = []
         for i, _ in enumerate(self.controller.data.clear_samples):
             if self.controller.data.clear_samples[i] == 1:
                 skips.append(i)
         class_set = CLIPPING.count_clipped_classes(self.controller.data, skips)
+        print(class_set)
+        if len(class_set) == 1:
+            class_add = class_set.pop()
+            primary_class = class_add  + " (pure)"
+            class_set.add(class_add)
+        else:
+            primary_class = CLIPPING.primary_clipped_class(self.controller.data)
+        if primary_class in self.controller.data.rule_regions:
+            primary_class += f" ({self.controller.data.rule_count})"
+        else:
+            self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
         
         class_str = ""
         for index, c in enumerate(class_set):
