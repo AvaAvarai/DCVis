@@ -17,7 +17,7 @@ Available under the MIT License, allowing for both personal and commercial use.
 from PyQt6 import QtWidgets
 import sys
 import VIEW, CONTROLLER
-
+  
 
 # DCVis application entry point
 if __name__ == '__main__':

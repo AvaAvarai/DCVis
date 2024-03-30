@@ -13,6 +13,8 @@ class Dataset:
         self.name: str = ''
         self.dataframe: Optional[pd.DataFrame] = None
 
+        self.original_dataframe: Optional[pd.DataFrame] = None
+
         # class information
         self.class_count: int = 0
         self.count_per_class: List[int] = []
@@ -40,7 +42,8 @@ class Dataset:
         self.plot_type: str = ''
         self.positions: List[float] = []
         
-        self.old_positions: List[float] = []
+        self.original_positions: List[float] = []
+        
         self.overlap_indices = []
         
         self.axis_positions: List[float] = []

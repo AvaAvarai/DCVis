@@ -15,18 +15,52 @@ class View(QtWidgets.QMainWindow):
         loadUi('GUI.ui', self)  # load .ui file for GUI made in Qt Designer
 
         self.plot_widget = None
-
         self.class_table = None
         self.attribute_table = None
-
         self.class_pl_exists = True
         self.attribute_pl_exists = True
-
         self.rule_count = 0
-        
-        # for swapping cells
         self.cell_swap = QtWidgets.QTableWidget()
         self.plot_layout = self.findChild(QtWidgets.QVBoxLayout, 'plotDisplay')
+
+        # Setup context menu for rulesListWidget
+        self.rulesListWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.rulesListWidget.customContextMenuRequested.connect(self.openContextMenu)
+
+    def removeSelectedRule(self):
+        currentItem = self.rulesListWidget.currentItem()
+        if currentItem:
+            row = self.rulesListWidget.row(currentItem)
+            item = self.rulesListWidget.takeItem(row)
+
+            item_text = item.text()
+            item_num = int(item_text.split()[1]) - 1
+
+            self.controller.data.rule_regions.pop(item_num)
+
+            
+            self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
+            old_clip = self.controller.data.clipped_samples.copy()
+            # clip remaining rules and update clear_samples
+            for rule in self.controller.data.rule_regions.values():
+                for rect in rule[1]:
+                    positions = self.controller.data.positions
+                    CLIPPING.Clipping(rect, self.controller.data)
+                    CLIPPING.clip_samples(positions, rect, self.controller.data)
+            self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+            self.controller.data.clipped_samples = old_clip
+            self.rule_count -= 1
+            # If you have additional data structures that track rules, update them here
+            del item  # Ensure the item is deleted to free up resources
+            self.plot_widget.update()
+            
+    def openContextMenu(self, position):
+        menu = QtWidgets.QMenu()
+        removeAction = menu.addAction("Remove Rule")
+        action = menu.exec(self.rulesListWidget.mapToGlobal(position))
+        if action == removeAction:
+            self.removeSelectedRule()
 
     def recenter_plot(self):
         if not self.plot_widget:
@@ -247,7 +281,12 @@ class View(QtWidgets.QMainWindow):
     def remove_rules(self):
         self.rule_count = 0
         
+        self.controller.data.positions = self.controller.data.original_positions.copy()
+        self.controller.data.original_dataframe = self.controller.data.dataframe.copy()
+        
         self.controller.data.rule_regions = {}
+        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
+        
         self.rulesListWidget.clear()
         
         self.plot_widget.update()
@@ -263,14 +302,18 @@ class View(QtWidgets.QMainWindow):
 
         rules = self.plot_widget.all_rect
         
+        if self.rule_count == 0:
+            self.controller.data.original_positions = self.controller.data.positions.copy()
+            self.controller.data.original_dataframe = self.controller.data.dataframe.copy()
+        
         primary_class = CLIPPING.primary_clipped_class(self.controller.data)
         if CLIPPING.is_pure_class(self.controller.data):
             primary_class += " (pure)"
         if primary_class in self.controller.data.rule_regions:
             primary_class += f" ({self.controller.data.rule_count})"
-            self.controller.data.rule_regions[primary_class] = rules
+            self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
         else:
-            self.controller.data.rule_regions[primary_class] = rules      
+            self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
         class_set = CLIPPING.count_clipped_classes(self.controller.data)
         case_count = CLIPPING.count_clipped_samples(self.controller.data)
 
@@ -294,7 +337,7 @@ class View(QtWidgets.QMainWindow):
             rule_num = int(rule_num) - 1
             rules = self.controller.data.rule_regions
             rule = rules[list(rules.keys())[rule_num]]
-            for rect in rule:
+            for rect in rule[1]:
                 positions = self.controller.data.positions
                 CLIPPING.Clipping(rect, self.controller.data)
                 CLIPPING.clip_samples(positions, rect, self.controller.data)
@@ -307,7 +350,7 @@ class View(QtWidgets.QMainWindow):
             rules = self.controller.data.rule_regions
             if len(rules) > rule_num:
                 rule = rules[list(rules.keys())[rule_num]]
-                for rect in rule:
+                for rect in rule[1]:
                     positions = self.controller.data.positions
                     CLIPPING.Clipping(rect, self.controller.data)
                     CLIPPING.clip_samples(positions, rect, self.controller.data)
