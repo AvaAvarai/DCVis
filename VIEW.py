@@ -314,7 +314,13 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
         else:
             self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
-        class_set = CLIPPING.count_clipped_classes(self.controller.data)
+        
+        skips = []
+        for i, _ in enumerate(self.controller.data.clear_samples):
+            if self.controller.data.clear_samples[i] == 1:
+                skips.append(i)
+        print(skips)
+        class_set = CLIPPING.count_clipped_classes(self.controller.data, skips)
         
         class_str = ""
         for index, c in enumerate(class_set):

@@ -187,11 +187,11 @@ def count_clipped_samples(dataset):
     
     return clipped_count
 
-def count_clipped_classes(dataset):
+def count_clipped_classes(dataset, skips=[]):
     clipped_classes = set()
     
     for i in range(dataset.sample_count):
-        if dataset.clipped_samples[i]:
+        if dataset.clipped_samples[i] and not i in skips:
             clipped_classes.add(dataset.dataframe['class'][i])
     
     return clipped_classes
