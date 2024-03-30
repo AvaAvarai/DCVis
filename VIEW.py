@@ -34,7 +34,7 @@ class View(QtWidgets.QMainWindow):
             item = self.rulesListWidget.takeItem(row)
 
             item_text = item.text()
-            item_num = int(item_text.split()[1]) - 1
+            item_num = int(item_text.split()[1][:-1]) - 1
 
             self.controller.data.rule_regions.pop(item_num)
 
@@ -319,7 +319,6 @@ class View(QtWidgets.QMainWindow):
         for i, _ in enumerate(self.controller.data.clear_samples):
             if self.controller.data.clear_samples[i] == 1:
                 skips.append(i)
-        print(skips)
         class_set = CLIPPING.count_clipped_classes(self.controller.data, skips)
         
         class_str = ""
