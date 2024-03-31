@@ -126,7 +126,7 @@ def draw_highlighted_curves(dataset, line_vao):
             for j in range(dataset.class_count):
                 if j < class_index:
                     size_index += dataset.count_per_class[j]
-
+            was_inner = False
             is_inner = (class_index == dataset.class_order[0]) and not class_count_one
             if len(dataset.class_order) > 1:
                 was_inner = (class_index == dataset.class_order[1])
@@ -691,7 +691,7 @@ class Plot(QOpenGLWidget):
                         was_inner = (class_index == data.class_order[1])
                     for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
                         position = data.positions[class_index][pos_index + j]
-                        
+
                         if is_inner:
                             position = adjust_point_towards_center(position, data.attribute_count)
                         if was_inner:
@@ -700,9 +700,10 @@ class Plot(QOpenGLWidget):
                         
                         if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
                             data.overlap_points[class_index] += 1
-                            # append index to overlap indices
-                            data.overlap_indices.append(pos_index // data.vertex_count)
-
+                            # append dataframe index to overlap indices
+                            index = pos_index // data.vertex_count
+                            if index not in data.overlap_indices:
+                                data.overlap_indices.append(index)
                             glPointSize(10)
                             glColor4ub(255, 0, 0, 255)
                             
@@ -876,20 +877,20 @@ class Plot(QOpenGLWidget):
                     if self.data.active_sectors[class_index]:
                         draw_filled_sector((0, 0), closest_angle, furthest_angle, sector_radius, segments=50)
 
-                sector_info = {
-                    'start_angle': closest_angle,
-                    'end_angle': furthest_angle,
-                    'radius': sector_radius
-                }
-                self.sectors.append(sector_info)
+                if closest is not None and furthest is not None:
+                    sector_info = {
+                        'start_angle': closest_angle,
+                        'end_angle': furthest_angle,
+                        'radius': sector_radius
+                    }
+                    self.sectors.append(sector_info)
 
         glDisable(GL_BLEND)
-  
-    def replot_overlaps(self):
-        self.data.old_positions += self.data.positions
 
+    def replot_overlaps(self):
+        
         filtered_df = self.data.dataframe.iloc[self.data.overlap_indices]
         self.data.load_frame(filtered_df)
-
+        
         self.update()
     

@@ -65,7 +65,6 @@ class View(QtWidgets.QMainWindow):
 
             
             self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
-            old_clip = self.controller.data.clipped_samples.copy()
             # clip remaining rules and update clear_samples
             for rule in self.controller.data.rule_regions.values():
                 for rect in rule[1]:
@@ -73,8 +72,6 @@ class View(QtWidgets.QMainWindow):
                     CLIPPING.Clipping(rect, self.controller.data)
                     CLIPPING.clip_samples(positions, rect, self.controller.data)
             self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
-            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-            self.controller.data.clipped_samples = old_clip
             self.rule_count -= 1
             del item
             self.plot_widget.update()
@@ -328,7 +325,6 @@ class View(QtWidgets.QMainWindow):
             if self.controller.data.clear_samples[i] == 1:
                 skips.append(i)
         class_set = CLIPPING.count_clipped_classes(self.controller.data, skips)
-        print(class_set)
         if len(class_set) == 1:
             class_add = class_set.pop()
             primary_class = class_add  + " (pure)"
