@@ -153,7 +153,6 @@ class View(QtWidgets.QMainWindow):
             print("Indices of clipped samples:", clipped_indices)
             clipped_positions = [self.controller.data.dataframe.iloc[i] for i in clipped_indices if i < self.controller.data.sample_count]
 
-            # Assuming you want to print these positions to console or handle them:
             print("Positions of clipped samples:")
             for pos in clipped_positions:
                 for i, val in enumerate(pos):
@@ -171,7 +170,11 @@ class View(QtWidgets.QMainWindow):
             # delete all clipped samples from dataset
             self.controller.data.delete_clip()
             self.controller.display_data()
-            
+            if self.plot_widget:
+                self.plot_layout.removeWidget(self.plot_widget)
+            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+            self.plot_layout.addWidget(self.plot_widget)
+
         self.refresh()
 
     # function to refresh plot
