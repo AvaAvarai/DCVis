@@ -102,6 +102,12 @@ class Dataset:
 
         # general dataframe
         self.dataframe = df
+    
+    def copy_clip(self):
+        # copy clipped samples as additional data entries
+        duplicated_data = self.dataframe.loc[self.clipped_samples].copy()
+        self.dataframe = pd.concat([self.dataframe, duplicated_data]).reset_index(drop=True)
+        self.load_frame(self.dataframe)
 
     def move_samples(self, move_delta: int):
         if self.dataframe is None or self.dataframe.empty:
@@ -116,7 +122,8 @@ class Dataset:
             return
 
         # translate clipped samples by delta
-        self.dataframe.loc[self.clipped_samples, self.attribute_names] += move_delta
+        for attribute in self.attribute_names:
+            self.dataframe.loc[self.clipped_samples, attribute] += move_delta
 
     def load_from_csv(self, filename: str):
         try:

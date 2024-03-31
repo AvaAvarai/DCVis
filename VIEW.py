@@ -155,7 +155,9 @@ class View(QtWidgets.QMainWindow):
             print("Positions of clipped samples:")
             for pos in clipped_positions:
                 for i, val in enumerate(pos):
-                    print(f"{self.controller.data.attribute_names[i % self.controller.data.attribute_count]}: {val}")     
+                    print(f"{self.controller.data.attribute_names[i % self.controller.data.attribute_count]}: {val}")
+        elif key == QtCore.Qt.Key.Key_C:
+            self.controller.data.copy_clip()
 
         self.plot_widget.update()
 
