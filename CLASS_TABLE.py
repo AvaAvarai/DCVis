@@ -76,7 +76,7 @@ class ClassTable(QtWidgets.QTableWidget):
         counter = 0
         for ele in dataset.class_names:
             class_name = QtWidgets.QTableWidgetItem(str(ele))
-            class_name.setForeground(QBrush(QColor(dataset.class_colors[counter][0], dataset.class_colors[counter][1], dataset.class_colors[counter][2])))
+            class_name.setForeground(QBrush(QColor(dataset.class_colors[dataset.class_order[counter]][0], dataset.class_colors[dataset.class_order[counter]][1], dataset.class_colors[dataset.class_order[counter]][2])))
             self.setItem(counter, 0, class_name)
 
             class_checkbox = CheckBox(counter, dataset, self.refresh_GUI, 'class', parent=self)
@@ -103,7 +103,7 @@ class Button(QtWidgets.QPushButton):
         super(Button, self).__init__(parent=parent)
 
         self.setText('Color')
-        self.index = row
+        self.index = dataset.class_order[row]
         self.cell = self.parent().item(self.index, 0)
         self.data = dataset
         self.r = refresh

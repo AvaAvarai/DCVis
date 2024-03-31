@@ -174,7 +174,6 @@ class View(QtWidgets.QMainWindow):
                 self.plot_layout.removeWidget(self.plot_widget)
             self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
             self.plot_layout.addWidget(self.plot_widget)
-
         self.refresh()
 
     # function to refresh plot

@@ -104,21 +104,39 @@ class Dataset:
         self.dataframe = df
     
     def delete_clip(self):
-        if isinstance(self.clipped_samples, list) or self.clipped_samples.dtype != np.bool_:
+        # Convert to boolean mask if necessary
+        if not isinstance(self.clipped_samples, np.ndarray) or self.clipped_samples.dtype != bool:
             clipped_mask = np.array(self.clipped_samples, dtype=bool)
         else:
             clipped_mask = self.clipped_samples
 
-        if self.dataframe is not None and clipped_mask.any():
+        # Perform deletion
+        if self.dataframe is not None and not self.dataframe.empty:
             self.dataframe = self.dataframe[~clipped_mask].reset_index(drop=True)
-        self.load_frame(self.dataframe)
+
+        # Manually update sample_count
+        self.sample_count = len(self.dataframe)
+
+        # Update count_per_class based on the new dataframe
+        if not self.dataframe.empty:
+            # Assuming 'class' is the column name that denotes the class for each sample
+            class_counts = self.dataframe['class'].value_counts().sort_index()
+            self.count_per_class = class_counts.tolist()
+
+            # Assuming class_names are already in the correct order,
+            # but if class_names need to be updated from the dataframe directly:
+            self.class_names = class_counts.index.tolist()
+
+            # Update class_count in case the number of classes has changed
+            self.class_count = len(self.class_names)
+        self.clipped_samples = np.repeat(False, self.sample_count)
     
     def copy_clip(self):
         # copy clipped samples as additional data entries
         bool_clipped = np.array(self.clipped_samples).astype(bool)
         
         duplicated_data = self.dataframe.iloc[bool_clipped].copy()
-        self.dataframe = pd.concat([self.dataframe, duplicated_data]).reset_index(drop=True)
+        self.dataframe = pd.concat([self.dataframe, duplicated_data])
         self.load_frame(self.dataframe)
 
     def move_samples(self, move_delta: int):
