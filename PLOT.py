@@ -202,9 +202,10 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
                     color = shift_hue(color, hue_shift_amount)
                     hue_shift_amount += 0.02
                 
-                if dataset.clear_samples[size_index + datapoint_cnt]:
-                    datapoint_cnt += 1
-                    continue
+                if size_index + datapoint_cnt < len(dataset.vertex_in):
+                    if dataset.clear_samples[size_index + datapoint_cnt]:
+                        datapoint_cnt += 1
+                        continue
 
                 sub_alpha = 0
                 if any(dataset.clipped_samples):
@@ -280,12 +281,13 @@ def draw_highlighted_nd_points(dataset, class_vao):
             # draw polyline
             size = len(dataset.positions[i])
             for j in range(0, size, dataset.vertex_count):
-                if dataset.clear_samples[size_index + datapoint_cnt]:
+                if size_index + datapoint_cnt < len(dataset.vertex_in):
+                    if dataset.clear_samples[size_index + datapoint_cnt]:
+                        datapoint_cnt += 1
+                        continue
+                    if dataset.clipped_samples[size_index + datapoint_cnt]:
+                        glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
                     datapoint_cnt += 1
-                    continue
-                if dataset.clipped_samples[size_index + datapoint_cnt]:
-                    glDrawArrays(GL_LINE_STRIP, j, dataset.vertex_count)
-                datapoint_cnt += 1
             glBindVertexArray(0)
 
     glLineWidth(1)

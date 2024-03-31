@@ -103,6 +103,19 @@ class Dataset:
         # general dataframe
         self.dataframe = df
     
+    def delete_clip(self):
+        # Convert clipped_samples to a boolean NumPy array with explicit dtype=bool
+        if isinstance(self.clipped_samples, list) or self.clipped_samples.dtype != np.bool_:
+            clipped_mask = np.array(self.clipped_samples, dtype=bool)
+        else:
+            clipped_mask = self.clipped_samples
+
+        # Now clipped_mask is guaranteed to be a boolean array, and we can safely use ~
+        if self.dataframe is not None and clipped_mask.any():
+            self.dataframe = self.dataframe[~clipped_mask]
+        # Assuming you need to reinitialize or update attributes after deletion
+        self.load_frame(self.dataframe)
+    
     def copy_clip(self):
         # copy clipped samples as additional data entries
         bool_clipped = np.array(self.clipped_samples).astype(bool)

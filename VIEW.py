@@ -167,6 +167,10 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.copy_clip()
             self.controller.display_data()
             self.create_plot()
+        elif key == QtCore.Qt.Key.Key_D:
+            # delete all clipped samples from dataset
+            self.controller.data.delete_clip()
+            self.controller.display_data()
             
         self.refresh()
 
