@@ -144,8 +144,10 @@ class View(QtWidgets.QMainWindow):
         elif key == QtCore.Qt.Key.Key_W:
             # move data samples up by 0.1 on all attributes and replot
             self.controller.data.move_samples(0.01)
+            self.create_plot()
         elif key == QtCore.Qt.Key.Key_S:
             self.controller.data.move_samples(-0.01)
+            self.create_plot()
         elif key == QtCore.Qt.Key.Key_P:
             clipped_indices = [i for i, value in enumerate(self.controller.data.clipped_samples) if value]
             print("Indices of clipped samples:", clipped_indices)
@@ -155,11 +157,18 @@ class View(QtWidgets.QMainWindow):
             print("Positions of clipped samples:")
             for pos in clipped_positions:
                 for i, val in enumerate(pos):
-                    print(f"{self.controller.data.attribute_names[i % self.controller.data.attribute_count]}: {val}")
+                    label = ""
+                    if i < len(self.controller.data.attribute_names):
+                        label = self.controller.data.attribute_names[i]
+                    else:
+                        label = "class"
+                    print(f"{label}: {val}")
         elif key == QtCore.Qt.Key.Key_C:
             self.controller.data.copy_clip()
-
-        self.plot_widget.update()
+            self.controller.display_data()
+            self.create_plot()
+            
+        self.refresh()
 
     # function to refresh plot
     def refresh(self):

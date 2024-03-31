@@ -105,7 +105,9 @@ class Dataset:
     
     def copy_clip(self):
         # copy clipped samples as additional data entries
-        duplicated_data = self.dataframe.loc[self.clipped_samples].copy()
+        bool_clipped = np.array(self.clipped_samples).astype(bool)
+        
+        duplicated_data = self.dataframe.iloc[bool_clipped].copy()
         self.dataframe = pd.concat([self.dataframe, duplicated_data]).reset_index(drop=True)
         self.load_frame(self.dataframe)
 
