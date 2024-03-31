@@ -103,6 +103,21 @@ class Dataset:
         # general dataframe
         self.dataframe = df
 
+    def move_samples(self, move_delta: int):
+        if self.dataframe is None or self.dataframe.empty:
+            print("DataFrame is not loaded or is empty.")
+            return
+
+        if not any(self.clipped_samples):
+            print("No samples selected.")
+            return
+
+        if move_delta == 0:
+            return
+
+        # translate clipped samples by delta
+        self.dataframe.loc[self.clipped_samples, self.attribute_names] += move_delta
+
     def load_from_csv(self, filename: str):
         try:
             df = pd.read_csv(filename)

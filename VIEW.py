@@ -141,8 +141,23 @@ class View(QtWidgets.QMainWindow):
                 self.controller.data.roll_clips(1)
             else:
                 self.controller.data.roll_vertex_in(1)
+        elif key == QtCore.Qt.Key.Key_W:
+            # move data samples up by 0.1 on all attributes and replot
+            self.controller.data.move_samples(0.01)
+        elif key == QtCore.Qt.Key.Key_S:
+            self.controller.data.move_samples(-0.01)
+        elif key == QtCore.Qt.Key.Key_P:
+            clipped_indices = [i for i, value in enumerate(self.controller.data.clipped_samples) if value]
+            print("Indices of clipped samples:", clipped_indices)
+            clipped_positions = [self.controller.data.dataframe.iloc[i] for i in clipped_indices if i < self.controller.data.sample_count]
 
-        self.refresh()
+            # Assuming you want to print these positions to console or handle them:
+            print("Positions of clipped samples:")
+            for pos in clipped_positions:
+                for i, val in enumerate(pos):
+                    print(f"{self.controller.data.attribute_names[i % self.controller.data.attribute_count]}: {val}")     
+
+        self.plot_widget.update()
 
     # function to refresh plot
     def refresh(self):
