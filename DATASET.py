@@ -136,6 +136,8 @@ class Dataset:
         
         # Reset clipped_samples to match the new dataframe size
         self.clipped_samples = np.zeros(len(self.dataframe), dtype=bool)
+        # set the duplicated data indices to clipped_samples
+        self.clipped_samples[-len(duplicated_data):] = True
 
     def move_samples(self, move_delta: int):
         if self.dataframe is None or self.dataframe.empty:
@@ -151,7 +153,7 @@ class Dataset:
 
         for attribute in self.attribute_names:
             self.dataframe.loc[self.clipped_samples, attribute] += move_delta
-            self.not_normalized_frame.loc[self.clipped_samples, attribute] += move_delta
+            self.not_normalized_frame.loc[self.clipped_samples, attribute] += move_delta * 10
 
     def load_from_csv(self, filename: str):
         try:

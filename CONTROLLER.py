@@ -56,7 +56,6 @@ class Controller:
         self.view.dataset_textbox.setText(data_info_string)
 
     def save_model(self):
-        print(self.data.not_normalized_frame)
         if not self.data or self.data.not_normalized_frame is None or self.data.not_normalized_frame.empty:
             QtWidgets.QMessageBox.warning(self.view, "Warning", "There is no data to save.")
             return
