@@ -37,6 +37,7 @@ class Controller:
         self.view.trace_mode.clicked.connect(self.view.trace_mode_func)
         self.view.replot_overlaps_btn.clicked.connect(self.view.replot_overlaps)
         self.view.replot_overlaps_btn.setEnabled(False)
+        self.view.save_model_button.clicked.connect(self.save_model)
         
         # Set keyboard shortcuts
         self.view.load_button.setShortcut(Qt.Key.Key_F1)
@@ -53,6 +54,24 @@ class Controller:
             data_info_string += f'\nClass {index + 1}: {ele} sample count: {self.data.count_per_class[index]}'
 
         self.view.dataset_textbox.setText(data_info_string)
+
+    def save_model(self):
+        print(self.data.not_normalized_frame)
+        if not self.data or self.data.not_normalized_frame is None or self.data.not_normalized_frame.empty:
+            QtWidgets.QMessageBox.warning(self.view, "Warning", "There is no data to save.")
+            return
+
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self.view, "Save File", "", "CSV Files (*.csv)")
+        if filename:
+            try:
+                # Ensure the filename has the correct extension
+                if not filename.endswith('.csv'):
+                    filename += '.csv'
+                # Save the DataFrame to the specified CSV file
+                self.data.not_normalized_frame.to_csv(filename, index=False)
+                QtWidgets.QMessageBox.information(self.view, "Success", "The dataset has been saved successfully.")
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self.view, "Error", f"An error occurred while saving the file: {e}")
 
     def load_dataset(self):
         if self.data:

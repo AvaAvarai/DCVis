@@ -13,6 +13,8 @@ class Dataset:
         self.name: str = ''
         self.dataframe: Optional[pd.DataFrame] = None
 
+        self.not_normalized_frame: Optional[pd.DataFrame] = None
+
         # class information
         self.class_count: int = 0
         self.count_per_class: List[int] = []
@@ -64,7 +66,7 @@ class Dataset:
         if 0 <= attribute_index < len(self.coefs):
             self.coefs[attribute_index] = new_coef_value
 
-    def load_frame(self, df: pd.DataFrame):
+    def load_frame(self, df: pd.DataFrame, not_normal = None):
         # put class column to end of dataframe
         df.insert(len(df.columns) - 1, 'class', df.pop('class'))
 
@@ -102,42 +104,38 @@ class Dataset:
 
         # general dataframe
         self.dataframe = df
+        
+        if not_normal is not None:
+            self.not_normalized_frame = not_normal
+        else:
+            self.not_normalized_frame = df.copy()
     
     def delete_clip(self):
-        # Convert to boolean mask if necessary
-        if not isinstance(self.clipped_samples, np.ndarray) or self.clipped_samples.dtype != bool:
-            clipped_mask = np.array(self.clipped_samples, dtype=bool)
-        else:
-            clipped_mask = self.clipped_samples
-
-        # Perform deletion
-        if self.dataframe is not None and not self.dataframe.empty:
-            self.dataframe = self.dataframe[~clipped_mask].reset_index(drop=True)
-
-        # Manually update sample_count
-        self.sample_count = len(self.dataframe)
-
-        # Update count_per_class based on the new dataframe
-        if not self.dataframe.empty:
-            # Assuming 'class' is the column name that denotes the class for each sample
-            class_counts = self.dataframe['class'].value_counts().sort_index()
-            self.count_per_class = class_counts.tolist()
-
-            # Assuming class_names are already in the correct order,
-            # but if class_names need to be updated from the dataframe directly:
-            self.class_names = class_counts.index.tolist()
-
-            # Update class_count in case the number of classes has changed
-            self.class_count = len(self.class_names)
+        clipped_mask = np.array(self.clipped_samples, dtype=bool)
+        self.dataframe = self.dataframe[~clipped_mask].reset_index(drop=True)
+        self.not_normalized_frame = self.not_normalized_frame[~clipped_mask].reset_index(drop=True).copy()
+        self.clipped_samples = np.zeros(len(self.dataframe), dtype=bool)
+        # get sample information
+        self.sample_count = len(self.dataframe.index)
+        self.count_per_class = self.dataframe['class'].value_counts().tolist()
+        # initialize arrays for clipping options
         self.clipped_samples = np.repeat(False, self.sample_count)
-    
+        self.clear_samples = np.repeat(False, self.sample_count)
+        self.vertex_in = np.repeat(False, self.sample_count)
+        self.last_vertex_in = np.repeat(False, self.sample_count)
+
     def copy_clip(self):
-        # copy clipped samples as additional data entries
-        bool_clipped = np.array(self.clipped_samples).astype(bool)
+        bool_clipped = np.array(self.clipped_samples, dtype=bool)
+        duplicated_data = self.dataframe[bool_clipped].copy()
+        duplicated_non_normalized_data = self.not_normalized_frame[bool_clipped].copy()
+
+        self.dataframe = pd.concat([self.dataframe, duplicated_data], ignore_index=True)
+        self.not_normalized_frame = pd.concat([self.not_normalized_frame, duplicated_non_normalized_data], ignore_index=True)
         
-        duplicated_data = self.dataframe.iloc[bool_clipped].copy()
-        self.dataframe = pd.concat([self.dataframe, duplicated_data])
-        self.load_frame(self.dataframe)
+        self.load_frame(self.dataframe, self.not_normalized_frame)
+        
+        # Reset clipped_samples to match the new dataframe size
+        self.clipped_samples = np.zeros(len(self.dataframe), dtype=bool)
 
     def move_samples(self, move_delta: int):
         if self.dataframe is None or self.dataframe.empty:
@@ -151,9 +149,9 @@ class Dataset:
         if move_delta == 0:
             return
 
-        # translate clipped samples by delta
         for attribute in self.attribute_names:
             self.dataframe.loc[self.clipped_samples, attribute] += move_delta
+            self.not_normalized_frame.loc[self.clipped_samples, attribute] += move_delta
 
     def load_from_csv(self, filename: str):
         try:
@@ -171,8 +169,11 @@ class Dataset:
     def normalize_data(self, our_range: Tuple[float, float]):
         if self.dataframe is None or self.dataframe.empty:
             print("DataFrame is not loaded or is empty.")
-            return
+            return self.dataframe
+        # Ensure a deep copy is made for the not normalized frame before normalization
+
         scaler = MinMaxScaler(our_range)
+        # Only normalize self.dataframe
         self.dataframe[self.attribute_names] = scaler.fit_transform(self.dataframe[self.attribute_names])
         return self.dataframe
 

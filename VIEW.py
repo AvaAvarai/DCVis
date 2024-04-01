@@ -165,7 +165,10 @@ class View(QtWidgets.QMainWindow):
         elif key == QtCore.Qt.Key.Key_C:
             self.controller.data.copy_clip()
             self.controller.display_data()
-            self.create_plot()
+            if self.plot_widget:
+                self.plot_layout.removeWidget(self.plot_widget)
+            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+            self.plot_layout.addWidget(self.plot_widget)
         elif key == QtCore.Qt.Key.Key_D:
             # delete all clipped samples from dataset
             self.controller.data.delete_clip()
