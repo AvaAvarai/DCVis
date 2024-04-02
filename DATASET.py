@@ -153,9 +153,11 @@ class Dataset:
             return
         bool_clipped = np.array(self.clipped_samples, dtype=bool)
         for attribute in self.attribute_names:
-            if self.dataframe[bool_clipped][attribute] + move_delta >= 0 and self.not_normalized_frame[bool_clipped][attribute] + move_delta * 10 >= 0:
-                self.dataframe.loc[bool_clipped, attribute] += move_delta
-                self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
+            # validate attribute + move_delta [0, 1]
+            if self.dataframe.loc[bool_clipped, attribute].min() + move_delta > 0 or self.dataframe.loc[bool_clipped, attribute].max() + move_delta < 1:
+                if self.not_normalized_frame.loc[bool_clipped, attribute].min() + move_delta * 10 > 0 or self.not_normalized_frame.loc[bool_clipped, attribute].max() + move_delta * 10 < 1:
+                    self.dataframe.loc[bool_clipped, attribute] += move_delta
+                    self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
 
     def load_from_csv(self, filename: str):
         try:
