@@ -69,25 +69,25 @@ class TrainValidateModels:
         all_results = {name: [] for name in models.keys()}
         skf = StratifiedKFold(n_splits=self.n_folds, shuffle=True, random_state=42)
 
-        # Use ThreadPoolExecutor to run models in parallel
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             for _ in range(self.n_runs):
                 for name, model_cls in models.items():
-                    # Instantiate a new model for each run
                     model = model_cls()
                     future = executor.submit(self.model_fit_predict, name, model, X_train, y_train, X_val, y_val, skf)
                     futures.append(future)
 
-            # Process futures as they complete
             for future in concurrent.futures.as_completed(futures):
                 name, cv_score, val_accuracy = future.result()
                 all_results[name].append((cv_score, val_accuracy))
 
         final_results = {
-            name: {'CV Mean Accuracy': np.mean([score[0] for score in acc]),
+            name: {
+                'CV Mean Accuracy': np.mean([score[0] for score in acc]),
                 'CV STD of Accuracy': np.std([score[0] for score in acc]),
-                'Validation Accuracy': np.mean([score[1] for score in acc])}
+                'Validation Accuracy': np.mean([score[1] for score in acc]),
+                'Validation STD of Accuracy': np.std([score[1] for score in acc]) if len(acc) > 1 else 0
+            }
             for name, acc in all_results.items()
         }
 
@@ -98,10 +98,19 @@ class TrainValidateModels:
         print("Training Dataset: {}".format(self.transformed_dataset))
         print("Validation Dataset: {}".format(self.original_dataset))
         print("===================================")
+        
+        # Define column widths
+        model_name_width = max([len(name) for name in final_results.keys()]) + 4  # Find the longest model name and add some padding
+        accuracy_width = 20
+
+        # Print the headers with specified widths
+        print(f"{'Model':<{model_name_width}}{'CV Mean Accuracy':<{accuracy_width}}{'CV STD of Accuracy':<{accuracy_width}}{'Validation Accuracy':<{accuracy_width}}{'Validation STD of Accuracy':<{accuracy_width}}")
+
+        # Iterate through each model and print the results with the same widths
         for model, stats in final_results.items():
-            print(f"{model}: CV Mean Accuracy = {stats['CV Mean Accuracy']:.4f}, CV STD of Accuracy = {stats['CV STD of Accuracy']:.4f}, Validation Accuracy = {stats['Validation Accuracy']:.4f}")
+            print(f"{model:<{model_name_width}}{stats['CV Mean Accuracy']:<{accuracy_width}.4f}{stats['CV STD of Accuracy']:<{accuracy_width}.4f}{stats['Validation Accuracy']:<{accuracy_width}.4f}{stats['Validation STD of Accuracy']:<{accuracy_width}.4f}")
         print("===================================")
-                
+        
         return final_results
 
 if __name__ == '__main__':
