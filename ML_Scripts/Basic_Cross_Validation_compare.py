@@ -14,20 +14,21 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import SGDClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import warnings
+import concurrent.futures
+
 
 warnings.filterwarnings("ignore")
 
-# Define your models here
 models = {
-    'Decision Tree': DecisionTreeClassifier(),
-    'SVM': SVC(),
-    'Random Forest': RandomForestClassifier(),
-    'KNN': KNeighborsClassifier(),
-    'Logistic Regression': LogisticRegression(),
-    'Naive Bayes': GaussianNB(),
-    'MLP': MLPClassifier(),
-    'SGD': SGDClassifier(),
-    'Linear Discriminant Analysis': LinearDiscriminantAnalysis(),
+    'Decision Tree': DecisionTreeClassifier,
+    'SVM': SVC,
+    'Random Forest': RandomForestClassifier,
+    'KNN': KNeighborsClassifier,
+    'Logistic Regression': LogisticRegression,
+    'Naive Bayes': GaussianNB,
+    'MLP': MLPClassifier,
+    'SGD': SGDClassifier,
+    'Linear Discriminant Analysis': LinearDiscriminantAnalysis,
 }
 
 class TrainValidateModels:
@@ -56,23 +57,37 @@ class TrainValidateModels:
 
         return X_train, y_train, X_val, y_val
 
+    def model_fit_predict(self, name, model, X_train, y_train, X_val, y_val, skf):
+        # This method fits the model and predicts validation set
+        cv_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
+        model.fit(X_train, y_train)  # Refit on the entire training set
+        y_pred = model.predict(X_val)  # Predict on the validation set
+        val_accuracy = accuracy_score(y_val, y_pred)
+        return name, np.mean(cv_scores), val_accuracy
+
     def run_models(self, X_train, y_train, X_val, y_val):
         all_results = {name: [] for name in models.keys()}
         skf = StratifiedKFold(n_splits=self.n_folds, shuffle=True, random_state=42)
 
-        for _ in range(self.n_runs):
-            for name, model in models.items():
-                # Perform cross-validation
-                cv_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
-                model.fit(X_train, y_train)  # Refit on the entire training set
-                y_pred = model.predict(X_val)  # Predict on the validation set
-                val_accuracy = accuracy_score(y_val, y_pred)
-                all_results[name].append((np.mean(cv_scores), val_accuracy))
+        # Use ThreadPoolExecutor to run models in parallel
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for _ in range(self.n_runs):
+                for name, model_cls in models.items():
+                    # Instantiate a new model for each run
+                    model = model_cls()
+                    future = executor.submit(self.model_fit_predict, name, model, X_train, y_train, X_val, y_val, skf)
+                    futures.append(future)
+
+            # Process futures as they complete
+            for future in concurrent.futures.as_completed(futures):
+                name, cv_score, val_accuracy = future.result()
+                all_results[name].append((cv_score, val_accuracy))
 
         final_results = {
             name: {'CV Mean Accuracy': np.mean([score[0] for score in acc]),
-                   'CV STD of Accuracy': np.std([score[0] for score in acc]),
-                   'Validation Accuracy': np.mean([score[1] for score in acc])}
+                'CV STD of Accuracy': np.std([score[0] for score in acc]),
+                'Validation Accuracy': np.mean([score[1] for score in acc])}
             for name, acc in all_results.items()
         }
 
@@ -102,4 +117,4 @@ if __name__ == '__main__':
 
     # Convert results to DataFrame and save
     results_df = pd.DataFrame(results).T
-    results_df.to_csv('model_validation_results_with_cv_stats.csv')
+    results_df.to_csv(f'classifier_results_{original_dataset}_train_{transformed_dataset}_validate.csv')
