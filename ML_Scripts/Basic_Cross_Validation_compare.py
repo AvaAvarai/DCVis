@@ -15,6 +15,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import warnings
 import concurrent.futures
+from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, ExtraTreesClassifier
 
 
 warnings.filterwarnings("ignore")
@@ -29,6 +30,9 @@ models = {
     'MLP': MLPClassifier,
     'SGD': SGDClassifier,
     'Linear Discriminant Analysis': LinearDiscriminantAnalysis,
+    'Gradient Boosting': GradientBoostingClassifier,
+    'AdaBoost': AdaBoostClassifier,
+    'Extra Trees': ExtraTreesClassifier,
 }
 
 class TrainValidateModels:
