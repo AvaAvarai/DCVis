@@ -5,8 +5,8 @@ Make sure there is only one class column, and the remaining columns are attribut
 """
 
 import os
-
-# imports
+import argparse
+from pathlib import Path
 from sklearn import tree
 import pandas as pd
 import graphviz
@@ -38,24 +38,39 @@ class PrintDT:
         # get data
         self.data = data
 
-    # build the tree
-    def build_tree(self, output_filename):
-        # uses CART DT algorithm
+    def build_tree(self, base_output_filename):
         clf = tree.DecisionTreeClassifier()
         clf.fit(self.data, self.labels)
 
+        # Extract the base name of the dataset for inclusion in the output filename
+        dataset_base_name = Path(self.dataset_name).stem
+
+        # Create a unique output filename by appending the dataset name
+        output_filename = f"{base_output_filename}_{dataset_base_name}"
+
         dot_data = tree.export_graphviz(clf, out_file=None)
         graph = graphviz.Source(dot_data)
-        graph.render(output_filename)
+        
+        # Check if the output file already exists. If it does, append a numeric suffix.
+        counter = 1
+        final_output_filename = output_filename
+        while os.path.exists(f"{final_output_filename}.pdf"):
+            final_output_filename = f"{output_filename}_{counter}"
+            counter += 1
+
+        # Render the graph, saving the file with the final, unique filename
+        graph.render(final_output_filename, cleanup=True)  # cleanup=True to remove intermediary files
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Build and print a decision tree from a dataset.")
+    parser.add_argument("dataset_name", help="Path to the dataset file (CSV format).")
+    parser.add_argument("class_column_name", help="The name of the class column in the dataset.")
+    args = parser.parse_args()
+
     os.environ["PATH"] += os.pathsep + 'C:\Program Files\Graphviz/bin'
-    dataset_name = 'iris_dataset.csv'
-    class_column_name = 'class'
+    base_output_filename = 'dt_graph'
 
-    output_filename = 'dt_graph'
-
-    a = PrintDT(dataset_name, class_column_name)
+    a = PrintDT(args.dataset_name, args.class_column_name)
     a.get_data_and_labels()
-    a.build_tree(output_filename)
+    a.build_tree(base_output_filename)
