@@ -143,11 +143,15 @@ class View(QtWidgets.QMainWindow):
                 self.controller.data.roll_vertex_in(1)
         elif key == QtCore.Qt.Key.Key_W:
             # move data samples up by 0.1 on all attributes and replot
+            selection = self.controller.data.clipped_samples
             self.controller.data.move_samples(0.01)
             self.create_plot()
+            self.controller.data.clipped_samples = selection
         elif key == QtCore.Qt.Key.Key_S:
+            selection = self.controller.data.clipped_samples
             self.controller.data.move_samples(-0.01)
             self.create_plot()
+            self.controller.data.clipped_samples = selection
         elif key == QtCore.Qt.Key.Key_P:
             clipped_indices = [i for i, value in enumerate(self.controller.data.clipped_samples) if value]
             print("Indices of clipped samples:", clipped_indices)
