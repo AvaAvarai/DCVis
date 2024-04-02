@@ -126,11 +126,12 @@ class Dataset:
 
     def copy_clip(self):
         bool_clipped = np.array(self.clipped_samples, dtype=bool)
+
         duplicated_data = self.dataframe[bool_clipped].copy()
         duplicated_non_normalized_data = self.not_normalized_frame[bool_clipped].copy()
 
-        self.dataframe = pd.concat([self.dataframe, duplicated_data], ignore_index=True)
-        self.not_normalized_frame = pd.concat([self.not_normalized_frame, duplicated_non_normalized_data], ignore_index=True)
+        self.dataframe = pd.concat([self.dataframe, duplicated_data])
+        self.not_normalized_frame = pd.concat([self.not_normalized_frame, duplicated_non_normalized_data])
         
         self.load_frame(self.dataframe, self.not_normalized_frame)
         
@@ -150,10 +151,11 @@ class Dataset:
 
         if move_delta == 0:
             return
-
+        bool_clipped = np.array(self.clipped_samples, dtype=bool)
         for attribute in self.attribute_names:
-            self.dataframe.loc[self.clipped_samples, attribute] += move_delta
-            self.not_normalized_frame.loc[self.clipped_samples, attribute] += move_delta * 10
+            if self.dataframe[bool_clipped][attribute] + move_delta >= 0 and self.not_normalized_frame[bool_clipped][attribute] + move_delta * 10 >= 0:
+                self.dataframe.loc[bool_clipped, attribute] += move_delta
+                self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
 
     def load_from_csv(self, filename: str):
         try:
