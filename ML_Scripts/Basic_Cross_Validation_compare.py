@@ -92,12 +92,16 @@ class TrainValidateModels:
         }
 
         # Print the results
+        print("===================================")
         print("\nModel Performance over {} Runs:".format(self.n_runs))
+        print("\n{}-Fold Cross-Validation".format(self.n_folds))
+        print("Training Dataset: {}".format(self.transformed_dataset))
+        print("Validation Dataset: {}".format(self.original_dataset))
         print("===================================")
         for model, stats in final_results.items():
             print(f"{model}: CV Mean Accuracy = {stats['CV Mean Accuracy']:.4f}, CV STD of Accuracy = {stats['CV STD of Accuracy']:.4f}, Validation Accuracy = {stats['Validation Accuracy']:.4f}")
         print("===================================")
-        
+                
         return final_results
 
 if __name__ == '__main__':
@@ -117,4 +121,7 @@ if __name__ == '__main__':
 
     # Convert results to DataFrame and save
     results_df = pd.DataFrame(results).T
-    results_df.to_csv(f'classifier_results_{original_dataset}_train_{transformed_dataset}_validate.csv')
+    # save to csv filename of transformed_ds + original_ds + n_runs + n_folds + 'results.csv'
+    transformed_dataset = transformed_dataset.split('\\')[-1].split('.')[0]
+    original_dataset =  original_dataset.split('\\')[-1].split('.')[0]
+    results_df.to_csv(f'train_{transformed_dataset}_validate_{original_dataset}_{n_runs}_{n_folds}_results.csv')
