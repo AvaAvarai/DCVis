@@ -266,7 +266,10 @@ class Clipping:
         positions = []
         for i in range(dataset.class_count):
             positions.append(np.array(dataset.positions[i]))
-            positions[i] = np.reshape(positions[i], (dataset.count_per_class[i], dataset.vertex_count * 2))
+            num_columns = dataset.vertex_count * 2
+            num_rows = positions[i].size // num_columns
+            positions[i] = np.reshape(positions[i], (num_rows, num_columns))
+
 
         clip_samples(positions, rect, dataset)
 
