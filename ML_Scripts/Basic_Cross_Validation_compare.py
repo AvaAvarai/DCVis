@@ -59,6 +59,11 @@ class TrainValidateModels:
         X_val = original_df.drop(self.class_column_name, axis=1)
         y_val = original_df[self.class_column_name]
 
+        X_train = np.asarray(X_train)
+        y_train = np.asarray(y_train)
+        X_val = np.asarray(X_val)
+        y_val = np.asarray(y_val)
+
         return X_train, y_train, X_val, y_val
 
     def model_fit_predict(self, name, model, X_train, y_train, X_val, y_val, skf):
