@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
 class DCC:
@@ -16,9 +17,21 @@ class DCC:
 
         # strip last column
         working_coef = working_coef.iloc[:, 0:-1]
+        
+        scaler = MinMaxScaler((0, 1))
+        attributes_scaled = scaler.fit_transform(working_df[dataset.attribute_names])
 
-        coefArr = [100 / 100 for i in range(dataset.attribute_count)]
+        # Prepare the data for LDA
+        X = attributes_scaled
+        y = working_df['class'].values  # Assuming 'class' column contains the class labels
 
+        # Fit LDA model
+        lda = LinearDiscriminantAnalysis()
+        lda.fit(X, y)
+        lda_coefs = np.abs(lda.coef_).mean(axis=0)
+
+        coefArr = lda_coefs / 100
+        print(coefArr)
         for index, col in enumerate(working_coef.columns):
             columnCoef = coefArr[index]
             working_df[col] = columnCoef * working_df[col]

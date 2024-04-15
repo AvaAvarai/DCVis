@@ -461,7 +461,8 @@ class View(QtWidgets.QMainWindow):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
             return
-
+        if self.controller.data.dataframe is None:
+            return
         self.controller.data.attribute_names.append('class')
         self.controller.data.dataframe = self.controller.data.dataframe[self.controller.data.attribute_names]
 

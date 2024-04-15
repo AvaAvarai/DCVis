@@ -9,4 +9,6 @@ lib/
 lib64
 *.cfg
 Scripts
-
+datasets/experiments/
+*.pdf
+share

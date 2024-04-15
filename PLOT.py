@@ -676,7 +676,6 @@ class Plot(QOpenGLWidget):
         hue_shift = 0.08
         
         class_count_one = data.class_count == 1
-        
         for class_index in range(data.class_count):
             data.overlap_points[class_index] = 0
             if data.active_markers[class_index]:
@@ -700,14 +699,14 @@ class Plot(QOpenGLWidget):
                             position = adjust_point_towards_center(position, -data.attribute_count)
                         
                         
-                        if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
-                            data.overlap_points[class_index] += 1
-                            # append dataframe index to overlap indices
-                            index = pos_index // data.vertex_count
-                            if index not in data.overlap_indices:
-                                data.overlap_indices.append(index)
-                            glPointSize(10)
-                            glColor4ub(255, 0, 0, 255)
+                        # if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
+                        #     # append dataframe index to overlap indices
+                        #     index = pos_index // data.vertex_count
+                        #     if index not in data.overlap_indices:
+                        #         data.overlap_points[class_index] += 1
+                        #         data.overlap_indices.append(index)
+                        #     glPointSize(10)
+                        #     glColor4ub(255, 0, 0, 255)
                             
                         glBegin(GL_POINTS)
                         glVertex2f(*position)
@@ -721,14 +720,12 @@ class Plot(QOpenGLWidget):
                         glEnd()
 
                     glBindVertexArray(0)
-        
-        # TODO: Move this to a non drawing function
-        # iterate and list class names with each overlap count
+
         overlap = ""
-        count = 0
         for i in range(data.class_count):
             overlap += f"Class {i + 1} {data.class_names[i]}: {data.overlap_points[i]}\n"
-            count += data.overlap_points[i]
+            data.overlap_points[i] = 0
+        count = len(data.overlap_indices)
         overlap += f"Total Overlaps: {count} / {data.sample_count} samples\n= {round(100 * (count / data.sample_count), 2)}% overlap for {round(100 * (1 - (count / data.sample_count)), 2)}% accuracy.\n"
         self.overlaps_textbox.setText(overlap)
         if count > 0:
@@ -779,47 +776,7 @@ class Plot(QOpenGLWidget):
                             
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
 
-                        def rotate_point_around_center(point, center, coef):
-                            ox, oy = center
-                            px, py = point
-
-                            # Calculate the angle from the center to the point
-                            initial_angle = np.arctan2(py - oy, px - ox)
-
-                            # Normalize angle to a positive range [0, 2π]
-                            if initial_angle < 0:
-                                initial_angle += 2 * np.pi
-
-                            # Define the target angle as the top of the circle (12 o'clock position, which is π/2 radians in this context)
-                            target_angle = np.pi / 2
-
-                            # Calculate how much we need to adjust the angle based on the coef
-                            # Coef of 1 means no adjustment; coef of 0 aims directly upwards
-                            angle_adjustment = (initial_angle - target_angle) * (1 - coef)
-                            
-                            # Calculate the new angle
-                            new_angle = initial_angle - angle_adjustment
-
-                            # Calculate the distance from the center to the point
-                            distance = np.sqrt((px - ox) ** 2 + (py - oy) ** 2)
-
-                            # Apply the coefficient to the distance if needed to bring the point closer to the top
-                            # This is only applied when the coef is towards 0 to simulate the movement towards the circle's top
-                            adjusted_distance = distance * coef if coef < 1 else distance
-
-                            # Calculate the new position using the adjusted angle and distance
-                            qx = ox + adjusted_distance * np.cos(new_angle)
-                            qy = oy + adjusted_distance * np.sin(new_angle)
-
-                            return qx, qy
-
-                        if data.plot_type == 'DCC':
-                            start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
-                            # Rotate end point around the start point by attribute angle
-                            end = rotate_point_around_center(end, (0, 0), data.coefs[h - 1])
-                        else:
-                            start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
-
+                        start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
                         
                         control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)       
 
@@ -864,15 +821,15 @@ class Plot(QOpenGLWidget):
                     closest_angle = np.arctan2(closest[1], closest[0])
                     furthest_angle = np.arctan2(furthest[1], furthest[0])
 
-                    # Adjust angles to be positive
-                    closest_angle = closest_angle if closest_angle >= 0 else closest_angle + 2 * np.pi
-                    furthest_angle = furthest_angle if furthest_angle >= 0 else furthest_angle + 2 * np.pi
+                    if self.data.plot_type == 'SCC':
+                        # Adjust angles to be positive
+                        closest_angle = closest_angle if closest_angle >= 0 else closest_angle + 2 * np.pi
+                        furthest_angle = furthest_angle if furthest_angle >= 0 else furthest_angle + 2 * np.pi
 
                     # Ensure start_angle < end_angle for drawing the sector correctly
                     if closest_angle > furthest_angle:
                         closest_angle, furthest_angle = furthest_angle, closest_angle
-                    
-                    # Define the outer radius of the sector. Adjust according to your needs.
+                        
                     sector_radius = radius * (data.class_count + 1)
 
                     # Draw the filled sector

@@ -95,7 +95,7 @@ class AttributeTable(QtWidgets.QTableWidget):
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         slider.setMinimum(0)
         slider.setMaximum(100)  # [0, 1]
-        slider.setValue(int(self.dataset.coefs[idx]))  # coefs are initially set to 100
+        slider.setValue(int(self.dataset.coefs[idx]))
         slider.valueChanged.connect(lambda value, x=idx: self.update_text_box(x, value, update_dataset=True))
 
         # Initialize textbox
@@ -115,6 +115,8 @@ class AttributeTable(QtWidgets.QTableWidget):
                 self.replot_func()
 
     def update_text_box(self, idx, value, update_dataset=False):
+        if self.cellWidget(idx, 3) is None:
+            return
         self.cellWidget(idx, 3).setText(str(value))
         if update_dataset:
             self.dataset.update_coef(idx, int(value))
