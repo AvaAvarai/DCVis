@@ -1,7 +1,21 @@
+# Scale.py is a script that scales the values of each row in a CSV file by a random amount within a certain range.
+# Used for data augmentation in machine learning projects.
+
 import pandas as pd
 import numpy as np
 
+
 def adjust_csv_row_proportions(input_csv, output_csv):
+    """Adjusts the values of each row in a CSV file by a random amount within a certain range.
+
+    Args:
+        input_csv (str): The file path to the input CSV file.
+        output_csv (str): The file path to save the adjusted CSV file.
+
+    Raises:
+        ValueError: If the input CSV does not contain a 'class' column.
+    """
+    
     # Load the CSV into a pandas DataFrame
     df = pd.read_csv(input_csv)
     
@@ -32,6 +46,16 @@ def adjust_csv_row_proportions(input_csv, output_csv):
     df_adjusted.to_csv(output_csv, index=False)
 
 def adjust_csv_row_proportions_no_bounds(input_csv, output_csv):
+    """Adjusts the values of each row in a CSV file by a random amount without considering min/max values.
+
+    Args:
+        input_csv (str): The file path to the input CSV file.
+        output_csv (str): The file path to save the adjusted CSV file.
+
+    Raises:
+        ValueError: If the input CSV does not contain a 'class' column.
+    """
+    
     # Load the CSV into a pandas DataFrame
     df = pd.read_csv(input_csv)
     
@@ -46,7 +70,6 @@ def adjust_csv_row_proportions_no_bounds(input_csv, output_csv):
     # Adjust each row with a random constant, not considering min/max values
     adjusted_rows = []
     for _, row in df_numerical.iterrows():
-        # Generate a random constant for adjustment; this could theoretically be any value
         adjustment = np.random.uniform(-1, 1, size=len(row))  # Uniform distribution
         adjusted_row = row + adjustment
         adjusted_rows.append(adjusted_row)
