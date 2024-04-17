@@ -12,3 +12,4 @@ Scripts
 datasets/experiments/
 *.pdf
 share
+train_datasets/
