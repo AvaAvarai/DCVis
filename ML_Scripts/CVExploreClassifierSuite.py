@@ -80,7 +80,7 @@ class TrainValidateModels:
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
-            for run in range(self.n_runs):
+            for run in range(1, self.n_runs+1):
                 for name, model_cls in models.items():
                     model = model_cls()
                     future = executor.submit(self.model_fit_predict, name, model, X_train, y_train, X_val, y_val, skf)
@@ -90,7 +90,7 @@ class TrainValidateModels:
                 concurrent.futures.wait(futures)
                 # Print the completion status of each run
                 plural = 's' if run > 1 else ''
-                print(f"{run + 1}/{self.n_runs} training cycle{plural} completed")
+                print(f"{run}/{self.n_runs} training cycle{plural} completed")
 
             for future in concurrent.futures.as_completed(futures):
                 name, cv_score, val_accuracy = future.result()
@@ -107,7 +107,7 @@ class TrainValidateModels:
         }
 
         # Print the results
-        plural = 's' if run > 1 else ''
+        plural = 's' if self.n_runs > 1 else ''
         print("==============================================================================================")
         print(f"Model Performance over {self.n_runs} independent cycle{plural} with {self.n_folds}-Fold Cross-Validation")
         print(f"Training Dataset: {self.transformed_dataset} Exploration Dataset: {self.original_dataset}")
