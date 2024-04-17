@@ -31,7 +31,7 @@ class DCC:
         lda_coefs = np.abs(lda.coef_).mean(axis=0)
 
         coefArr = lda_coefs / 100
-        print(coefArr)
+
         for index, col in enumerate(working_coef.columns):
             columnCoef = coefArr[index]
             working_df[col] = columnCoef * working_df[col]
