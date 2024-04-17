@@ -15,6 +15,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import warnings
 import concurrent.futures
+from concurrent.futures import ProcessPoolExecutor
 from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, ExtraTreesClassifier
 
 
@@ -78,19 +79,14 @@ class TrainValidateModels:
         all_results = {name: [] for name in models.keys()}
         skf = StratifiedKFold(n_splits=self.n_folds, shuffle=True, random_state=42)
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with ProcessPoolExecutor() as executor:
             futures = []
-            for run in range(1, self.n_runs+1):
+            for _ in range(1, self.n_runs+1):
                 for name, model_cls in models.items():
                     model = model_cls()
                     future = executor.submit(self.model_fit_predict, name, model, X_train, y_train, X_val, y_val, skf)
                     futures.append(future)
-
-                # Wait for all futures in the current run to complete before moving to the next run
-                concurrent.futures.wait(futures)
-                # Print the completion status of each run
-                plural = 's' if run > 1 else ''
-                print(f"{run}/{self.n_runs} training cycle{plural} completed")
+                # No need to wait for all futures here, can be managed outside the loop
 
             for future in concurrent.futures.as_completed(futures):
                 name, cv_score, val_accuracy = future.result()
@@ -108,7 +104,7 @@ class TrainValidateModels:
 
         # Print the results
         plural = 's' if self.n_runs > 1 else ''
-        print("==============================================================================================")
+        print("\n==============================================================================================")
         print(f"Model Performance over {self.n_runs} independent cycle{plural} with {self.n_folds}-Fold Cross-Validation")
         print(f"Training Dataset: {self.transformed_dataset} Exploration Dataset: {self.original_dataset}")
         print("==============================================================================================")
@@ -123,7 +119,7 @@ class TrainValidateModels:
         # Iterate through each model and print the results with the same widths
         for model, stats in final_results.items():
             print(f"{model:<{model_name_width}}{stats['CV Mean Accuracy']:<{accuracy_width}.4f}{stats['CV STD of Accuracy']:<{accuracy_width}.4f}{stats['Validation Accuracy']:<{accuracy_width}.4f}{stats['Validation STD of Accuracy']:<{accuracy_width}.4f}")
-        print("==============================================================================================")
+        print("==============================================================================================\n")
         return final_results
 
 if __name__ == '__main__':
