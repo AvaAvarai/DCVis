@@ -17,23 +17,27 @@ import warnings
 import concurrent.futures
 from concurrent.futures import ProcessPoolExecutor
 from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, ExtraTreesClassifier
+from xgboost import XGBClassifier
+from sklearn.linear_model import RidgeClassifier
 
 
 warnings.filterwarnings("ignore")
 
 models = {
     'Decision Tree': DecisionTreeClassifier,
-    'SVM': SVC,
     'Random Forest': RandomForestClassifier,
+    'Extra Trees': ExtraTreesClassifier,
     'KNN': KNeighborsClassifier,
+    'SVM': SVC,
+    'Linear Discriminant Analysis': LinearDiscriminantAnalysis,
     'Logistic Regression': LogisticRegression,
+    'Ridge': RidgeClassifier,
     'Naive Bayes': GaussianNB,
     'MLP': MLPClassifier,
     'SGD': SGDClassifier,
-    'Linear Discriminant Analysis': LinearDiscriminantAnalysis,
     'Gradient Boosting': GradientBoostingClassifier,
     'AdaBoost': AdaBoostClassifier,
-    'Extra Trees': ExtraTreesClassifier,
+    'XGBoost': XGBClassifier
 }
 
 class TrainValidateModels:
@@ -101,14 +105,14 @@ class TrainValidateModels:
             }
             for name, acc in all_results.items()
         }
-
+                
         # Print the results
         plural = 's' if self.n_runs > 1 else ''
         print("\n==============================================================================================")
         print(f"Model Performance over {self.n_runs} independent cycle{plural} with {self.n_folds}-Fold Cross-Validation")
         print(f"Training Dataset: {self.transformed_dataset} Exploration Dataset: {self.original_dataset}")
         print("==============================================================================================")
-        
+
         # Define column widths
         model_name_width = max([len(name) for name in final_results.keys()]) + 2  # Find the longest model name and add some padding
         accuracy_width = 16
@@ -118,8 +122,25 @@ class TrainValidateModels:
 
         # Iterate through each model and print the results with the same widths
         for model, stats in final_results.items():
-            print(f"{model:<{model_name_width}}{stats['CV Mean Accuracy']:<{accuracy_width}.4f}{stats['CV STD of Accuracy']:<{accuracy_width}.4f}{stats['Validation Accuracy']:<{accuracy_width}.4f}{stats['Validation STD of Accuracy']:<{accuracy_width}.4f}")
+            # Improved formatting logic using custom function to handle floating point precision better
+            def format_percentage(value):
+                if np.isclose(value, 0):
+                    return '0%'
+                else:
+                    # Formatting with no unnecessary decimal
+                    formatted = f"{value * 100:.2f}".rstrip('0').rstrip('.')
+                    if formatted.endswith('.'):  # In case the value was like 96.0 after strip
+                        return formatted[:-1] + '%'
+                    return formatted + '%'
+
+            cv_mean_acc = format_percentage(stats['CV Mean Accuracy'])
+            cv_std_acc = format_percentage(stats['CV STD of Accuracy'])
+            val_mean_acc = format_percentage(stats['Validation Accuracy'])
+            val_std_acc = format_percentage(stats['Validation STD of Accuracy'])
+
+            print(f"{model:<{model_name_width}}{cv_mean_acc:<{accuracy_width}}{cv_std_acc:<{accuracy_width}}{val_mean_acc:<{accuracy_width}}{val_std_acc:<{accuracy_width}}")
         print("==============================================================================================\n")
+
         return final_results
 
 if __name__ == '__main__':
