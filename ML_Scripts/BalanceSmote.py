@@ -1,3 +1,5 @@
+# BalanceSmote.py is a script that applies the Synthetic Minority Over-sampling Technique (SMOTE) to the entire dataset and exports the balanced dataset.
+
 import pandas as pd
 from imblearn.over_sampling import SMOTE
 import argparse

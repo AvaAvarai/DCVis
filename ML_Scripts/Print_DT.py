@@ -1,8 +1,4 @@
-"""
-This script will make a print out of a full decision tree
-Add column headers and fix missing values before running models
-Make sure there is only one class column, and the remaining columns are attributes you'd like to run in the model
-"""
+# Print_DT.py is a script that builds and prints a decision tree from a dataset.
 
 import os
 import argparse

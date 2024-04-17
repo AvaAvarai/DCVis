@@ -1,4 +1,4 @@
-# Scale.py is a script that scales the values of each row in a CSV file by a random amount within a certain range.
+# Scale_Randomnly.py is a script that scales the values of each row in a CSV file by a random amount within a certain range.
 # Used for data augmentation in machine learning projects.
 
 import pandas as pd
