@@ -19,26 +19,35 @@ from concurrent.futures import ProcessPoolExecutor
 from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, ExtraTreesClassifier
 from xgboost import XGBClassifier
 from sklearn.linear_model import RidgeClassifier
-
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc, RocCurveDisplay
+from sklearn.preprocessing import label_binarize
+from itertools import cycle
+from sklearn.metrics import roc_auc_score
+import os
+import datetime
 
 warnings.filterwarnings("ignore")
 
 models = {
-    'Decision Tree': DecisionTreeClassifier,
-    'Random Forest': RandomForestClassifier,
-    'Extra Trees': ExtraTreesClassifier,
-    'KNN': KNeighborsClassifier,
-    'SVM': SVC,
-    'Linear Discriminant Analysis': LinearDiscriminantAnalysis,
-    'Logistic Regression': LogisticRegression,
-    'Ridge': RidgeClassifier,
-    'Naive Bayes': GaussianNB,
-    'MLP': MLPClassifier,
-    'SGD': SGDClassifier,
-    'Gradient Boosting': GradientBoostingClassifier,
-    'AdaBoost': AdaBoostClassifier,
-    'XGBoost': XGBClassifier
+    'DT': DecisionTreeClassifier,       # Decision Tree
+    'RF': RandomForestClassifier,       # Random Forest
+    'XT': ExtraTreesClassifier,         # Extra Trees
+    'KNN': KNeighborsClassifier,        # K-Nearest Neighbors
+    'SVM': SVC,                         # Support Vector Machine
+    'LDA': LinearDiscriminantAnalysis,  # Linear Discriminant Analysis
+    'LR': LogisticRegression,           # Logistic Regression
+    'Ridge': RidgeClassifier,           # Ridge Classifier
+    'NB': GaussianNB,                   # Gaussian Naive Bayes
+    'MLP': MLPClassifier,               # Multi-layer Perceptron
+    'SGD': SGDClassifier,               # Stochastic Gradient Descent
+    'GB': GradientBoostingClassifier,   # Gradient Boosting
+    'AB': AdaBoostClassifier,           # AdaBoost
+    'XB': XGBClassifier                 # XGBoost
 }
+
+models_needing_probability = {'SVM'}
+
 
 class TrainValidateModels:
     def __init__(self, transformed_dataset, original_dataset, class_column_name, n_runs, n_folds):
@@ -47,6 +56,65 @@ class TrainValidateModels:
         self.class_column_name = class_column_name
         self.n_runs = n_runs
         self.n_folds = n_folds
+
+    def plot_roc_curves(self, y_test, y_score, n_classes, target_names, output_dir):
+        # Binarize the output labels for multi-class plotting
+        y_test = label_binarize(y_test, classes=np.arange(n_classes))
+
+        # Compute ROC curve and ROC area for each class
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
+
+        # Aggregate all false positive rates
+        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+
+        # Then interpolate all ROC curves at these points
+        mean_tpr = np.zeros_like(all_fpr)
+        for i in range(n_classes):
+            mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+
+        # Average it and compute AUC
+        mean_tpr /= n_classes
+
+        fpr["macro"] = all_fpr
+        tpr["macro"] = mean_tpr
+        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+        # Compute micro-average ROC curve and ROC area
+        fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+        # Plot
+        fig, ax = plt.subplots(figsize=(6, 6))
+        plt.plot(fpr["micro"], tpr["micro"],
+                label=f"Micro-average ROC curve (AUC = {roc_auc['micro']:.2f})",
+                color="deeppink", linestyle=":", linewidth=4)
+        plt.plot(fpr["macro"], tpr["macro"],
+                label=f"Macro-average ROC curve (AUC = {roc_auc['macro']:.2f})",
+                color="navy", linestyle=":", linewidth=4)
+
+        colors = cycle(["aqua", "darkorange", "cornflowerblue"])
+        for i, color in zip(range(n_classes), colors):
+            plt.plot(fpr[i], tpr[i], color=color, lw=2,
+                    label=f'ROC curve for {target_names[i]} (AUC = {roc_auc[i]:.2f})')
+
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Extension of Receiver Operating Characteristic to Multi-class')
+        plt.legend(loc="lower right")
+
+        # Create the output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Save the plot
+        output_path = os.path.join(output_dir, f"roc_curves.png")
+        plt.savefig(output_path)
+        plt.close()
+
 
     def prepare_data(self):
         # Load datasets
@@ -70,78 +138,140 @@ class TrainValidateModels:
         y_val = np.asarray(y_val)
 
         return X_train, y_train, X_val, y_val
+            
+    def analyze_roc(self, roc_data, y_val):
+        n_classes = len(np.unique(y_val))
+        auc_values = {}
+        best_worst_indices = {}
+
+        for name, data in roc_data.items():
+            auc_scores = []
+            for (y_val_run, y_proba_run) in data:
+                if y_proba_run is not None:
+                    roc_auc = roc_auc_score(y_val_run, y_proba_run, multi_class="ovr")
+                    auc_scores.append(roc_auc)
+                else:
+                    auc_scores.append(float('-inf'))  # Ignore runs without ROC capability
+
+            if auc_scores:
+                best_index = np.argmax(auc_scores)
+                worst_index = np.argmin(auc_scores)
+                best_worst_indices[name] = (best_index, worst_index, max(auc_scores), min(auc_scores))
+                auc_values[name] = (max(auc_scores), min(auc_scores))
+
+        auc_df = pd.DataFrame.from_dict(auc_values, orient='index', columns=['Best AUC', 'Worst AUC'])
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        auc_df.to_csv(f'./roc_auc_values_{timestamp}.csv')
+
+        for name, (best_index, worst_index, _, _) in best_worst_indices.items():
+            target_names = [f'Class {i}' for i in range(n_classes)]
+            y_val_best, y_proba_best = roc_data[name][best_index]
+            y_val_worst, y_proba_worst = roc_data[name][worst_index]
+            if y_proba_best is not None and y_proba_worst is not None:
+                self.save_roc_plot(y_val_best, y_proba_best, n_classes, target_names, name, 'best')
+                self.save_roc_plot(y_val_worst, y_proba_worst, n_classes, target_names, name, 'worst')
+
+        return auc_df
+
+    def save_roc_plot(self, y_test, y_score, n_classes, target_names, model_name, label):
+        try:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+            output_dir = f"./roc_plots/{timestamp}"
+            os.makedirs(output_dir, exist_ok=True)
+            
+            y_test = label_binarize(y_test, classes=np.arange(n_classes))
+            fpr, tpr, roc_auc = {}, {}, {}
+            for i in range(n_classes):
+                fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+                roc_auc[i] = auc(fpr[i], tpr[i])
+            
+            fig, ax = plt.subplots(figsize=(10, 8))
+            colors = cycle(["aqua", "darkorange", "cornflowerblue"])
+            for i, color in zip(range(n_classes), colors):
+                plt.plot(fpr[i], tpr[i], color=color, lw=2, label=f'Class {i} (AUC = {roc_auc[i]:.2f})')
+
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title(f'{model_name} ROC Curve ({label})')
+            plt.legend(loc="lower right")
+            output_path = os.path.join(output_dir, f"{model_name}_{label}_roc.png")
+            plt.savefig(output_path)
+            plt.close()
+        except Exception as e:
+            print(f"Failed to save plot: {e}")
+
 
     def model_fit_predict(self, name, model, X_train, y_train, X_val, y_val, skf):
-        # This method fits the model and predicts validation set
+        # Fit the model and predict the validation set
         cv_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
         model.fit(X_train, y_train)  # Refit on the entire training set
         y_pred = model.predict(X_val)  # Predict on the validation set
         val_accuracy = accuracy_score(y_val, y_pred)
-        return name, np.mean(cv_scores), val_accuracy
+
+        # Check if the model supports probability prediction or decision function
+        if hasattr(model, "predict_proba"):
+            y_proba = model.predict_proba(X_val)
+        elif hasattr(model, "decision_function"):
+            y_scores = model.decision_function(X_val)
+            y_proba = np.exp(y_scores) / np.sum(np.exp(y_scores), axis=1, keepdims=True)
+        else:
+            y_proba = None  # Not available for ROC plotting
+
+        return name, np.mean(cv_scores), val_accuracy, y_proba
 
     def run_models(self, X_train, y_train, X_val, y_val):
         all_results = {name: [] for name in models.keys()}
+        roc_data = {}
         skf = StratifiedKFold(n_splits=self.n_folds, shuffle=True, random_state=42)
 
         with ProcessPoolExecutor() as executor:
             futures = []
-            for _ in range(1, self.n_runs+1):
+            for _ in range(1, self.n_runs + 1):
                 for name, model_cls in models.items():
-                    model = model_cls()
+                    model = model_cls(probability=True) if name in models_needing_probability else model_cls()
                     future = executor.submit(self.model_fit_predict, name, model, X_train, y_train, X_val, y_val, skf)
                     futures.append(future)
-                # No need to wait for all futures here, can be managed outside the loop
 
             for future in concurrent.futures.as_completed(futures):
-                name, cv_score, val_accuracy = future.result()
+                name, cv_score, val_accuracy, y_proba = future.result()
                 all_results[name].append((cv_score, val_accuracy))
+                if name not in roc_data:
+                    roc_data[name] = []
+                roc_data[name].append((y_val, y_proba))
 
-        final_results = {
-            name: {
-                'CV Mean Accuracy': np.mean([score[0] for score in acc]),
-                'CV STD of Accuracy': np.std([score[0] for score in acc]),
-                'Validation Accuracy': np.mean([score[1] for score in acc]),
-                'Validation STD of Accuracy': np.std([score[1] for score in acc]) if len(acc) > 1 else 0
-            }
-            for name, acc in all_results.items()
-        }
-                
-        # Print the results
+        # Capture the AUC DataFrame
+        auc_df = self.analyze_roc(roc_data, y_val)
+
+        # Pass the AUC DataFrame to print_results
+        self.print_results(all_results, auc_df)
+
+        return all_results
+
+    def print_results(self, results, auc_df):
         plural = 's' if self.n_runs > 1 else ''
         print("\n==============================================================================================")
         print(f"Model Performance over {self.n_runs} independent cycle{plural} with {self.n_folds}-Fold Cross-Validation")
         print(f"Training Dataset: {self.transformed_dataset} Exploration Dataset: {self.original_dataset}")
         print("==============================================================================================")
 
-        # Define column widths
-        model_name_width = max([len(name) for name in final_results.keys()]) + 2  # Find the longest model name and add some padding
-        accuracy_width = 16
+        headers = ['Model', 'CV Mean Acc.', 'CV STD of Acc.', 'Exp. Mean Acc.', 'Exp. STD of Acc.', 'Best AUC', 'Worst AUC']
+        print("{:<8}{:<15}{:<15}{:<15}{:<15}{:<10}{:<10}".format(*headers))
 
-        # Print the headers with specified widths
-        print(f"{'Model':<{model_name_width}}{'CV Mean Acc.':<{accuracy_width}}{'CV STD of Acc.':<{accuracy_width}}{'Exp. Mean Acc.':<{accuracy_width}}{'Exp. STD of Acc.':<{accuracy_width}}")
-
-        # Iterate through each model and print the results with the same widths
-        for model, stats in final_results.items():
-            # Improved formatting logic using custom function to handle floating point precision better
-            def format_percentage(value):
-                if np.isclose(value, 0):
-                    return '0%'
-                else:
-                    # Formatting with no unnecessary decimal
-                    formatted = f"{value * 100:.2f}".rstrip('0').rstrip('.')
-                    if formatted.endswith('.'):  # In case the value was like 96.0 after strip
-                        return formatted[:-1] + '%'
-                    return formatted + '%'
-
-            cv_mean_acc = format_percentage(stats['CV Mean Accuracy'])
-            cv_std_acc = format_percentage(stats['CV STD of Accuracy'])
-            val_mean_acc = format_percentage(stats['Validation Accuracy'])
-            val_std_acc = format_percentage(stats['Validation STD of Accuracy'])
-
-            print(f"{model:<{model_name_width}}{cv_mean_acc:<{accuracy_width}}{cv_std_acc:<{accuracy_width}}{val_mean_acc:<{accuracy_width}}{val_std_acc:<{accuracy_width}}")
+        for model, stats in results.items():
+            cv_mean_acc = np.mean([score[0] for score in stats])
+            cv_std_acc = np.std([score[0] for score in stats])
+            val_mean_acc = np.mean([score[1] for score in stats])
+            val_std_acc = np.std([score[1] for score in stats])
+            best_auc, worst_auc = auc_df.loc[model]
+            print(f"{model:<8}{cv_mean_acc:<15.2f}{cv_std_acc:<15.2f}{val_mean_acc:<15.2f}{val_std_acc:<15.2f}{best_auc:<10.2f}{worst_auc:<10.2f}")
         print("==============================================================================================\n")
 
-        return final_results
+    def format_percentage(self, value):
+        if np.isclose(value, 0):
+            return '0%'
+        else:
+            formatted = f"{value * 100:.2f}".rstrip('0').rstrip('.')
+            return formatted[:-1] + '%' if formatted.endswith('.') else formatted + '%'
 
 if __name__ == '__main__':
     if len(sys.argv) < 6:

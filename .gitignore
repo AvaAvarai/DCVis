@@ -2,6 +2,7 @@
 __pycache__
 test_*.csv
 train_*.csv
+roc_*.csv
 .venv
 settings.json
 bin/
@@ -12,3 +13,4 @@ Scripts
 datasets/experiments/
 *.pdf
 share
+roc_plots/
