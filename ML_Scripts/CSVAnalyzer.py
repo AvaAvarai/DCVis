@@ -2,9 +2,12 @@ import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
 import pandas as pd
 import numpy as np
+from imblearn.over_sampling import SMOTE
 
 # Global variable to store the current DataFrame
 current_data = None
+smote_button = None  # Global reference to the SMOTE button
+
 
 def adjust_csv_row_proportions():
     """Adjusts the values of each row in the current CSV data by a random amount within a certain range."""
@@ -76,6 +79,20 @@ def save_csv():
         current_data.to_csv(output_file, index=False)
         messagebox.showinfo("Success", "CSV file has been saved.")
 
+def update_smote_button():
+    """Updates the enabled/disabled status of the SMOTE button based on the balance of the class column."""
+    global current_data, smote_button
+    if current_data is None or 'class' not in current_data.columns:
+        smote_button['state'] = 'disabled'
+        return
+    
+    # Check if data is balanced
+    class_counts = current_data['class'].value_counts()
+    if class_counts.nunique() == 1:  # All class counts are the same
+        smote_button['state'] = 'disabled'
+    else:
+        smote_button['state'] = 'normal'
+
 def load_csv():
     global current_data
     filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
@@ -83,9 +100,36 @@ def load_csv():
         try:
             current_data = pd.read_csv(filepath)
             display_data(current_data)
-            examine_data(current_data)
+            update_smote_button()  # Update the SMOTE button status based on new data
         except Exception as e:
             update_status(f"Error: {str(e)}")
+
+def apply_smote():
+    global current_data
+
+    if current_data is None:
+        messagebox.showerror("Error", "No data loaded. Please load data first.")
+        return
+    
+    # Separate features and target variable
+    X = current_data.drop('class', axis=1)
+    y = current_data['class']
+
+    # Apply SMOTE
+    smote = SMOTE(random_state=42)
+    X_smote, y_smote = smote.fit_resample(X, y)
+
+    # Concatenate the features and labels back into a DataFrame
+    balanced_data = pd.concat([X_smote, y_smote.rename('class')], axis=1)
+
+    # Update the global current_data with the balanced dataset
+    current_data = balanced_data
+
+    # Update display
+    display_data(current_data)
+    update_smote_button()  # Re-check if SMOTE should be enabled or disabled
+
+    messagebox.showinfo("Success", "SMOTE applied successfully. Data is balanced now.")
 
 def display_data(data):
     # Clear existing data in the Treeview
@@ -152,42 +196,64 @@ def adjust_and_save_csv(adjustment_function):
             messagebox.showerror("Error", str(e))
 
 def main():
-    global tree, status_label
+    global tree, status_label, smote_button
     root = tk.Tk()
     root.title("CSV Analyzer")
-    
-    root.geometry('800x600')  # Adjust size if needed to accommodate all buttons in one row
+
+    # Define the window size
+    window_width = 800
+    window_height = 600
+
+    # Get the screen dimension
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    # Find the center position
+    center_x = int((screen_width - window_width) / 2)
+    center_y = int((screen_height - window_height) / 2)
+
+    # Set the position of the window to the center of the screen
+    root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+
+    # Function to exit application on Esc key press
+    def on_esc_press(event):
+        root.quit()
+
+    # Bind Esc key to the on_esc_press function
+    root.bind('<Escape>', on_esc_press)
 
     # Button to load CSV
     load_button = tk.Button(root, text="Load CSV", command=load_csv)
-    load_button.grid(row=0, column=0, padx=5, pady=10)
+    load_button.grid(row=0, column=0, padx=5, pady=5)
+
+    # Button to apply SMOTE, initially disabled
+    smote_button = tk.Button(root, text="Apply SMOTE", command=apply_smote, state='disabled')
+    smote_button.grid(row=1, column=3, padx=5, pady=5)
 
     # Button to adjust row proportions with bounds
     adjust_button = tk.Button(root, text="Adjust Row Proportions", command=adjust_csv_row_proportions)
-    adjust_button.grid(row=0, column=1, padx=5, pady=10)
-
-    # Button to adjust row proportions without bounds
-    adjust_no_bounds_button = tk.Button(root, text="Adjust Row Proportions No Bounds", command=adjust_csv_row_proportions_no_bounds)
-    adjust_no_bounds_button.grid(row=0, column=2, padx=5, pady=10)
+    adjust_button.grid(row=1, column=0, padx=5, pady=5)
 
     # Button to save the adjusted CSV
     save_button = tk.Button(root, text="Save CSV", command=save_csv)
-    save_button.grid(row=0, column=3, padx=5, pady=10)
+    save_button.grid(row=0, column=3, padx=5, pady=5)
+
+    # Button to adjust row proportions without bounds
+    adjust_no_bounds_button = tk.Button(root, text="Adjust Row Proportions No Bounds", command=adjust_csv_row_proportions_no_bounds)
+    adjust_no_bounds_button.grid(row=1, column=1, padx=5, pady=5, columnspan=2)  # Span across two columns for visual balance
 
     # Treeview widget for displaying CSV data
     tree = ttk.Treeview(root)
-    tree.grid(row=1, column=0, columnspan=4, padx=10, pady=10, sticky='nsew')
+    tree.grid(row=2, column=0, columnspan=4, padx=10, pady=10, sticky='nsew')
 
     # Status label for displaying results
     status_label = tk.Label(root, text="", justify=tk.LEFT, anchor="w", font=('TkDefaultFont', 10), relief=tk.SUNKEN)
-    status_label.grid(row=2, column=0, columnspan=4, padx=10, pady=10, sticky='ew')
+    status_label.grid(row=3, column=0, columnspan=4, padx=10, pady=10, sticky='ew')
 
-    # Configure the grid to allow the Treeview to expand more
-    root.grid_rowconfigure(1, weight=1)
-    root.grid_columnconfigure(0, weight=1)
-    root.grid_columnconfigure(1, weight=1)
-    root.grid_columnconfigure(2, weight=1)
-    root.grid_columnconfigure(3, weight=1)
+    # Configure the grid to allow the Treeview to expand and to distribute space evenly
+    root.grid_rowconfigure(2, weight=1)  # Make the Treeview row expandable
+    for i in range(4):
+        root.grid_columnconfigure(i, weight=1)  # Make all columns expand evenly
 
     root.mainloop()
 
