@@ -27,6 +27,7 @@ from itertools import cycle
 from sklearn.metrics import roc_auc_score
 import os
 import datetime
+from sklearn.calibration import CalibratedClassifierCV
 
 warnings.filterwarnings("ignore")
 
@@ -49,6 +50,9 @@ models = {
 
 models_needing_probability = {'SVM'}
 
+# Define sigmoid function for binary case
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 class TrainValidateModels:
     def __init__(self, transformed_dataset, original_dataset, class_column_name, n_runs, n_folds):
@@ -149,7 +153,15 @@ class TrainValidateModels:
             auc_scores = []
             for (y_val_run, y_proba_run) in data:
                 if y_proba_run is not None:
-                    roc_auc = roc_auc_score(y_val_run, y_proba_run, multi_class="ovr")
+                    if n_classes == 2 and y_proba_run.ndim == 2 and y_proba_run.shape[1] == 2:
+                        # For binary classification, use the probabilities for the positive class (second column)
+                        roc_auc = roc_auc_score(y_val_run, y_proba_run[:, 1])
+                    elif n_classes > 2:
+                        # For multiclass classification, use One-vs-Rest (OvR) strategy if applicable
+                        roc_auc = roc_auc_score(y_val_run, y_proba_run, multi_class="ovr")
+                    else:
+                        # For other unexpected cases
+                        roc_auc = roc_auc_score(y_val_run, y_proba_run)
                     auc_scores.append(roc_auc)
                 else:
                     auc_scores.append(float('-inf'))  # Ignore runs without ROC capability
@@ -161,35 +173,35 @@ class TrainValidateModels:
                 auc_values[name] = (max(auc_scores), min(auc_scores))
 
         auc_df = pd.DataFrame.from_dict(auc_values, orient='index', columns=['Best AUC', 'Worst AUC'])
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        auc_df.to_csv(f'./roc_auc_values_{timestamp}.csv')
-
-        for name, (best_index, worst_index, _, _) in best_worst_indices.items():
-            target_names = [f'Class {i}' for i in range(n_classes)]
-            y_val_best, y_proba_best = roc_data[name][best_index]
-            y_val_worst, y_proba_worst = roc_data[name][worst_index]
-            if y_proba_best is not None and y_proba_worst is not None:
-                self.save_roc_plot(y_val_best, y_proba_best, n_classes, target_names, name, 'best')
-                self.save_roc_plot(y_val_worst, y_proba_worst, n_classes, target_names, name, 'worst')
-
+        auc_df.to_csv(f'./roc_auc_values_{datetime.datetime.now().strftime("%Y%m%d_%H%M")}.csv')
         return auc_df
 
-    def save_roc_plot(self, y_test, y_score, n_classes, target_names, model_name, label):
+    def save_roc_plot(self, y_test, y_proba, n_classes, target_names, model_name, label):
         try:
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-            output_dir = f"./roc_plots/{timestamp}"
+            # Ensure y_proba is at least 2D
+            if y_proba.ndim == 1:
+                y_proba = y_proba.reshape(-1, 1)
+
+            output_dir = f"./roc_plots/{datetime.datetime.now().strftime('%Y%m%d_%H%M')}"
             os.makedirs(output_dir, exist_ok=True)
             
-            y_test = label_binarize(y_test, classes=np.arange(n_classes))
-            fpr, tpr, roc_auc = {}, {}, {}
-            for i in range(n_classes):
-                fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
-                roc_auc[i] = auc(fpr[i], tpr[i])
-            
+            # Plotting setup
             fig, ax = plt.subplots(figsize=(10, 8))
             colors = cycle(["aqua", "darkorange", "cornflowerblue"])
-            for i, color in zip(range(n_classes), colors):
-                plt.plot(fpr[i], tpr[i], color=color, lw=2, label=f'Class {i} (AUC = {roc_auc[i]:.2f})')
+
+            if n_classes == 2 and y_proba.shape[1] == 1:
+                # Binary classification with single probability array
+                fpr, tpr, _ = roc_curve(y_test, y_proba[:, 0])
+                roc_auc = auc(fpr, tpr)
+                plt.plot(fpr, tpr, color=next(colors), lw=2,
+                        label=f'{target_names[1]} (AUC = {roc_auc:.2f})')  # Class 1 is typically the positive class
+            else:
+                # Multiclass or binary with separate probabilities
+                for i in range(n_classes):
+                    fpr, tpr, _ = roc_curve(y_test[:, i], y_proba[:, i])
+                    roc_auc = auc(fpr, tpr)
+                    plt.plot(fpr, tpr, color=next(colors), lw=2,
+                            label=f'{target_names[i]} (AUC = {roc_auc:.2f})')
 
             plt.xlabel('False Positive Rate')
             plt.ylabel('True Positive Rate')
@@ -200,7 +212,6 @@ class TrainValidateModels:
             plt.close()
         except Exception as e:
             print(f"Failed to save plot: {e}")
-
 
     def model_fit_predict(self, name, model, X_train, y_train, X_val, y_val, skf):
         # Fit the model and predict the validation set
@@ -214,7 +225,14 @@ class TrainValidateModels:
             y_proba = model.predict_proba(X_val)
         elif hasattr(model, "decision_function"):
             y_scores = model.decision_function(X_val)
-            y_proba = np.exp(y_scores) / np.sum(np.exp(y_scores), axis=1, keepdims=True)
+            # Convert decision function scores to probabilities
+            if name in ['Ridge', 'SGD']:  # These classifiers need calibration
+                # Use CalibratedClassifierCV if not calibrated
+                model = CalibratedClassifierCV(model, method='sigmoid', cv=5)
+                model.fit(X_train, y_train)
+                y_proba = model.predict_proba(X_val)
+            else:
+                y_proba = sigmoid(y_scores)  # Sigmoid for binary classification
         else:
             y_proba = None  # Not available for ROC plotting
 
