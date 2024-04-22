@@ -38,9 +38,9 @@ class View(QtWidgets.QMainWindow):
             primary_class, rects = rule
             
             # Check if it's already highlighted or not
-            if not primary_class.endswith(" (highlighted)"):
+            if not str(primary_class).endswith(" (highlighted)"):
                 # Mark as highlighted
-                new_primary_class = primary_class + " (highlighted)"
+                new_primary_class = str(primary_class) + " (highlighted)"
             else:
                 # Remove "(highlighted)" to toggle off the highlight
                 new_primary_class = primary_class[:-14]
@@ -377,7 +377,7 @@ class View(QtWidgets.QMainWindow):
         
         class_str = ""
         for index, c in enumerate(class_set):
-            class_str += c
+            class_str += str(c)
             if index < len(class_set) - 1:
                 class_str += ", "
         

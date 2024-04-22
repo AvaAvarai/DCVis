@@ -82,7 +82,7 @@ class Controller:
             return
 
         # GUI changes for changing datasets without restarting the application
-        if self.data and self.view.plot_widget and self.view.class_table and self.view.plot_layout:
+        if self.view.plot_widget and self.view.class_table and self.view.plot_layout:
             self.view.plot_layout.removeWidget(self.view.plot_widget)
             del self.view.plot_widget
             self.view.plot_widget = None
