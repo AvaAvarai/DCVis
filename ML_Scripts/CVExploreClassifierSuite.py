@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
+import os
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
@@ -290,7 +291,18 @@ if __name__ == '__main__':
 
     # Convert results to DataFrame and save
     results_df = pd.DataFrame(results).T
-    # save to csv filename of transformed_ds + original_ds + n_runs + n_folds + 'results.csv'
-    transformed_dataset = transformed_dataset.split('\\')[-1].split('.')[0]
-    original_dataset =  original_dataset.split('\\')[-1].split('.')[0]
-    results_df.to_csv(f'train_{transformed_dataset}_validate_{original_dataset}_{n_runs}_{n_folds}_results.csv')
+    # Extracting the filenames without paths and extensions to use in the output file name
+    transformed_dataset_base = transformed_dataset.split('\\')[-1].split('.')[0]
+    original_dataset_base = original_dataset.split('\\')[-1].split('.')[0]
+
+    # Directory where the results will be saved
+    results_dir = f'train_datasets/{transformed_dataset_base}_validate_datasets/{original_dataset_base}'
+    # Check if the directory exists, if not, create it
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
+    # Define the full path for the results csv
+    results_file_path = os.path.join(results_dir, f'{n_runs}_{n_folds}_results.csv')
+    results_df.to_csv(results_file_path)
+
+    print(f'Results saved to {results_file_path}')
