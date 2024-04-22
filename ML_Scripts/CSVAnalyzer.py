@@ -100,6 +100,7 @@ def load_csv():
         try:
             current_data = pd.read_csv(filepath)
             display_data(current_data)
+            examine_data(current_data)
             update_smote_button()  # Update the SMOTE button status based on new data
         except Exception as e:
             update_status(f"Error: {str(e)}")
@@ -130,6 +131,8 @@ def apply_smote():
     update_smote_button()  # Re-check if SMOTE should be enabled or disabled
 
     messagebox.showinfo("Success", "SMOTE applied successfully. Data is balanced now.")
+
+    examine_data(current_data)
 
 def display_data(data):
     # Clear existing data in the Treeview
