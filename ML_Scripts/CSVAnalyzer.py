@@ -1,15 +1,89 @@
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, ttk, messagebox
 import pandas as pd
 import numpy as np
 
+# Global variable to store the current DataFrame
+current_data = None
+
+def adjust_csv_row_proportions():
+    """Adjusts the values of each row in the current CSV data by a random amount within a certain range."""
+
+    global current_data
+
+    # Check for 'class' column
+    if 'class' not in current_data.columns:
+        messagebox.showerror("Error", "CSV must contain a 'class' column.")
+        return
+
+    # Separate the 'class' column
+    labels = current_data['class']
+    df_numerical = current_data.drop(columns=['class'])
+
+    # Calculate the minimum and maximum value for each column
+    min_vals = df_numerical.min()
+    max_vals = df_numerical.max()
+
+    # Adjust each row within the range of the original data
+    adjusted_rows = []
+    for _, row in df_numerical.iterrows():
+        adjustment = np.random.uniform(-1, 1, size=len(row)) * (max_vals - min_vals) * 0.1  # Max 10% adjustment
+        adjusted_row = np.clip(row + adjustment, min_vals, max_vals)
+        adjusted_rows.append(adjusted_row)
+
+    # Create a new DataFrame from the adjusted rows
+    current_data = pd.DataFrame(adjusted_rows, columns=df_numerical.columns)
+    current_data['class'] = labels.values  # Reattach 'class' column
+
+    # Update display
+    display_data(current_data)
+
+def adjust_csv_row_proportions_no_bounds():
+    """Adjusts the values of each row in the current CSV data by a random amount without considering min/max values."""
+
+    global current_data
+
+    # Check for 'class' column
+    if 'class' not in current_data.columns:
+        messagebox.showerror("Error", "CSV must contain a 'class' column.")
+        return
+
+    # Temporarily remove the 'class' column
+    labels = current_data['class']
+    df_numerical = current_data.drop(columns=['class'])
+
+    # Adjust each row with a random constant, not considering min/max values
+    adjusted_rows = []
+    for _, row in df_numerical.iterrows():
+        adjustment = np.random.uniform(-1, 1, size=len(row))  # Uniform distribution
+        adjusted_row = row + adjustment
+        adjusted_rows.append(adjusted_row)
+
+    # Create a new DataFrame from the adjusted rows
+    current_data = pd.DataFrame(adjusted_rows, columns=df_numerical.columns)
+    current_data['class'] = labels.values  # Reattach 'class' column
+
+    # Update display
+    display_data(current_data)
+
+def save_csv():
+    if current_data is None:
+        messagebox.showerror("Error", "No data to save. Please load or adjust data first.")
+        return
+
+    output_file = filedialog.asksaveasfilename(filetypes=[("CSV files", "*.csv")], defaultextension=".csv")
+    if output_file:
+        current_data.to_csv(output_file, index=False)
+        messagebox.showinfo("Success", "CSV file has been saved.")
+
 def load_csv():
+    global current_data
     filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
     if filepath:
         try:
-            data = pd.read_csv(filepath)
-            display_data(data)
-            examine_data(data)
+            current_data = pd.read_csv(filepath)
+            display_data(current_data)
+            examine_data(current_data)
         except Exception as e:
             update_status(f"Error: {str(e)}")
 
@@ -64,25 +138,57 @@ def examine_data(data):
 def update_status(message):
     status_label.config(text=message)
 
+def adjust_and_save_csv(adjustment_function):
+    if current_data is None:
+        messagebox.showerror("Error", "No CSV loaded. Please load a CSV file first.")
+        return
+    
+    output_file = filedialog.asksaveasfilename(filetypes=[("CSV files", "*.csv")])
+    if output_file:
+        try:
+            adjustment_function(current_data, output_file)
+            messagebox.showinfo("Success", "CSV file has been adjusted and saved.")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
 def main():
     global tree, status_label
     root = tk.Tk()
     root.title("CSV Analyzer")
     
-    root.geometry('800x400')  # Larger size to accommodate the data display
+    root.geometry('800x600')  # Adjust size if needed to accommodate all buttons in one row
 
     # Button to load CSV
     load_button = tk.Button(root, text="Load CSV", command=load_csv)
-    load_button.pack(pady=10)
+    load_button.grid(row=0, column=0, padx=5, pady=10)
+
+    # Button to adjust row proportions with bounds
+    adjust_button = tk.Button(root, text="Adjust Row Proportions", command=adjust_csv_row_proportions)
+    adjust_button.grid(row=0, column=1, padx=5, pady=10)
+
+    # Button to adjust row proportions without bounds
+    adjust_no_bounds_button = tk.Button(root, text="Adjust Row Proportions No Bounds", command=adjust_csv_row_proportions_no_bounds)
+    adjust_no_bounds_button.grid(row=0, column=2, padx=5, pady=10)
+
+    # Button to save the adjusted CSV
+    save_button = tk.Button(root, text="Save CSV", command=save_csv)
+    save_button.grid(row=0, column=3, padx=5, pady=10)
 
     # Treeview widget for displaying CSV data
     tree = ttk.Treeview(root)
-    tree.pack(pady=10, padx=10, fill='both', expand=True)
+    tree.grid(row=1, column=0, columnspan=4, padx=10, pady=10, sticky='nsew')
 
     # Status label for displaying results
     status_label = tk.Label(root, text="", justify=tk.LEFT, anchor="w", font=('TkDefaultFont', 10), relief=tk.SUNKEN)
-    status_label.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
-    
+    status_label.grid(row=2, column=0, columnspan=4, padx=10, pady=10, sticky='ew')
+
+    # Configure the grid to allow the Treeview to expand more
+    root.grid_rowconfigure(1, weight=1)
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_columnconfigure(1, weight=1)
+    root.grid_columnconfigure(2, weight=1)
+    root.grid_columnconfigure(3, weight=1)
+
     root.mainloop()
 
 if __name__ == "__main__":
