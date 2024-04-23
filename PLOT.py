@@ -400,7 +400,7 @@ class Plot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [125 / 255, 125 / 255, 125 / 255, 1]  # Default gray
+        self.background_color = [200 / 255, 200 / 255, 200 / 255, 1]  # Default gray
         self.axes_color = [1, 1, 1, 1]  # Default white
 
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)

@@ -371,17 +371,15 @@ class View(QtWidgets.QMainWindow):
         else:
             primary_class = CLIPPING.primary_clipped_class(self.controller.data)
         if primary_class in self.controller.data.rule_regions:
-            primary_class += f" ({self.controller.data.rule_count})"
+            primary_class = str(primary_class) + f" ({str(self.controller.data.rule_count)})"
         else:
-            self.controller.data.rule_regions[self.rule_count] = (primary_class, rules)
-        
+            self.controller.data.rule_regions[self.rule_count] = (str(primary_class), rules)
         class_str = ""
         for index, c in enumerate(class_set):
             class_str += str(c)
             if index < len(class_set) - 1:
                 class_str += ", "
         
-        # count number of samples clipped by rule which are in clear_samples
         overcounts = np.count_nonzero(np.logical_and(self.controller.data.clipped_samples, self.controller.data.clear_samples))
         
         case_count = CLIPPING.count_clipped_samples(self.controller.data)
