@@ -394,7 +394,8 @@ class TrainValidateModels:
         plural = 's' if self.n_runs > 1 else ''
         print("\n==============================================================================================")
         print(f"Model Performance over {self.n_runs} independent cycle{plural} with {self.n_folds}-Fold Cross-Validation")
-        print(f"Training Dataset: {self.transformed_dataset} Exploration Dataset: {self.original_dataset}")
+        print(f"Training Dataset: {self.transformed_dataset}")
+        print(f"Exploration Dataset: {self.original_dataset}")
         print("==============================================================================================")
 
         headers = ['Model', 'CV Mean Acc.', 'CV STD of Acc.', 'Exp. Mean Acc.', 'Exp. STD of Acc.', 'Best AUC', 'Worst AUC']

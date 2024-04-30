@@ -49,25 +49,28 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
 
     return control1, control2
 
-def adjust_point_towards_center(point, atts=1):
-    # Calculate direction vector from point towards the center (assumed to be at (0, 0))
+def adjust_point_towards_center(point, multiplier=1.0):
+    # Calculate direction vector from point towards the center (0, 0)
     direction = [-point[0], -point[1]]
-    scale = 0.0025
-    adjust = atts * scale
+    # Define the scale factor
+    scale = 0.0025 * multiplier  # Adjust this base scale factor as needed
     # Normalize the direction vector
     norm = (direction[0]**2 + direction[1]**2)**0.5
+    if norm == 0:
+        return point  # Return original if normalization fails
     direction_normalized = [direction[0]/norm, direction[1]/norm]
-    # Adjust point to move 0.025 units towards the center
-    return [point[0] + adjust * direction_normalized[0], point[1] + adjust * direction_normalized[1]]
+    # Adjust point by moving it towards the center by the scaled amount
+    adjusted_point = [point[0] + scale * direction_normalized[0], point[1] + scale * direction_normalized[1]]
+    return adjusted_point
 
 def draw_cubic_bezier_curve(start, control1, control2, end, inner, atts):
     # Draw a cubic Bezier curve using OpenGL's immediate mode.
-    segments = 20  # The number of line segments to use
+    segments = 100  # The number of line segments to use
 
     if inner:
         # Adjust both start and end points for inner curves
-        start_adjusted = adjust_point_towards_center(start, atts)
-        end_adjusted = adjust_point_towards_center(end, atts)
+        start_adjusted = adjust_point_towards_center(start, 1)
+        end_adjusted = adjust_point_towards_center(end, 1)
     else:
         # Use original points if not inner
         start_adjusted = start
@@ -158,8 +161,26 @@ def draw_highlighted_curves(dataset, line_vao):
             glBindVertexArray(0)
     glLineWidth(1)
     glDisable(GL_BLEND)
+    
+def draw_attribute_radials(data):
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    radius = calculate_radius(data)
+    center = (0, 0)  # Center of the circle
+    angle_increment = 2 * np.pi / data.attribute_count
+
+    for i in range(data.attribute_count):
+        angle = np.pi / 2 - i * angle_increment  # Starting from north and moving counterclockwise
+        x = radius * np.cos(angle)
+        y = radius * np.sin(angle)
+        end_point = (x, y)
+        glColor3ub(*data.class_colors[i % len(data.class_colors)])  # Using class colors
+        #draw_radial_line(center, end_point)
+
+    glDisable(GL_BLEND)
 
 def draw_radial_line(start, end):
+    """Draw a line from start to end."""
     glBegin(GL_LINES)
     glVertex2f(*start)
     glVertex2f(*end)
@@ -400,8 +421,8 @@ class Plot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [200 / 255, 200 / 255, 200 / 255, 1]  # Default gray
-        self.axes_color = [1, 1, 1, 1]  # Default white
+        self.background_color = [0.9375, 0.9375, 0.9375, 1]  # Default gray in RGBA
+        self.axes_color = [0, 0, 0, 0]  # Default black
 
         self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         self.data.class_colors = self.color_instance.colors_array
@@ -674,7 +695,8 @@ class Plot(QOpenGLWidget):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         hue_shift = 0.08
-        
+        # set line width to 1
+        glLineWidth(1)
         class_count_one = data.class_count == 1
         for class_index in range(data.class_count):
             data.overlap_points[class_index] = 0
@@ -697,16 +719,15 @@ class Plot(QOpenGLWidget):
                             position = adjust_point_towards_center(position, data.attribute_count)
                         if was_inner:
                             position = adjust_point_towards_center(position, -data.attribute_count)
-                        
-                        
-                        # if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
-                        #     # append dataframe index to overlap indices
-                        #     index = pos_index // data.vertex_count
-                        #     if index not in data.overlap_indices:
-                        #         data.overlap_points[class_index] += 1
-                        #         data.overlap_indices.append(index)
-                        #     glPointSize(10)
-                        #     glColor4ub(255, 0, 0, 255)
+
+                        if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
+                            # append dataframe index to overlap indices
+                            index = pos_index // data.vertex_count
+                            if index not in data.overlap_indices:
+                                data.overlap_points[class_index] += 1
+                                data.overlap_indices.append(index)
+                            glPointSize(10)
+                            glColor4ub(255, 0, 0, 255)
                             
                         glBegin(GL_POINTS)
                         glVertex2f(*position)
@@ -734,30 +755,28 @@ class Plot(QOpenGLWidget):
 
     def draw_unhighlighted_curves(self, data, line_vao):
         glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_LINE_SMOOTH)
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
         radius = calculate_radius(data)
-        self.sectors = []
         hue_shift_amount = 0.02
 
         class_count_one = data.class_count == 1
 
         for class_index in range(data.class_count):
-            min_angle = np.inf
-            max_angle = -np.inf
-            closest = furthest = None
-            
-            was_inner = False
-            is_inner = (class_index == data.class_order[0]) and not class_count_one
-            if len(data.class_order) > 1:
-                was_inner = (class_index == data.class_order[1])
+            closest_points = [[] for _ in range(data.attribute_count)]
+            furthest_points = [[] for _ in range(data.attribute_count)]
             if data.active_classes[class_index]:
                 glBindVertexArray(line_vao[class_index])
-
                 datapoint_count = 0
                 size_index = 0
                 for j in range(data.class_count):
                     if j < class_index:
                         size_index += data.count_per_class[j]
+
+                was_inner = False
+                is_inner = (class_index == data.class_order[0]) and not class_count_one
+                if len(data.class_order) > 1:
+                    was_inner = (class_index == data.class_order[1])
 
                 for j in range(0, len(data.positions[class_index]), data.vertex_count):
                     sub_alpha = 0
@@ -765,7 +784,7 @@ class Plot(QOpenGLWidget):
                         index = size_index + datapoint_count
                         if index < len(data.clear_samples) and (h > data.attribute_count or data.clear_samples[index]):
                             continue
-                        
+
                         if data.trace_mode:
                             color = shift_hue(data.class_colors[class_index], hue_shift_amount)
                             hue_shift_amount += 0.02  # Increase hue shift for each attribute or sample
@@ -773,78 +792,35 @@ class Plot(QOpenGLWidget):
                             color = shift_hue(data.class_colors[class_index], 0.1)  # Apply a hue shift for the last attribute
                         else:
                             color = shift_hue(data.class_colors[class_index], 0)  # No hue shift if not the last attribute or not in trace mode
-                            
+
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
-
-                        start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
                         
-                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)       
+                        start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
 
-                        # Adjust start and end for inner classes
+                        # Adjust start and end for inner curves
                         if is_inner:
-                            start = adjust_point_towards_center(start)
-                            end = adjust_point_towards_center(end)
+                            start = adjust_point_towards_center(start, data.attribute_count)
+                            end = adjust_point_towards_center(end, data.attribute_count)
                         if was_inner:
                             start = adjust_point_towards_center(start, -data.attribute_count)
                             end = adjust_point_towards_center(end, -data.attribute_count)
 
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
+                        if is_inner:
+                            control1 = adjust_point_towards_center(control1, data.attribute_count)
+                            control2 = adjust_point_towards_center(control2, data.attribute_count)
+                        if was_inner:
+                            control1 = adjust_point_towards_center(control1, -data.attribute_count)
+                            control2 = adjust_point_towards_center(control2, -data.attribute_count)
+
                         draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
 
-                        angle = calculate_angle(end[0], end[1])
-                        
-                        if angle < min_angle and h == data.attribute_count - 1:
-                            min_angle = angle
-                            closest = end
-                        if angle > max_angle:
-                            max_angle = angle
-                            furthest = end
-                            
                     datapoint_count += 1
 
                 glBindVertexArray(0)
 
-                mult = 5
-                if class_index == data.class_count-1:
-                    mult = 2.5
-                
-                if closest is not None:
-                    extended_closest = (closest[0] * mult, closest[1] * mult)
-                    if self.data.active_sectors[class_index]:
-                        draw_radial_line((0, 0), extended_closest)
-                if furthest is not None:
-                    extended_endest = (furthest[0] * mult, furthest[1] * mult)
-                    if self.data.active_sectors[class_index]:
-                        draw_radial_line((0, 0), extended_endest)
-                
-                if closest is not None and furthest is not None:
-                    glColor4ub(color[0], color[1], color[2], 50)
-                    closest_angle = np.arctan2(closest[1], closest[0])
-                    furthest_angle = np.arctan2(furthest[1], furthest[0])
-
-                    if self.data.plot_type == 'SCC':
-                        # Adjust angles to be positive
-                        closest_angle = closest_angle if closest_angle >= 0 else closest_angle + 2 * np.pi
-                        furthest_angle = furthest_angle if furthest_angle >= 0 else furthest_angle + 2 * np.pi
-
-                    # Ensure start_angle < end_angle for drawing the sector correctly
-                    if closest_angle > furthest_angle:
-                        closest_angle, furthest_angle = furthest_angle, closest_angle
-                        
-                    sector_radius = radius * (data.class_count + 1)
-
-                    # Draw the filled sector
-                    if self.data.active_sectors[class_index]:
-                        draw_filled_sector((0, 0), closest_angle, furthest_angle, sector_radius, segments=50)
-
-                if closest is not None and furthest is not None:
-                    sector_info = {
-                        'start_angle': closest_angle,
-                        'end_angle': furthest_angle,
-                        'radius': sector_radius
-                    }
-                    self.sectors.append(sector_info)
-
         glDisable(GL_BLEND)
+
 
     def replot_overlaps(self):
         
@@ -852,4 +828,3 @@ class Plot(QOpenGLWidget):
         self.data.load_frame(filtered_df)
         
         self.update()
-    
