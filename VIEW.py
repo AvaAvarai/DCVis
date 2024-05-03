@@ -1,8 +1,8 @@
 from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtWidgets import QColorDialog
 from PyQt6.uic.load_ui import loadUi
-
 import numpy as np
+from PyQt6.QtWidgets import QApplication
 
 import CLASS_TABLE, ATTRIBUTE_TABLE, PLOT, CLIPPING,WARNINGS
 
@@ -28,6 +28,15 @@ class View(QtWidgets.QMainWindow):
         self.rulesListWidget.customContextMenuRequested.connect(self.openContextMenu)
         
         self.rulesListWidget.itemClicked.connect(self.highlightAssociatedRegions)
+    
+        self.center_on_screen()
+    
+    def center_on_screen(self):
+        '''Centers the window on the screen.'''
+        screen = QApplication.primaryScreen()
+        resolution = screen.geometry()
+        self.move(int(resolution.width() / 2 - self.frameSize().width() / 2),
+                  int(resolution.height() / 2 - self.frameSize().height() / 2))
     
     def highlightAssociatedRegions(self, item):
         rule_num = item.text().split()[1][:-1]
