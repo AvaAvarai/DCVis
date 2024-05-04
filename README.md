@@ -26,40 +26,53 @@ Execute `DCVIS_MAIN.py` script to launch the DCVis application: `python DCVIS_MA
 
 ## Software Features
 
-- Visualize multi-dimensional numerical data (.csv or .txt file) in 2D visualizations using OpenGL for GPU rendering.  
-- Plot can be interacted with, panning around, zooming in/out, configuring view options, and exploring data interactively.  
+- Visualize multi-dimensional numerical data (.csv or .txt file) in 2D visualizations using OpenGL.  
+- Plot can be interacted with through panning, zooming, color and transparency selection, and interactive point selection.  
 - Data may be highlighted with dual-right click clipping, analyzed, and exported or hidden for further analysis.  
-- Classification rules can be built from clipped samples.
-- Axes can be inverted to further find n-D data patterns.
+- Classification rules can be built from clipped cases.
+- Axes can be reordered or inverted to further find n-D data patterns.
 - For building visual machine learning models using rules-based classification. Combining and chaining rules to produce classifiers for future data.
 - Background, class, and axes colors are each configurable.
-- Axes can be shown or hidden.
+- Axes, points, and connecting lines can be shown or hidden.
 - Trace mode alternates colors for visual tracing.
 
 ## Controls
 
-- scroll-wheel click and drag on plot to pan the plot.
-- Scroll the mouse wheel to zoom in/out of the plot.
-- Right click twice to make a box clipping rectangle. The 1st right click is the upper right corner, and the 2nd right click is the bottom left corner.
-- Left click to pick up single point of sample(s).
-- Q and E keys to cycle currently selected sample(s).
-- Clipped samples are highlighted, 'Hide Clips' button will suppress clipped samples from being drawn, 'Remove Clips' button will restore.
-- The cells in the class and attribute tables can be dragged and dropped to switch their orders.
-- The slider below the attribute table will change the transparency of the attribute markers that are not selected in the highlight column.
-- Hotkeys listed next to user interface elements.
+### Mouse Interactions
+
+- **Pan Plot**: Click and drag with the scroll-wheel to pan the plot.
+- **Zoom**: Scroll the mouse wheel to zoom in or out.
+- **Box Clipping**: Right-click twice to create a clipping rectangle (first click sets the upper right corner, second click sets the bottom left corner).
+- **Select Point**: Left-click to select a single point or multiple sample points.
+
+### Keyboard Shortcuts
+
+- **Cycle Selections**: Use the `Q` and `E` keys to cycle through the currently selected sample(s).
+- **Adjust Vertical Position**: The `W` and `S` keys move the selected cases up or down proportionally.
+
+### UI Elements
+
+- **Highlight Clipped Cases**: Clipped cases are highlighted on the plot. Use the 'Add Classification Rule' button to convert current clipped rectangles into a new rule.
+- **Rule Visibility**: Toggle the visibility of cases contained within a rule using the checkbox next to the rule.
+- **Reorder Tables**: Drag and drop cells within the class and attribute tables to reorder them.
+- **Adjust Transparency**: A slider below the attribute table adjusts the transparency of attribute markers not selected in the highlight column.
+
+### Additional Information
+
+- Hotkeys are provided next to relevant user interface elements for quick reference.
 
 ## Datasets included
 
-- Fisher Iris of flower measurements -- 150 samples, 4 features, 3 classes
-- Breast Cancer Wisconsin diagnostics -- 569 samples, 30 features, 2 classes
-- Diabetes diagnostics -- 768 samples, 8 features, 2 classes
-- Heart Disease diagnostics -- 1,025 samples, 13 features, 2 classes
-- Ionosphere atmosphere readings -- 351 samples, 34 features, 2 classes (some empty cells)
-- MNIST Capital Letters handwriting -- 20,000 samples, 16 features, 26 classes
-- Sinusoidal wave samplings -- 200 samples, 2 features, 2 classes
-- Wheat Seed variety measurements -- 210 samples, 7 features, 3 classes
-- Wine chemical analysis measurements -- 4,898 samples, 11 features, 7 classes
-- Artificial testing datasets which exhibit various properties of visualizations.
+- Fisher Iris of flower measurements -- 150 cases, 4 features, 3 classes
+- Breast Cancer Wisconsin diagnostics -- 569 cases, 30 features, 2 classes
+- WBC -- 696 cases, 9 features, 2 classes
+- Diabetes diagnostics -- 768 cases, 8 features, 2 classes
+- Heart Disease diagnostics -- 1,025 cases, 13 features, 2 classes
+- Ionosphere atmosphere readings -- 351 cases, 34 features, 2 classes (some empty cells)
+- MNIST Capital Letters handwriting -- 20,000 cases, 16 features, 26 classes
+- Sinusoidal wave samplings -- 200 cases, 2 features, 2 classes
+- Wheat Seed variety measurements -- 210 cases, 7 features, 3 classes
+- Wine chemical analysis measurements -- 4,898 cases, 11 features, 7 classes
 
 ## Dataset requirements
 
