@@ -49,6 +49,9 @@ Execute `DCVIS_MAIN.py` script to launch the DCVis application: `python DCVIS_MA
 
 - **Cycle Selections**: Use the `Q` and `E` keys to cycle through the currently selected sample(s).
 - **Adjust Vertical Position**: The `W` and `S` keys move the selected cases up or down proportionally.
+- **Delete Samples**: Press the `D` key to delete the selected samples from the dataset.
+- **Print Samples**: Press the `P` key to print the details of the selected samples.
+- **Clone Samples**: Press the `C` key to create a synthetic copy of the selected samples.
 
 ### UI Elements
 
