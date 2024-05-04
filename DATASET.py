@@ -1,4 +1,5 @@
 from typing import List, Optional, Tuple
+import WARNINGS
 import pandas as pd
 import numpy as np
 import os
@@ -19,7 +20,7 @@ class Dataset:
         self.class_count: int = 0
         self.count_per_class: List[int] = []
         self.class_names: List[str] = []
-        self.class_colors: List[Tuple[int, int, int]] = []  # RGB colors TODO: change to using RGBA for individualized attribute alpha slider control
+        self.class_colors: List[Tuple[int, int, int, int]] = []  # RGB colors TODO: change to using RGBA for individualized attribute alpha slider control
 
         self.rule_regions = {}
 
@@ -43,6 +44,7 @@ class Dataset:
         self.positions: List[float] = []
         
         self.overlap_indices = []
+        self.radial_bounds = {}
         
         self.axis_positions: List[float] = []
         self.axis_on: bool = True
@@ -88,7 +90,7 @@ class Dataset:
         self.attribute_names = df.columns.tolist()[:-1]
         self.attribute_count = len(df.columns) - 1
         self.attribute_order = np.arange(0, self.attribute_count)
-
+        self.max_radial_distances = [0] * self.attribute_count
         self.coefs = np.ones(self.attribute_count) * 100
 
         self.active_attributes = np.repeat(True, self.attribute_count)
@@ -109,7 +111,7 @@ class Dataset:
             self.not_normalized_frame = not_normal
         else:
             self.not_normalized_frame = df.copy()
-    
+
     def delete_clip(self):
         clipped_mask = np.array(self.clipped_samples, dtype=bool)
         self.dataframe = self.dataframe[~clipped_mask].reset_index(drop=True)
@@ -165,10 +167,6 @@ class Dataset:
             self.name = os.path.basename(filename)
             self.load_frame(df)
 
-        except FileNotFoundError:  # TODO: use WARNINGS.py errors
-            print(f"File {filename} not found.")
-        except pd.errors.EmptyDataError:
-            print("The file is empty.")
         except Exception as e:
             print(f"An error occurred: {e}")
             

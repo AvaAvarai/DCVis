@@ -2,11 +2,15 @@ import colorsys
 
 
 class getColors:
-    def __init__(self, num_colors, bg_color, axis_color):
+    def __init__(self, num_colors, bg_color, axis_color, default_colors=None, color_names=None):
         self.bg_color = [x / 255.0 for x in bg_color]  # Normalize to [0, 1]
         self.axis_color = [x / 255.0 for x in axis_color]  # Normalize to [0, 1]
         self.colors_array = []
         self.colors_names_array = []
+        if default_colors is not None:
+            self.colors_array = default_colors
+            if color_names is not None:
+                self.colors_names_array = color_names
         self.num_colors = num_colors
         self.generate_colors()
 

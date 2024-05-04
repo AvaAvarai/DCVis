@@ -85,9 +85,9 @@ def draw_cubic_bezier_curve(start, control1, control2, end, inner, atts):
     glEnd()
 
 def calculate_angle(x, y):
-    angle = np.arctan2(x, y)
+    angle = np.arctan2(y, x)  # Ensure y is first in arctan2
     if angle < 0:
-        angle += 2 * np.pi
+        angle += 2 * np.pi  # Normalize to 0 to 2π if needed
     return angle
 
 def is_point_in_sector(point, center, start_angle, end_angle, radius):
@@ -162,30 +162,6 @@ def draw_highlighted_curves(dataset, line_vao):
     glLineWidth(1)
     glDisable(GL_BLEND)
     
-def draw_attribute_radials(data):
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    radius = calculate_radius(data)
-    center = (0, 0)  # Center of the circle
-    angle_increment = 2 * np.pi / data.attribute_count
-
-    for i in range(data.attribute_count):
-        angle = np.pi / 2 - i * angle_increment  # Starting from north and moving counterclockwise
-        x = radius * np.cos(angle)
-        y = radius * np.sin(angle)
-        end_point = (x, y)
-        glColor3ub(*data.class_colors[i % len(data.class_colors)])  # Using class colors
-        #draw_radial_line(center, end_point)
-
-    glDisable(GL_BLEND)
-
-def draw_radial_line(start, end):
-    """Draw a line from start to end."""
-    glBegin(GL_LINES)
-    glVertex2f(*start)
-    glVertex2f(*end)
-    glEnd()
-
 def calculate_radius(data):
     circumference = data.attribute_count
     # Calculate the radius from the circumference which is the number of attributes
@@ -230,7 +206,7 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
 
                 sub_alpha = 0
                 if any(dataset.clipped_samples):
-                    sub_alpha = 100  # TODO: Make this a scrollable option
+                    sub_alpha = 0  # TODO: Make this a scrollable option
 
                 glBegin(GL_LINES)
                 for m in range(1, dataset.vertex_count):
@@ -424,7 +400,12 @@ class Plot(QOpenGLWidget):
         self.background_color = [0.9375, 0.9375, 0.9375, 1]  # Default gray in RGBA
         self.axes_color = [0, 0, 0, 0]  # Default black
 
-        self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
+        # if class names lower has benign and malignant case insensitive then set colors to green and red
+        if 'benign' in [x.lower() for x in self.data.class_names] and 'malignant' in [x.lower() for x in self.data.class_names]:
+            self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color, default_colors=[[0, 255, 0], [255, 0, 0]], color_names=['green', 'red'])
+        else:
+            self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
+        
         self.data.class_colors = self.color_instance.colors_array
 
     def reset_zoom(self):
@@ -517,6 +498,7 @@ class Plot(QOpenGLWidget):
             self.draw_unhighlighted_curves(self.data, self.line_vao)
             draw_highlighted_curves(self.data, self.line_vao)
             self.draw_unhighlighted_curves_vertices(self.data, self.marker_vao)
+            #self.draw_attribute_radials(self.data)
         else:  # Polylines
             draw_unhighlighted_nd_points(self.data, self.line_vao)
             draw_highlighted_nd_points(self.data, self.line_vao)
@@ -753,22 +735,74 @@ class Plot(QOpenGLWidget):
             self.replot_overlaps_btn.setEnabled(True)
         glDisable(GL_BLEND)
 
+    def draw_radial_lines(self, data):
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glLineWidth(2)  # Adequate line width for visibility
+        radius = calculate_radius(data)  # Correct radius for your plot
+
+        for class_index, bounds in data.radial_bounds.items():
+            if bounds['smallest'] is not None and bounds['largest'] is not None:
+                x_min = radius * np.cos(bounds['smallest'])
+                y_min = radius * np.sin(bounds['smallest'])
+                x_max = radius * np.cos(bounds['largest'])
+                y_max = radius * np.sin(bounds['largest'])
+
+                glColor3ub(*data.class_colors[class_index % len(data.class_colors)])  # Using class colors
+
+                glBegin(GL_LINES)
+                glVertex2f(0, 0)
+                glVertex2f(5*x_min, 5*y_min)
+                glEnd()
+
+                glBegin(GL_LINES)
+                glVertex2f(0, 0)
+                glVertex2f(5*x_max, 5*y_max)
+                glEnd()
+
+        glDisable(GL_BLEND)
+
+    def draw_attribute_radials(self, data):
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glLineWidth(2)
+        center = (0, 0)
+        # Draw radial lines
+        for i in range(data.attribute_count):
+            if i < len(data.max_radial_distances):
+                angle = 2 * np.pi * i / data.attribute_count
+                x = data.max_radial_distances[i] * np.cos(angle)
+                y = data.max_radial_distances[i] * np.sin(angle)
+                glColor3ub(*data.class_colors[i % len(data.class_colors)])
+                glBegin(GL_LINES)
+                glVertex2f(*center)
+                glVertex2f(x, y)
+                glEnd()
+
+        glDisable(GL_BLEND)
+
+
     def draw_unhighlighted_curves(self, data, line_vao):
         glEnable(GL_BLEND)
         glEnable(GL_LINE_SMOOTH)
         glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
         radius = calculate_radius(data)
-        hue_shift_amount = 0.02
+        hue_shift_amount = 0.1
 
         class_count_one = data.class_count == 1
 
         for class_index in range(data.class_count):
-            closest_points = [[] for _ in range(data.attribute_count)]
-            furthest_points = [[] for _ in range(data.attribute_count)]
             if data.active_classes[class_index]:
                 glBindVertexArray(line_vao[class_index])
                 datapoint_count = 0
                 size_index = 0
+                smallest_vector = float('inf')
+                largest_vector = 0
+
+                # Initialize the radial bounds for this class if not already present
+                if class_index not in data.radial_bounds:
+                    data.radial_bounds[class_index] = {'smallest': None, 'largest': None}
+
                 for j in range(data.class_count):
                     if j < class_index:
                         size_index += data.count_per_class[j]
@@ -779,48 +813,39 @@ class Plot(QOpenGLWidget):
                     was_inner = (class_index == data.class_order[1])
 
                 for j in range(0, len(data.positions[class_index]), data.vertex_count):
-                    sub_alpha = 0
                     for h in range(1, data.vertex_count):
                         index = size_index + datapoint_count
                         if index < len(data.clear_samples) and (h > data.attribute_count or data.clear_samples[index]):
                             continue
 
-                        if data.trace_mode:
+                        # For the last attribute, use hue shift color
+                        if h == data.attribute_count - 1:
                             color = shift_hue(data.class_colors[class_index], hue_shift_amount)
-                            hue_shift_amount += 0.02  # Increase hue shift for each attribute or sample
-                        elif h == data.attribute_count - 1:
-                            color = shift_hue(data.class_colors[class_index], 0.1)  # Apply a hue shift for the last attribute
                         else:
-                            color = shift_hue(data.class_colors[class_index], 0)  # No hue shift if not the last attribute or not in trace mode
+                            color = data.class_colors[class_index]
+                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[h] else 255)
 
-                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
-                        
                         start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
+                        angle = np.arctan2(end[1], end[0])
 
-                        # Adjust start and end for inner curves
-                        if is_inner:
-                            start = adjust_point_towards_center(start, data.attribute_count)
-                            end = adjust_point_towards_center(end, data.attribute_count)
-                        if was_inner:
-                            start = adjust_point_towards_center(start, -data.attribute_count)
-                            end = adjust_point_towards_center(end, -data.attribute_count)
+                        if angle < smallest_vector:
+                            smallest_vector = angle
+                        if angle > largest_vector:
+                            largest_vector = angle
 
+                        # Draw the curve
                         control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
-                        if is_inner:
-                            control1 = adjust_point_towards_center(control1, data.attribute_count)
-                            control2 = adjust_point_towards_center(control2, data.attribute_count)
-                        if was_inner:
-                            control1 = adjust_point_towards_center(control1, -data.attribute_count)
-                            control2 = adjust_point_towards_center(control2, -data.attribute_count)
-
                         draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
 
                     datapoint_count += 1
 
+                # Update the radial bounds for this class
+                data.radial_bounds[class_index]['smallest'] = smallest_vector
+                data.radial_bounds[class_index]['largest'] = largest_vector
+
                 glBindVertexArray(0)
 
         glDisable(GL_BLEND)
-
 
     def replot_overlaps(self):
         

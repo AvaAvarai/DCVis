@@ -1,10 +1,17 @@
 # DCVis: Dynamic Coordinate Visualisation System
 
-DCVis is a research project to build visual machine learning models with multidimensional visualizations and interactive classification tools.  
+DCVis is a Visual Knowledge Discovery (VKD) Artificial Intelligence and Machine Learning (AI/ML) research project.  
+This project allows for interactive building of visual ML models using multidimensional (n-D) data in visualizations.  
+With interactive classification tools and synthetic data generation features supporting novel classifier improvement techniques.  
 
-Contributors: Alice Williams, James Battistoni, Charles Recaido  
-at Central Washington University Visual Knowledge Discovery Lab  
-on projects by Dr. Boris Kovalerchuk during years 2022 to 2024.  
+Project contributors: Alice Williams, James Battistoni IV, Charles Recaido, and Dr. Boris Kovalerchuk
+at Central Washington University Visual Knowledge Discovery Lab, project during years 2022 to 2024.
+
+Software developed for the paper:
+
+- Synthetic Data Generation and Automated Multidimensional Data Labeling for AI/ML in General and Circular Coordinates by Alice Williams and Dr. Boris Kovalerchuk
+
+Available under the MIT License, allowing for both personal and commercial use.
 
 *This software is a rewrite of [DSCVis](https://github.com/Charles57-CWU/DSCVis) with new visualizations and tooling features.*  
 

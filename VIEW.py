@@ -36,7 +36,7 @@ class View(QtWidgets.QMainWindow):
         screen = QApplication.primaryScreen()
         resolution = screen.geometry()
         self.move(int(resolution.width() / 2 - self.frameSize().width() / 2),
-                  int(resolution.height() / 2 - self.frameSize().height() / 2))
+                  int(resolution.height() / 2 - (self.frameSize().height() * 1.045) / 2))
     
     def highlightAssociatedRegions(self, item):
         rule_num = item.text().split()[1][:-1]
