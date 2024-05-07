@@ -230,28 +230,25 @@ def draw_unhighlighted_nd_point_vertices(dataset, marker_vao):
     # Loop through classes in class order
     for i in dataset.class_order[::-1]:
         size_index = 0
+        # Adjust color based on trace mode
+        color = dataset.class_colors[i]
+        class_color = color
 
-        # Draw polylines and markers
-        if dataset.active_classes[i]:
-            # Adjust color based on trace mode
-            color = dataset.class_colors[i]
-            class_color = color
+        for j in range(dataset.class_count):
+            if j < i:
+                size_index += dataset.count_per_class[j]
+                
+        if dataset.active_markers[i]:
+            # Draw markers
+            for j in range(dataset.vertex_count):
+                glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
+                glPointSize(5 if j < dataset.vertex_count - 1 else 7)  # Different size for the last marker
 
-            for j in range(dataset.class_count):
-                if j < i:
-                    size_index += dataset.count_per_class[j]
-                    
-            if dataset.active_markers[i]:
-                # Draw markers
-                for j in range(dataset.vertex_count):
-                    glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
-                    glPointSize(5 if j < dataset.vertex_count - 1 else 7)  # Different size for the last marker
+                # Apply adjusted color for each marker
+                glColor4ub(class_color[0], class_color[1], class_color[2], dataset.attribute_alpha if dataset.active_attributes[j] else 255)
+                glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
 
-                    # Apply adjusted color for each marker
-                    glColor4ub(class_color[0], class_color[1], class_color[2], dataset.attribute_alpha if dataset.active_attributes[j] else 255)
-                    glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
-
-                    glBindVertexArray(0)
+                glBindVertexArray(0)
 
     glDisable(GL_BLEND)
 

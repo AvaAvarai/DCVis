@@ -111,7 +111,7 @@ def apply_smote():
     if current_data is None:
         messagebox.showerror("Error", "No data loaded. Please load data first.")
         return
-    
+
     # Separate features and target variable
     X = current_data.drop('class', axis=1)
     y = current_data['class']
@@ -119,6 +119,11 @@ def apply_smote():
     # Apply SMOTE
     smote = SMOTE(random_state=42)
     X_smote, y_smote = smote.fit_resample(X, y)
+
+    # Identify synthetic samples and modify their class names
+    original_samples_mask = y.index
+    synthetic_samples_mask = [i for i in y_smote.index if i not in original_samples_mask]
+    y_smote.loc[synthetic_samples_mask] = y_smote.loc[synthetic_samples_mask].apply(lambda x: f"{x}_smote")
 
     # Concatenate the features and labels back into a DataFrame
     balanced_data = pd.concat([X_smote, y_smote.rename('class')], axis=1)
@@ -130,7 +135,7 @@ def apply_smote():
     display_data(current_data)
     update_smote_button()  # Re-check if SMOTE should be enabled or disabled
 
-    messagebox.showinfo("Success", "SMOTE applied successfully. Data is balanced now.")
+    messagebox.showinfo("Success", "SMOTE applied successfully. Data is now balanced with distinct labels for synthetic samples.")
 
     examine_data(current_data)
 
