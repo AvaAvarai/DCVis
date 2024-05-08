@@ -1,6 +1,6 @@
 # DCVis: Dynamic Coordinate Visualization System
 
-DCVis is a Visual Knowledge Discovery (VKD) tool developed as part of an Artificial Intelligence and Machine Learning (AI/ML) research project at Central Washington University's Visual Knowledge Discovery Lab. The project spans from 2022 to 2024 and is still ongoing.With contributors Alice Williams, James Battistoni IV, Charles Recaido, and Dr. Boris Kovalerchuk.
+DCVis is a Visual Knowledge Discovery (VKD) tool developed as part of an Artificial Intelligence and Machine Learning (AI/ML) research project at Central Washington University's Visual Knowledge Discovery Lab. The project spans from 2022 to 2024 and is still ongoing. Contributors are Alice Williams, James Battistoni IV, Charles Recaido, and Dr. Boris Kovalerchuk.
 
 This software enables users to interactively construct visual ML models and explore multidimensional/multivariate data through General Line Coordinate visualizations. Features include interactive classification tools and synthetic data generation, shown to enhance supervised learning classifier models.
 
@@ -22,15 +22,36 @@ Execute `DCVIS_MAIN.py` script to launch the DCVis application: `python DCVIS_MA
 
 ## Software Features
 
-- Visualize multi-dimensional numerical data (.csv or .txt file) in 2D visualizations using OpenGL.  
-- Plot can be interacted with through panning, zooming, color and transparency selection, and interactive point selection.  
-- Data may be highlighted with dual-right click clipping, analyzed, and exported or hidden for further analysis.  
-- Classification rules can be built from clipped cases.
-- Axes can be reordered or inverted to further find n-D data patterns.
-- For building visual machine learning models using rules-based classification. Combining and chaining rules to produce classifiers for future data.
-- Background, class, and axes colors are each configurable.
-- Axes, points, and connecting lines can be shown or hidden.
-- Trace mode alternates colors for visual tracing.
+DCVis offers a robust suite of tools for visualizing and analyzing multidimensional numerical data. Here's what you can do with DCVis:
+
+### Visualization
+
+- **2D Visualizations**: Utilize OpenGL to render multidimensional numerical data from .csv or .txt files.
+- **Interactive Plotting**: Engage with plots through panning, zooming, and selecting different color and transparency options.
+- **Dynamic Visualization**: Reorder or invert axes to uncover patterns in n-D data, enhancing visual exploration.
+
+### Data Interaction
+
+- **Clipping Tools**: Use dual-right click clipping to highlight, analyze, export, or hide data for detailed analysis.
+- **Point Selection**: Interactively select points or samples directly on the plot for detailed examination.
+
+### Classification and Analysis
+
+- **Rule-Based Classification**: Construct visual machine learning models by creating and combining classification rules.
+- **Enhanced Learning Models**: Improve supervised learning classifiers using interactive tools and synthetic data generation.
+
+### Customization
+
+- **Configurable Display**: Customize background, class, and axes colors to suit different visualization needs.
+- **Visibility Toggles**: Show or hide axes, points, connecting lines, and other elements to focus on relevant data.
+- **Trace Mode**: Use alternating colors to trace data points across different visualization schemes.
+
+### User Interface Enhancements
+
+- **Interactive UI Elements**: Easily manage data and visualization settings with intuitive controls and UI elements.
+- **Hotkeys and Shortcuts**: Access frequently used functions quickly with keyboard shortcuts.
+
+These features are designed to facilitate an interactive, user-friendly experience for both novice and expert users, making complex data analysis more accessible and efficient.
 
 ## Controls
 
@@ -73,13 +94,19 @@ Execute `DCVIS_MAIN.py` script to launch the DCVis application: `python DCVIS_MA
 - Wheat Seed variety measurements -- 210 cases, 7 features, 3 classes
 - Wine chemical analysis measurements -- 4,898 cases, 11 features, 7 classes
 
-## Dataset requirements
+## Dataset Requirements
 
-- Format of .txt or .csv
-- Header row required
-- One label column denoted 'class' in header
-- Any number of feature columns attribute name in header
-- Features must be numerical data
+DCVis is designed to work with structured numerical datasets to ensure compatibility and optimal functionality. Here are the specific requirements for datasets used in DCVis:
+
+- **File Format**: The dataset must be in either `.txt` or `.csv` file format.
+- **Header Row**: Each dataset file must include a header row. The headers specify the names of the features and the label column.
+- **Label Column**: There must be one column specifically designated for labels, identified by the header name 'class'.
+- **Feature Columns**:
+  - The number of feature columns can vary.
+  - Each feature column must be labeled in the header.
+  - All data within feature columns must be numerical, as the software does not process textual or categorical data without pre-conversion to numerical formats.
+
+These requirements ensure that the data is properly recognized and processed by DCVis, facilitating accurate and meaningful visualizations.
 
 ## Visualizations Supported
 
