@@ -66,6 +66,25 @@ class Dataset:
         self.attribute_order: List[int] = []
         self.all_arc_lengths: List[int] = []
 
+    def duplicate_last_attribute(self):
+        if self.dataframe is None or self.dataframe.empty:
+            print("DataFrame is not loaded or is empty.")
+            return
+
+        last_attribute = self.dataframe.columns[-2]
+        new_attribute = f'{last_attribute}_copy'
+        self.dataframe[new_attribute] = self.dataframe[last_attribute]
+        self.attribute_names.append(new_attribute)
+        self.attribute_count += 1
+        self.vertex_count += 1
+        self.active_attributes = np.append(self.active_attributes, True)
+        self.attribute_inversions = np.append(self.attribute_inversions, False)
+        
+        # reorder DataFrame columns to ensure 'class' is the last column
+        cols = self.dataframe.columns.tolist()
+        cols.append(cols.pop(cols.index('class')))  # Move 'class' to the end
+        self.dataframe = self.dataframe[cols]
+
     def reload(self):
         if self.filepath:
             try:
