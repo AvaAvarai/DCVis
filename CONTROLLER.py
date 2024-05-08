@@ -38,6 +38,7 @@ class Controller:
         self.view.replot_overlaps_btn.clicked.connect(self.view.replot_overlaps)
         self.view.replot_overlaps_btn.setEnabled(False)
         self.view.save_model_button.clicked.connect(self.save_model)
+        self.view.refresh_button.clicked.connect(self.view.refresh_plot)
         
         # Set keyboard shortcuts
         self.view.load_button.setShortcut(Qt.Key.Key_F1)

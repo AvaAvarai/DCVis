@@ -208,6 +208,23 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.axis_on = False
 
         self.refresh()
+        
+    def refresh_plot(self):
+        if not self.plot_widget:
+            WARNINGS.no_data_warning()
+            return
+        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
+        self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
+        self.rulesListWidget.clear()
+        self.controller.data.rule_regions = {}
+        self.rule_count = 0
+        self.controller.data.rule_count = 0
+        self.controller.data.overlap_count = 0
+        self.controller.data.reload()
+        self.controller.display_data()
+        self.create_plot()
 
     def create_plot(self):
         # Check if data not loaded
@@ -218,12 +235,6 @@ class View(QtWidgets.QMainWindow):
         if not (self.controller.data and self.controller.data.class_count > 0):
             print("No class data available to display in ClassTable.")
             return
-        
-        self.rulesListWidget.clear()
-        self.controller.data.rule_regions = {}
-        self.rule_count = 0
-        self.controller.data.rule_count = 0
-        self.controller.data.overlap_count = 0
 
         # remove initial placeholder
         if self.pl:
@@ -232,10 +243,6 @@ class View(QtWidgets.QMainWindow):
             self.plot_layout.removeWidget(self.plot_widget)
 
         self.controller.data.positions = []
-        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
-        self.controller.data.vertex_in = np.zeros(self.controller.data.sample_count)
-        self.controller.data.last_vertex_in = np.zeros(self.controller.data.sample_count)
 
         selected_plot_type = self.plot_select.currentText()
 
@@ -254,7 +261,6 @@ class View(QtWidgets.QMainWindow):
         else:
             return
 
-        self.controller.data.reload()
         self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
         
         # class table placeholder
