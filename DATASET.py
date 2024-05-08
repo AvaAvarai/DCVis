@@ -88,8 +88,12 @@ class Dataset:
     def reload(self):
         if self.filepath:
             try:
+                # store inversions
+                inversions = self.attribute_inversions
                 df = pd.read_csv(self.filepath)
                 self.load_frame(df)
+                # restore inversions
+                self.attribute_inversions = inversions
             except Exception as e:
                 print(f"Error reloading data: {e}")
         else:

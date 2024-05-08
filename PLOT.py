@@ -184,7 +184,6 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
 
         # Draw polylines and markers
         if dataset.active_classes[i]:
-            # Adjust color based on trace mode
             color = dataset.class_colors[i]
             glBindVertexArray(class_vao[i])
 
@@ -195,7 +194,7 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
 
             # Iterate over positions for polylines
             for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
-                
+                # Adjust color based on trace mode
                 if dataset.trace_mode:
                     color = shift_hue(color, hue_shift_amount)
                     hue_shift_amount += 0.02
@@ -823,6 +822,12 @@ class Plot(QOpenGLWidget):
                             color = shift_hue(data.class_colors[class_index], hue_shift_amount)
                         else:
                             color = data.class_colors[class_index]
+                        
+                        # Adjust color based on trace mode
+                        if data.trace_mode:
+                            color = shift_hue(color, hue_shift_amount)
+                            hue_shift_amount += 0.02
+                        
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[h] else 255)
 
                         start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]

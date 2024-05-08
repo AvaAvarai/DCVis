@@ -19,7 +19,6 @@ class GCA:
             dataset.vertex_count = dataset.attribute_count // 2
             if (len(dataset.dataframe.columns) - 1) % 2 == 1:
                 dataset.duplicate_last_attribute()
-            print(dataset.dataframe.dtypes)
             SPC.SPC(dataset)
             
         elif dataset.plot_type == 'DSC1':
