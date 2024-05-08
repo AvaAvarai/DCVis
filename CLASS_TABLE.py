@@ -60,7 +60,7 @@ class ClassTable(QtWidgets.QTableWidget):
             self.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem('Sector'))
             self.setHorizontalHeaderItem(4, QtWidgets.QTableWidgetItem('Color'))
 
-        self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Draw Order'))
+        self.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem('Order'))
         self.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem('Lines'))
         self.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem('Points'))
         self.setRowCount(dataset.class_count)

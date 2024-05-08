@@ -255,9 +255,8 @@ class View(QtWidgets.QMainWindow):
             return
 
         self.controller.data.reload()
-
         self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
-
+        
         # class table placeholder
         if self.class_pl_exists:
             self.class_table_layout.removeWidget(self.class_pl)

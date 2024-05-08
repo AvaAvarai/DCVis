@@ -189,8 +189,7 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
 
             for j in range(dataset.class_count):
                 if j < i:
-                    if len(dataset.positions) < j:
-                        size_index += dataset.count_per_class[j]
+                    size_index += dataset.count_per_class[j] if j < len(dataset.count_per_class) else 0
 
             # Iterate over positions for polylines
             for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
@@ -236,8 +235,7 @@ def draw_unhighlighted_nd_point_vertices(dataset, marker_vao):
 
         for j in range(dataset.class_count):
             if j < i:
-                if len(dataset.positions) < j:
-                    size_index += dataset.count_per_class[j]
+                size_index += dataset.count_per_class[j] if j < len(dataset.count_per_class) else 0
                 
         if dataset.active_markers[i]:
             # Draw markers
@@ -271,8 +269,8 @@ def draw_highlighted_nd_points(dataset, class_vao):
             size_index = 0
             for j in range(dataset.class_count):
                 if j < i:
-                    if len(dataset.positions) < j:
-                        size_index += dataset.count_per_class[j]
+                    size_index += dataset.count_per_class[j] if j < len(dataset.count_per_class) else 0
+                        
 
             # draw polyline
             size = len(dataset.positions[i])
@@ -533,6 +531,7 @@ class Plot(QOpenGLWidget):
 
     # === Mouse Events ===
     def mousePressEvent(self, event):
+        # Normalize mouse coordinates to [0,1] for both x and y.
         x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width
         y = self.m_bottom + ((self.height - event.position().y()) * (self.m_top - self.m_bottom)) / self.height
 
@@ -551,25 +550,6 @@ class Plot(QOpenGLWidget):
                 precision_exp += 0.05
                 precision = 10 ** precision_exp
 
-            # Cull selection to single closest sample
-            if self.data.clipped_count > 1:
-                closest_sample_index = None
-                min_distance = float('inf')
-
-                for index, sample in enumerate(self.data.clipped_samples):
-                    if sample:
-                        sample_x, sample_y = self.data.get_sample_position(index)
-                        distance = ((sample_x - x) ** 2 + (sample_y - y) ** 2) ** 0.5
-                        if distance < min_distance:
-                            min_distance = distance
-                            closest_sample_index = index
-
-                # Reset all samples except the closest one
-                for index in range(self.data.sample_count):
-                    self.data.clipped_samples[index] = 1.0 if index == closest_sample_index else 0.0
-
-                self.data.clipped_count = 1
-            
             self.update()
             event.accept()
             
@@ -779,7 +759,6 @@ class Plot(QOpenGLWidget):
                 glEnd()
 
         glDisable(GL_BLEND)
-
 
     def draw_unhighlighted_curves(self, data, line_vao):
         glEnable(GL_BLEND)
