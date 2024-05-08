@@ -817,6 +817,14 @@ class Plot(QOpenGLWidget):
                         if angle > largest_vector:
                             largest_vector = angle
 
+                        # Adjust start and end for inner classes
+                        if is_inner:
+                            start = adjust_point_towards_center(start)
+                            end = adjust_point_towards_center(end)
+                        if was_inner:
+                            start = adjust_point_towards_center(start, -data.attribute_count)
+                            end = adjust_point_towards_center(end, -data.attribute_count)
+
                         # Draw the curve
                         control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
                         draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
