@@ -262,7 +262,8 @@ def draw_highlighted_nd_points(dataset, class_vao):
     # loop through classes in class order
     for i in dataset.class_order[::-1]:
         datapoint_cnt = 0
-        # check if active
+
+        size = len(dataset.positions[i])
         if dataset.active_classes[i]:
             # positions of the class
             glBindVertexArray(class_vao[i])
@@ -270,10 +271,7 @@ def draw_highlighted_nd_points(dataset, class_vao):
             for j in range(dataset.class_count):
                 if j < i:
                     size_index += dataset.count_per_class[j] if j < len(dataset.count_per_class) else 0
-                        
-
             # draw polyline
-            size = len(dataset.positions[i])
             for j in range(0, size, dataset.vertex_count):
                 if size_index + datapoint_cnt < len(dataset.vertex_in):
                     if dataset.clear_samples[size_index + datapoint_cnt]:

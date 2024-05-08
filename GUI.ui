@@ -87,7 +87,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Plot Setup</string>
+               <string>Plotting</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -109,19 +109,6 @@
                 </property>
                 <property name="autoDefault">
                  <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="save_model_button">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Save Model</string>
                 </property>
                </widget>
               </item>
@@ -305,7 +292,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Overlaps</string>
+                   <string>Overlapping Cases [WIP]</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
@@ -383,7 +370,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Clip Analysis</string>
+                   <string>Clipped Cases Analysis</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
@@ -415,7 +402,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Analyze Clips</string>
+                 <string>Analyze Cases</string>
                 </property>
                </widget>
               </item>
@@ -428,7 +415,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Clear Last Clip</string>
+                 <string>Undo Clip</string>
                 </property>
                </widget>
               </item>
@@ -441,7 +428,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Clear All Clips</string>
+                 <string>Clear Clips</string>
                 </property>
                </widget>
               </item>
@@ -498,7 +485,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>Add Classification Rule</string>
+                   <string>Add Rule</string>
                   </property>
                  </widget>
                 </item>
@@ -511,7 +498,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>Clear Classification Rules</string>
+                   <string>Clear Rules</string>
                   </property>
                  </widget>
                 </item>
@@ -667,43 +654,47 @@
            </layout>
           </item>
           <item>
-           <widget class="QLabel" name="label_5">
-            <property name="font">
-             <font>
-              <family>Georgia</family>
-              <pointsize>11</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-              <underline>false</underline>
-              <kerning>true</kerning>
-             </font>
-            </property>
-            <property name="text">
-             <string>Attribute Alpha</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="attribute_slide">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>255</number>
-            </property>
-            <property name="value">
-             <number>255</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="font">
+               <font>
+                <family>Georgia</family>
+                <pointsize>11</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+                <underline>false</underline>
+                <kerning>true</kerning>
+               </font>
+              </property>
+              <property name="text">
+               <string>Attribute Alpha</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="attribute_slide">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="value">
+               <number>255</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -798,6 +789,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>120</height>
+          </size>
+         </property>
          <property name="frameShape">
           <enum>QFrame::Panel</enum>
          </property>
@@ -825,7 +822,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Options</string>
+                 <string>Color Options</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -840,26 +837,6 @@
            <widget class="QWidget" name="widget" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
-              <widget class="QLabel" name="label_8">
-               <property name="font">
-                <font>
-                 <family>Georgia</family>
-                 <pointsize>12</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                 <underline>false</underline>
-                 <kerning>true</kerning>
-                </font>
-               </property>
-               <property name="text">
-                <string>Colors</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QPushButton" name="background_button">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -868,7 +845,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Background</string>
+                <string>Back</string>
                </property>
               </widget>
              </item>
@@ -885,16 +862,10 @@
                </property>
               </widget>
              </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_2" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_16">
              <item>
               <widget class="QCheckBox" name="show_axes">
                <property name="text">
-                <string>Axes (A)</string>
+                <string>Axes</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -907,10 +878,83 @@
                 <bool>true</bool>
                </property>
                <property name="text">
-                <string>Trace (T)</string>
+                <string>Trace</string>
                </property>
                <property name="checked">
                 <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_2" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_16"/>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="optsFrame_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Panel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="lineWidth">
+          <number>2</number>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_12">
+          <item>
+           <layout class="QVBoxLayout" name="optsFrameLayout_3">
+            <item>
+             <layout class="QVBoxLayout" name="ots_table_layout_3">
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="font">
+                 <font>
+                  <family>Georgia</family>
+                  <pointsize>12</pointsize>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                  <underline>false</underline>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Export &amp; Exit</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_4" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
+             <item>
+              <widget class="QPushButton" name="save_model_button">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Save Model</string>
                </property>
               </widget>
              </item>

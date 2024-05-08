@@ -46,8 +46,6 @@ class Controller:
         self.view.refresh_button.setShortcut(Qt.Key.Key_F4)
         self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
         self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
-        self.view.trace_mode.setShortcut(Qt.Key.Key_T)
-        self.view.show_axes.setShortcut(Qt.Key.Key_A)
 
     def display_data(self):
         data_info_string = f'Dataset Name: {self.data.name} \nNumber of classes: {self.data.class_count} attributes: {self.data.attribute_count} samples: {self.data.sample_count}'
