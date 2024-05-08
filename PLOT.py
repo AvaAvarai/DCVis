@@ -65,7 +65,7 @@ def adjust_point_towards_center(point, multiplier=1.0):
 
 def draw_cubic_bezier_curve(start, control1, control2, end, inner, atts):
     # Draw a cubic Bezier curve using OpenGL's immediate mode.
-    segments = 100  # The number of line segments to use
+    segments = 11  # The number of line segments to use
 
     if inner:
         # Adjust both start and end points for inner curves
