@@ -190,7 +190,8 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
 
             for j in range(dataset.class_count):
                 if j < i:
-                    size_index += dataset.count_per_class[j]
+                    if len(dataset.positions) < j:
+                        size_index += dataset.count_per_class[j]
 
             # Iterate over positions for polylines
             for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
@@ -236,7 +237,8 @@ def draw_unhighlighted_nd_point_vertices(dataset, marker_vao):
 
         for j in range(dataset.class_count):
             if j < i:
-                size_index += dataset.count_per_class[j]
+                if len(dataset.positions) < j:
+                    size_index += dataset.count_per_class[j]
                 
         if dataset.active_markers[i]:
             # Draw markers
@@ -270,7 +272,8 @@ def draw_highlighted_nd_points(dataset, class_vao):
             size_index = 0
             for j in range(dataset.class_count):
                 if j < i:
-                    size_index += dataset.count_per_class[j]
+                    if len(dataset.positions) < j:
+                        size_index += dataset.count_per_class[j]
 
             # draw polyline
             size = len(dataset.positions[i])
