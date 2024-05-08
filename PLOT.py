@@ -537,18 +537,28 @@ class Plot(QOpenGLWidget):
 
         # left mouse button single sample select
         if event.button() == Qt.MouseButton.LeftButton:
-            precision_exp = -3
+            precision_exp = -4
             precision = 10 ** precision_exp
             self.data.clipped_count = 0
             self.data.clipped_samples = [False for _ in range(self.data.sample_count)]
 
             # Expansive search outward for a sample
-            while self.data.clipped_count == 0 and precision_exp < -2:
+            while self.data.clipped_count == 0 and precision_exp < -3:
                 self.left_rect = [x - precision, y - precision, x + precision, y + precision]
                 CLIPPING.Clipping(self.left_rect, self.data)
 
-                precision_exp += 0.05
+                precision_exp += 0.005
                 precision = 10 ** precision_exp
+            
+            # Cull clipped samples to only the nearest if multiple are found
+            if self.data.clipped_count > 1:
+                # Compute distances to each clipped sample
+                positions = self.data.positions[self.data.clipped_samples]
+                distances = np.linalg.norm(positions - np.array([x, y]), axis=1)
+                min_index = np.argmin(distances)
+                closest_sample = np.where(self.data.clipped_samples)[0][min_index]
+                self.data.clipped_samples[:] = False
+                self.data.clipped_samples[closest_sample] = True
 
             self.update()
             event.accept()
