@@ -1,19 +1,15 @@
-# DCVis: Dynamic Coordinate Visualisation System
+# DCVis: Dynamic Coordinate Visualization System
 
-DCVis is a Visual Knowledge Discovery (VKD) Artificial Intelligence and Machine Learning (AI/ML) research project.  
-This project allows for interactive building of visual ML models using multidimensional (n-D) data in visualizations.  
-With interactive classification tools and synthetic data generation features supporting novel classifier improvement techniques.  
+DCVis is a Visual Knowledge Discovery (VKD) tool developed as part of an Artificial Intelligence and Machine Learning (AI/ML) research project at Central Washington University's Visual Knowledge Discovery Lab. The project spans from 2022 to 2024 and is still ongoing.With contributors Alice Williams, James Battistoni IV, Charles Recaido, and Dr. Boris Kovalerchuk.
 
-Project contributors: Alice Williams, James Battistoni IV, Charles Recaido, and Dr. Boris Kovalerchuk
-at Central Washington University Visual Knowledge Discovery Lab, project during years 2022 to 2024.
+This software enables users to interactively construct visual ML models and explore multidimensional/multivariate data through General Line Coordinate visualizations. Features include interactive classification tools and synthetic data generation, shown to enhance supervised learning classifier models.
 
-Software developed for the paper:
+## Key Publications
 
-- Synthetic Data Generation and Automated Multidimensional Data Labeling for AI/ML in General and Circular Coordinates by Alice Williams and Dr. Boris Kovalerchuk
+- **Synthetic Data Generation and Automated Multidimensional Data Labeling for AI/ML in General and Circular Coordinates** by Alice Williams and Dr. Boris Kovalerchuk
+- **Interpretable Machine Learning for Self-Service High-Risk Decision-Making** by Charles Recaido and Dr. Boris Kovalerchuk
 
-Available under the MIT License, allowing for both personal and commercial use.
-
-*This software is a rewrite of [DSCVis](https://github.com/Charles57-CWU/DSCVis) with new visualizations and tooling features.*  
+DCVis is a complete rebuild of the [DSCVis](https://github.com/Charles57-CWU/DSCVis) software, incorporating new visualizations and enhanced tooling. The DCVis software is freely available under the MIT License, permitting both personal and commercial use.
 
 ## Requirements
 
