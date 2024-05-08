@@ -8,7 +8,6 @@ import DCC
 
 class GCA:
     def __init__(self, dataset):
-        print(dataset.plot_type)
         dataset.positions = []
 
         if dataset.plot_type == 'PC':

@@ -51,7 +51,8 @@ class Controller:
         data_info_string = f'Dataset Name: {self.data.name} \nNumber of classes: {self.data.class_count} attributes: {self.data.attribute_count} samples: {self.data.sample_count}'
 
         for index, ele in enumerate(self.data.class_names):
-            data_info_string += f'\nClass {index + 1}: {ele} sample count: {self.data.count_per_class[index]}'
+            if len(self.data.count_per_class) > index:
+                data_info_string += f'\nClass {index + 1}: {ele} sample count: {self.data.count_per_class[index]}'
 
         self.view.dataset_textbox.setText(data_info_string)
 

@@ -12,6 +12,8 @@ class Dataset:
     def __init__(self):
         # dataset info
         self.name: str = ''
+        self.filepath: str = ''
+        
         self.dataframe: Optional[pd.DataFrame] = None
 
         self.not_normalized_frame: Optional[pd.DataFrame] = None
@@ -63,6 +65,16 @@ class Dataset:
         self.class_order: List[int] = []
         self.attribute_order: List[int] = []
         self.all_arc_lengths: List[int] = []
+
+    def reload(self):
+        if self.filepath:
+            try:
+                df = pd.read_csv(self.filepath)
+                self.load_frame(df)
+            except Exception as e:
+                print(f"Error reloading data: {e}")
+        else:
+            print("No filepath set for reloading.")
 
     def update_coef(self, attribute_index, new_coef_value):
         if 0 <= attribute_index < len(self.coefs):
@@ -165,6 +177,7 @@ class Dataset:
         try:
             df = pd.read_csv(filename)
             self.name = os.path.basename(filename)
+            self.filepath = filename
             self.load_frame(df)
 
         except Exception as e:
