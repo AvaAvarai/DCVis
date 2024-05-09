@@ -392,7 +392,7 @@ class Plot(QOpenGLWidget):
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [0.9375, 0.9375, 0.9375, 1]  # Default gray in RGBA
+        self.background_color = [171 / 255, 171 / 255, 171 / 255, 1]  # Default gray in RGBA
         self.axes_color = [0, 0, 0, 0]  # Default black
 
         # if class names lower has benign and malignant case insensitive then set colors to green and red
