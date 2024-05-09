@@ -396,9 +396,10 @@ class Plot(QOpenGLWidget):
         self.axes_color = [0, 0, 0, 0]  # Default black
 
         # if class names lower has benign and malignant case insensitive then set colors to green and red
-        if 'benign' in [x.lower() for x in self.data.class_names] and 'malignant' in [x.lower() for x in self.data.class_names]:
-            self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color, default_colors=[[0, 255, 0], [255, 0, 0]], color_names=['green', 'red'])
-        else:
+        if isinstance(self.data.class_names[0], str):
+            if 'benign' in [x.lower() for x in self.data.class_names] and 'malignant' in [x.lower() for x in self.data.class_names]:
+                self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color, default_colors=[[0, 255, 0], [255, 0, 0]], color_names=['green', 'red'])
+        if not hasattr(self, 'color_instance'):
             self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
         
         self.data.class_colors = self.color_instance.colors_array

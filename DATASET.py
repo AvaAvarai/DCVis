@@ -148,6 +148,7 @@ class Dataset:
             self.not_normalized_frame = df.copy()
 
     def delete_clip(self):
+        """Delete the selected samples from the dataframe."""
         clipped_mask = np.array(self.clipped_samples, dtype=bool)
         self.dataframe = self.dataframe[~clipped_mask].reset_index(drop=True)
         self.not_normalized_frame = self.not_normalized_frame[~clipped_mask].reset_index(drop=True).copy()
@@ -162,6 +163,7 @@ class Dataset:
         self.last_vertex_in = np.repeat(False, self.sample_count)
 
     def copy_clip(self):
+        """Duplicate the selected samples in the dataframe."""
         bool_clipped = np.array(self.clipped_samples, dtype=bool)
 
         duplicated_data = self.dataframe[bool_clipped].copy()
@@ -178,6 +180,7 @@ class Dataset:
         self.clipped_samples[-len(duplicated_data):] = True
 
     def move_samples(self, move_delta: int):
+        """Move the selected samples up or down in the dataframe."""
         if self.dataframe is None or self.dataframe.empty:
             print("DataFrame is not loaded or is empty.")
             return
@@ -198,6 +201,7 @@ class Dataset:
                     self.not_normalized_frame.loc[bool_clipped, attribute] += int(move_delta * 10)
 
     def load_from_csv(self, filename: str):
+        """Load the dataset from a CSV file."""
         try:
             df = pd.read_csv(filename)
             self.name = os.path.basename(filename)
@@ -208,10 +212,10 @@ class Dataset:
             print(f"An error occurred: {e}")
             
     def normalize_data(self, our_range: Tuple[float, float]):
+        """Normalize the data in the dataframe to the specified range."""
         if self.dataframe is None or self.dataframe.empty:
             print("DataFrame is not loaded or is empty.")
             return self.dataframe
-        # Ensure a deep copy is made for the not normalized frame before normalization
 
         scaler = MinMaxScaler(our_range)
         # Only normalize self.dataframe
@@ -219,12 +223,15 @@ class Dataset:
         return self.dataframe
 
     def normalize_col(self, col: int, our_range: Tuple[float, float]):
+        """Normalize a specific column in the dataframe to the specified range."""
         scaler = MinMaxScaler(our_range)
         self.dataframe[self.attribute_names[col]] = scaler.fit_transform(self.dataframe[[self.attribute_names[col]]])
         return self.dataframe
 
     def roll_clips(self, roll_dir: int):
+        """Select the next sample(s) to clip"""
         self.clipped_samples = list(np.roll(self.clipped_samples, roll_dir))
 
     def roll_vertex_in(self, roll_dir: int):
+        """Select the previous sample(s) to clip"""
         self.vertex_in = list(np.roll(self.vertex_in, roll_dir))
