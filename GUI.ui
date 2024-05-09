@@ -1029,7 +1029,14 @@
     </property>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionControls_List"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -1040,6 +1047,11 @@
   <action name="actionLoad_Data">
    <property name="text">
     <string>Load Data</string>
+   </property>
+  </action>
+  <action name="actionControls_List">
+   <property name="text">
+    <string>Controls List</string>
    </property>
   </action>
  </widget>

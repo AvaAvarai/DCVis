@@ -1,5 +1,6 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
+from HELP_DIALOG import HelpDialog
 
 import sys
 
@@ -12,6 +13,16 @@ class Controller:
         self.view = view
         if self.view is not None:
             self.setup_connections()
+            self.setup_menu()
+
+    def setup_menu(self):
+        self.view.menuHelp.addAction(self.view.actionControls_List)
+        self.view.actionControls_List.triggered.connect(self.show_help_dialog)
+
+    def show_help_dialog(self):
+        # This method creates and shows the HelpDialog
+        dialog = HelpDialog(self.view)
+        dialog.exec()  # Use exec() to show it as a modal dialog
 
     def setup_connections(self):
         # Bind buttons to functions
