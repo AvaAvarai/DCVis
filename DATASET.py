@@ -194,7 +194,8 @@ class Dataset:
             if self.dataframe.loc[bool_clipped, attribute].min() + move_delta > 0 or self.dataframe.loc[bool_clipped, attribute].max() + move_delta < 1:
                 if self.not_normalized_frame.loc[bool_clipped, attribute].min() + move_delta * 10 > 0 or self.not_normalized_frame.loc[bool_clipped, attribute].max() + move_delta * 10 < 1:
                     self.dataframe.loc[bool_clipped, attribute] += move_delta
-                    self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
+                    # update not_normalized_frame without incompatible dtype by casting to int
+                    self.not_normalized_frame.loc[bool_clipped, attribute] += int(move_delta * 10)
 
     def load_from_csv(self, filename: str):
         try:

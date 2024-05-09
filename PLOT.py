@@ -533,22 +533,26 @@ class Plot(QOpenGLWidget):
         x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width
         y = self.m_bottom + ((self.height - event.position().y()) * (self.m_top - self.m_bottom)) / self.height
 
-        # left mouse button single sample select
+        # EXPANDING COHEN SUTHERLAND SEARCH ROUTINE to left mouse button single sample select
         if event.button() == Qt.MouseButton.LeftButton:
+            # TUNING PARAMETERS
             precision_exp = -4
+            tuning = 0.005
             precision = 10 ** precision_exp
+            
+            # Reset clipped samples
             self.data.clipped_count = 0
             self.data.clipped_samples = [False for _ in range(self.data.sample_count)]
 
-            # Expansive search outward for a sample
+            # Expand search outward for a sample
             while self.data.clipped_count == 0 and precision_exp < -3:
                 self.left_rect = [x - precision, y - precision, x + precision, y + precision]
                 CLIPPING.Clipping(self.left_rect, self.data)
 
-                precision_exp += 0.005
+                precision_exp += tuning
                 precision = 10 ** precision_exp
             
-            # Cull clipped samples to only the nearest if multiple are found
+            # Cull clipped samples to only the nearest if multiple are found, can not handle direct overlap
             if self.data.clipped_count > 1:
                 # Compute distances to each clipped sample
                 positions = self.data.positions[self.data.clipped_samples]
@@ -562,7 +566,8 @@ class Plot(QOpenGLWidget):
             event.accept()
             
             return super().mousePressEvent(event)
-        
+        # END OF EXPANDING COHEN SUTHERLAND SEARCH ROUTINE
+
         if event.button() == Qt.MouseButton.RightButton:
             self.rect.append(x)
             self.rect.append(y)
