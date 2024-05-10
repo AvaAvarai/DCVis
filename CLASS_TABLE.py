@@ -116,6 +116,7 @@ class Button(QtWidgets.QPushButton):
             rgb = color.getRgb()
             self.cell.setForeground(QBrush(QColor(rgb[0], rgb[1], rgb[2])))
             self.data.class_colors[self.index] = [rgb[0], rgb[1], rgb[2]]
+            self.r.emit()
 
 
 # class for checkbox in the class table
