@@ -954,7 +954,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Save Model</string>
+                <string>Export CSV</string>
                </property>
               </widget>
              </item>

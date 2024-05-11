@@ -1,3 +1,5 @@
+# COLORS.py: Has models for RGB and HSV colors, and functions to generate colors for unique color palettes or benign/malignant.
+
 import colorsys
 
 def downRange(color):
@@ -6,7 +8,10 @@ def downRange(color):
 def upRange(color):
     return [int(x * 255) for x in color]
 
+
 class HSVColor:
+    """Model for HSV color"""
+    
     def __init__(self, h, s, v):
         self.h = h
         self.s = s
@@ -22,7 +27,10 @@ class HSVColor:
     def shift_hue(self, amount):
         self.h = (self.h + amount) % 1.0
 
+
 class RGBColor:
+    """Model for RGB color"""
+    
     def __init__(self, r, g, b):
         self.r = r
         self.g = g
@@ -41,11 +49,15 @@ class RGBColor:
 
 
 def generate_benign_malignant_colors():
+    """Generates benign (GREEN) and malignant (RED) colors"""
+    
     colors_array: list[RGBColor] = [RGBColor(0, 255, 0), RGBColor(255, 0, 0)]
     colors_names_array = ["Green", "Red"]
     return colors_array, colors_names_array
 
 def generate_colors(num_colors):
+    """Generates a list of unique colors based on the number of colors specified in the input parameter"""
+    
     colors_array = []
     colors_names_array = []
     for i in range(num_colors):

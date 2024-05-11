@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor, QBrush
-
+import COLORS
 
 def reset_checkmarks(table, count):
     for idx in range(count):
@@ -116,7 +116,7 @@ class Button(QtWidgets.QPushButton):
         if color.isValid():
             rgb = color.getRgb()
             self.cell.setForeground(QBrush(QColor(rgb[0], rgb[1], rgb[2])))
-            self.data.class_colors[self.index] = [rgb[0], rgb[1], rgb[2]]
+            self.data.class_colors[self.index] = COLORS.RGBColor(rgb[0], rgb[1], rgb[2])
             self.r.emit()
 
 
