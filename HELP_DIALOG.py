@@ -35,8 +35,10 @@ class HelpDialog(QDialog):
         All other controls are available through the GUI.
         Please see the README.md file for more information.
         """
+        
         label = QLabel(controls_info)
         layout.addWidget(label)
         button = QPushButton("Close", clicked=self.accept)
         layout.addWidget(button)
+        
         self.setLayout(layout)

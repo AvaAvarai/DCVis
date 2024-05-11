@@ -114,7 +114,7 @@ class Dataset:
         self.class_order = np.arange(0, self.class_count)
 
         # get class colors
-        self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0], [1, 1, 1]).colors_array
+        self.class_colors, self.color_names = COLORS.generate_colors(self.class_count)
 
         # initialize arrays for class options
         self.active_markers = np.repeat(True, self.class_count)

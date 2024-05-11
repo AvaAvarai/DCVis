@@ -9,8 +9,7 @@ from PyQt6.QtCore import *
 
 from typing import List
 import numpy as np
-import GCA, CLIPPING
-from COLORS import getColors, shift_hue
+import GCA, CLIPPING, COLORS
 
 
 def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, is_inner, class_index):
@@ -184,7 +183,7 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
 
         # Draw polylines and markers
         if dataset.active_classes[i]:
-            color = dataset.class_colors[i]
+            color = dataset.class_colors[i].to_rgb()
             glBindVertexArray(class_vao[i])
 
             for j in range(dataset.class_count):
@@ -195,7 +194,7 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
             for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
                 # Adjust color based on trace mode
                 if dataset.trace_mode:
-                    color = shift_hue(color, hue_shift_amount)
+                    color = color.to_hsv().shift_hue(color, hue_shift_amount).to_rgb()
                     hue_shift_amount += 0.02
                 
                 if size_index + datapoint_cnt < len(dataset.vertex_in):
@@ -230,8 +229,7 @@ def draw_unhighlighted_nd_point_vertices(dataset, marker_vao):
     for i in dataset.class_order[::-1]:
         size_index = 0
         # Adjust color based on trace mode
-        color = dataset.class_colors[i]
-        class_color = color
+        color = dataset.class_colors[i].to_rgb()
 
         for j in range(dataset.class_count):
             if j < i:
@@ -244,7 +242,7 @@ def draw_unhighlighted_nd_point_vertices(dataset, marker_vao):
                 glPointSize(5 if j < dataset.vertex_count - 1 else 7)  # Different size for the last marker
 
                 # Apply adjusted color for each marker
-                glColor4ub(class_color[0], class_color[1], class_color[2], dataset.attribute_alpha if dataset.active_attributes[j] else 255)
+                glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha if dataset.active_attributes[j] else 255)
                 glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
 
                 glBindVertexArray(0)
@@ -397,12 +395,12 @@ class Plot(QOpenGLWidget):
 
         # if class names lower has benign and malignant case insensitive then set colors to green and red
         if isinstance(self.data.class_names[0], str):
-            if 'benign' in [x.lower() for x in self.data.class_names] and 'malignant' in [x.lower() for x in self.data.class_names]:
-                self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color, default_colors=[[0, 255, 0], [255, 0, 0]], color_names=['green', 'red'])
+            if ('benign' in [x.lower() for x in self.data.class_names] and 'malignant' in [x.lower() for x in self.data.class_names] or 'negative' in [x.lower() for x in self.data.class_names] and 'positive' in [x.lower() for x in self.data.class_names]) and len(self.data.class_names) == 2:
+                self.color_instance = COLORS.generate_benign_malignant_colors()
         if not hasattr(self, 'color_instance'):
-            self.color_instance = getColors(self.data.class_count, self.background_color, self.axes_color)
+            self.color_instance = COLORS.generate_colors(self.data.class_count)
         
-        self.data.class_colors = self.color_instance.colors_array
+        self.data.class_colors, self.data.colors_names = self.color_instance
 
     def reset_zoom(self):
         self.m_left = -1.125
@@ -681,7 +679,7 @@ class Plot(QOpenGLWidget):
                     color = data.class_colors[class_index]
                     # last marker hue shift
                     if j == data.vertex_count - 1:
-                        color = shift_hue(color, hue_shift)
+                        color = COLORS.shift_hue(color, hue_shift)
 
                     was_inner = False
                     is_inner = class_index == data.class_order[0] and not class_count_one
@@ -812,13 +810,13 @@ class Plot(QOpenGLWidget):
 
                         # For the last attribute, use hue shift color
                         if h == data.attribute_count - 1:
-                            color = shift_hue(data.class_colors[class_index], hue_shift_amount)
+                            color = COLORS.shift_hue(data.class_colors[class_index], hue_shift_amount)
                         else:
                             color = data.class_colors[class_index]
                         
                         # Adjust color based on trace mode
                         if data.trace_mode:
-                            color = shift_hue(color, hue_shift_amount)
+                            color = COLORS.shift_hue(color, hue_shift_amount)
                             hue_shift_amount += 0.02
                         
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[h] else 255)

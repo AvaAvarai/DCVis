@@ -1,56 +1,60 @@
 import colorsys
 
-color_dict = {
-    'black': [0, 0, 0, 255],
-    'white': [255, 255, 255, 255],
-    'red': [255, 0, 0, 255],
-    'green': [0, 255, 0, 255],
-    'blue': [0, 0, 255, 255],
-    'dark_gray': [169, 169, 169, 255],
-    'gray': [128, 128, 128, 255],
-    'light_gray': [211, 211, 211, 255],
-}
-
-class getColors:
-    def __init__(self, num_colors, bg_color, axis_color, default_colors=None, color_names=None):
-        self.bg_color = downRange(bg_color)
-        self.axis_color = downRange(axis_color)
-        self.colors_array = []
-        self.colors_names_array = []
-        if default_colors is not None:
-            self.colors_array = default_colors
-            if color_names is not None:
-                self.colors_names_array = color_names
-        self.num_colors = num_colors
-        self.generate_colors()
-
-    def generate_colors(self):
-        for i in range(self.num_colors):
-            hue = i / float(self.num_colors)
-            lightness = 0.5
-            saturation = 0.8
-
-            r, g, b = upRange(colorsys.hls_to_rgb(hue, lightness, saturation))
-            
-            self.colors_array.append([r, g, b])
-            self.colors_names_array.append(f"color_{i}")
-
-
-def shift_hue(rgb, amount):
-    # Convert RGB to HSV
-    r, g, b = downRange(rgb)
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    # Shift the hue
-    h = (h + amount) % 1.0
-    # Convert back to RGB
-    r, g, b = colorsys.hsv_to_rgb(h, s, v)
-    return upRange([r, g, b])
-
-def get_color_dict():
-    return color_dict
-
 def downRange(color):
-    return [x / 255.0 for x in color]
+    return [int(x * 255) for x in color]
 
 def upRange(color):
     return [int(x * 255) for x in color]
+
+class HSVColor:
+    def __init__(self, h, s, v):
+        self.h = h
+        self.s = s
+        self.v = v
+
+    def to_rgb(self):
+        r, g, b = upRange(colorsys.hsv_to_rgb(self.h, self.s, self.v))
+        return r, g, b
+
+    def to_hsv(self):
+        return self.h, self.s, self.v
+
+    def shift_hue(self, amount):
+        self.h = (self.h + amount) % 1.0
+
+class RGBColor:
+    def __init__(self, r, g, b):
+        self.r = r
+        self.g = g
+        self.b = b
+
+    def to_rgb(self):
+        return self.r, self.g, self.b
+
+    def to_hsv(self):
+        return colorsys.rgb_to_hsv(downRange([self.r, self.g, self.b]))
+
+    def shift_hue(self, amount):
+        hsv = HSVColor(*self.to_hsv())
+        hsv.shift_hue(amount)
+        self.r, self.g, self.b = hsv.to_rgb()
+
+
+def generate_benign_malignant_colors():
+    colors_array: list[RGBColor] = [RGBColor(0, 255, 0), RGBColor(255, 0, 0)]
+    colors_names_array = ["Green", "Red"]
+    return colors_array, colors_names_array
+
+def generate_colors(num_colors):
+    colors_array = []
+    colors_names_array = []
+    for i in range(num_colors):
+        hue = i / float(num_colors)
+        lightness = 0.5
+        saturation = 0.8
+
+        r, g, b = upRange(colorsys.hls_to_rgb(hue, lightness, saturation))
+        
+        colors_array.append(RGBColor(r, g, b))
+        colors_names_array.append(f"color_{i}")
+    return colors_array, colors_names_array
