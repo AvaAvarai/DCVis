@@ -657,12 +657,8 @@ class Plot(QOpenGLWidget):
                     if str(key).endswith('(pure)'):
                         class_name = key[:-7]
                         class_index = self.data.class_names.index(class_name)
-                        c = self.data.class_colors[class_index].copy()
-                        for i, _c in enumerate(c):
-                            c[i] = _c / 255
-                        if len(c) == 3:
-                            c.append(1/3)
-                        draw_box(box, c)
+                        c = COLORS.upRange(self.data.class_colors[class_index].__copy__().to_rgb())
+                        draw_box(box, [*c, 1/3])
                     else:
                         draw_box(box, [1.0, 1.0, 1.0, 1/3])
                 else:

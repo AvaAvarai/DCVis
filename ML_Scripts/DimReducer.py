@@ -64,7 +64,8 @@ def apply_reduction(method, n_components):
     if method == 'PCA':
         model = PCA(n_components=n_components)
     elif method == 'MDS':
-        model = MDS(n_components=n_components)
+        # Set normalized_stress to 'auto' as will be required in future versions
+        model = MDS(n_components=n_components, normalized_stress='auto')
     elif method == 'TSNE':
         model = TSNE(n_components=n_components)
     else:
