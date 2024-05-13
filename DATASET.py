@@ -191,14 +191,24 @@ class Dataset:
 
         if move_delta == 0:
             return
+
         bool_clipped = np.array(self.clipped_samples, dtype=bool)
-        for attribute in self.attribute_names:
-            # validate attribute + move_delta [0, 1]
-            if self.dataframe.loc[bool_clipped, attribute].min() + move_delta > 0 or self.dataframe.loc[bool_clipped, attribute].max() + move_delta < 1:
-                if self.not_normalized_frame.loc[bool_clipped, attribute].min() + move_delta * 10 > 0 or self.not_normalized_frame.loc[bool_clipped, attribute].max() + move_delta * 10 < 1:
-                    self.dataframe.loc[bool_clipped, attribute] += move_delta
-                    # update not_normalized_frame without incompatible dtype by casting to int
-                    self.not_normalized_frame.loc[bool_clipped, attribute] += int(move_delta * 10)
+        if len(bool_clipped) != len(self.dataframe):
+            print("Mismatch in the length of clipped_samples and dataframe rows.")
+            return
+
+        try:
+            for attribute in self.attribute_names:
+                self.dataframe.loc[bool_clipped, attribute] += move_delta
+                # Safely cast the delta for not_normalized_frame
+                self.not_normalized_frame.loc[bool_clipped, attribute] += int(move_delta * 10)
+        except Exception as e:
+            print(f"Error during dataframe update: {e}")
+            return
+
+        self.dataframe.reset_index(drop=True, inplace=True)
+        self.not_normalized_frame.reset_index(drop=True, inplace=True)
+
 
     def load_from_csv(self, filename: str):
         """Load the dataset from a CSV file."""

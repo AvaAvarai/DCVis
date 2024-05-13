@@ -526,7 +526,7 @@ class Plot(QOpenGLWidget):
         self.zoomed_height = 1.125
         self.is_zooming = False
         self.is_panning = False
-
+    
         # for dragging
         self.has_dragged = False  # bool to check for starting location
         self.prev_horiz = None  # need previous x location
@@ -720,6 +720,31 @@ class Plot(QOpenGLWidget):
                 self.update()
 
             event.accept()
+        
+        if event.button() == Qt.MouseButton.MiddleButton:
+            # if mouse in a previous self.rect expand eps and remake it
+            
+            seen = False
+            for rect in self.all_rect:
+                if x > rect[0] and x < rect[2] and y > rect[1] and y < rect[3]:
+                    self.rect = rect
+                    self.all_rect.remove(rect)
+                    seen = True
+                    width = (rect[2] - rect[0]) / 2
+                    break
+            # make box around the mouse cursor
+            eps = 0.01
+            if seen:
+                eps += width
+            self.rect = []
+            self.rect.append(x - eps)
+            self.rect.append(y - eps)
+            self.rect.append(x + eps)
+            self.rect.append(y + eps)
+            CLIPPING.Clipping(self.rect, self.data)
+            self.all_rect.append(self.rect)
+            self.update()
+            return super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.MiddleButton:
