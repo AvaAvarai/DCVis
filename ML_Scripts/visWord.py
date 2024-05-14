@@ -19,16 +19,15 @@ def load_pdf_and_analyze(file_path):
     # Count words
     word_counter = Counter(text.lower().split())
 
-    # Plotting the character frequencies
-    # Selecting the top characters if there are more than 26
-    top_chars = char_counter.most_common(26)
-    labels, values = zip(*top_chars)
+    # Sort the character counts alphabetically
+    sorted_chars = sorted(char_counter.items())
+    labels, values = zip(*sorted_chars)
 
     plt.figure(figsize=(10, 5))
     plt.bar(labels, values, color='b')
     plt.xlabel('Characters')
     plt.ylabel('Frequency')
-    plt.title('Character Frequency in PDF')
+    plt.title('Character Frequency in PDF (Alphabetically Ordered)')
     plt.show()
 
     # Print the top 10 words
@@ -36,6 +35,7 @@ def load_pdf_and_analyze(file_path):
     print("\nTop 10 words:")
     for word, count in top_words:
         print(f"{word}: {count}")
+
 
 # Example usage
 file_path = r"ML_Scripts\DCVis_v41.pdf"  # Change this to your PDF file path
