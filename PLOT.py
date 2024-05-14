@@ -722,8 +722,7 @@ class Plot(QOpenGLWidget):
             event.accept()
         
         if event.button() == Qt.MouseButton.MiddleButton:
-            # if mouse in a previous self.rect expand eps and remake it
-            
+            # if mouse in a previous self.rect expand eps and remake it bigger
             seen = False
             for rect in self.all_rect:
                 if x > rect[0] and x < rect[2] and y > rect[1] and y < rect[3]:
@@ -732,6 +731,7 @@ class Plot(QOpenGLWidget):
                     seen = True
                     width = (rect[2] - rect[0]) / 2
                     break
+            
             # make box around the mouse cursor
             eps = 0.01
             if seen:
