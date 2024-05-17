@@ -12,7 +12,6 @@ lib64
 Scripts
 datasets/experiments/
 datasets/dim_reductions/
-*.pdf
 share
 roc_plots/
 train_datasets/
