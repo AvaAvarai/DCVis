@@ -2,7 +2,6 @@ import PyPDF2
 from collections import Counter
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-import matplotlib
 
 def load_pdf_and_analyze(file_path):
     # Open the PDF file
@@ -53,5 +52,5 @@ def load_pdf_and_analyze(file_path):
         print(f"{word}: {count}")
 
 # Load the PDF file and analyze it
-file_path = r"Related_Papers/DCVis_v41.pdf"  # Change this to your PDF file path
+file_path = r"Related_Papers/DCVis_v41.pdf"
 load_pdf_and_analyze(file_path)

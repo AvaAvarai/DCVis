@@ -1,7 +1,5 @@
 import PyPDF2
 from collections import Counter
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 from matplotlib.ft2font import FT2Font
 import re
 
