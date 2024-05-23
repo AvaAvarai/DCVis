@@ -19,26 +19,29 @@ def uncheck_checkmarks(table, count):
 
 def table_swap(table, dataset, plot, event):
     moved_from = table.currentRow()
-    from_item = table.item(moved_from, 0).text()
     moved_to = table.rowAt(round(event.position().y()))
 
-    to_item = table.item(moved_to, 0)
-    if not to_item:
+    if moved_from == moved_to or moved_to == -1:
         return
-    to_item = to_item.text()
 
-    from_rgb = dataset.class_colors[moved_to].to_rgb()
-    to_rgb = dataset.class_colors[moved_from].to_rgb()
-    
-    table.item(moved_from, 0).setText(to_item)
-    table.item(moved_from, 0).setForeground(QBrush(QColor(*to_rgb)))
-    
-    table.item(moved_to, 0).setText(from_item)
-    table.item(moved_to, 0).setForeground(QBrush(QColor(*from_rgb)))
+    # Swap the text and colors
+    from_item = table.item(moved_from, 0)
+    to_item = table.item(moved_to, 0)
 
-    place_holder = dataset.class_order[moved_from]
-    dataset.class_order[moved_from] = dataset.class_order[moved_to]
-    dataset.class_order[moved_to] = place_holder
+    from_text = from_item.text()
+    to_text = to_item.text()
+
+    from_color = from_item.foreground().color()
+    to_color = to_item.foreground().color()
+
+    from_item.setText(to_text)
+    from_item.setForeground(QBrush(to_color))
+
+    to_item.setText(from_text)
+    to_item.setForeground(QBrush(from_color))
+
+    # Swap the class orders
+    dataset.class_order[moved_from], dataset.class_order[moved_to] = dataset.class_order[moved_to], dataset.class_order[moved_from]
 
     plot.update()
 
