@@ -200,15 +200,10 @@ class Dataset:
         try:
             for attribute in self.attribute_names:
                 self.dataframe.loc[bool_clipped, attribute] += move_delta
-                # Safely cast the delta for not_normalized_frame
-                self.not_normalized_frame.loc[bool_clipped, attribute] += int(move_delta * 10)
+                self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
         except Exception as e:
             print(f"Error during dataframe update: {e}")
             return
-
-        self.dataframe.reset_index(drop=True, inplace=True)
-        self.not_normalized_frame.reset_index(drop=True, inplace=True)
-
 
     def load_from_csv(self, filename: str):
         """Load the dataset from a CSV file."""
