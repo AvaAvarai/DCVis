@@ -200,7 +200,7 @@ class Dataset:
         try:
             for attribute in self.attribute_names:
                 self.dataframe.loc[bool_clipped, attribute] += move_delta
-                self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
+                self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta
         except Exception as e:
             print(f"Error during dataframe update: {e}")
             return
