@@ -114,7 +114,7 @@ class Dataset:
         self.class_order = np.arange(0, self.class_count)
 
         # get class colors
-        self.class_colors, self.color_names = COLORS.generate_colors(self.class_count)
+        self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0], [1, 1, 1]).colors_array
 
         # initialize arrays for class options
         self.active_markers = np.repeat(True, self.class_count)
@@ -193,17 +193,12 @@ class Dataset:
             return
 
         bool_clipped = np.array(self.clipped_samples, dtype=bool)
-        if len(bool_clipped) != len(self.dataframe):
-            print("Mismatch in the length of clipped_samples and dataframe rows.")
-            return
-
-        try:
-            for attribute in self.attribute_names:
-                self.dataframe.loc[bool_clipped, attribute] += move_delta
-                self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta
-        except Exception as e:
-            print(f"Error during dataframe update: {e}")
-            return
+        for attribute in self.attribute_names:
+            # validate attribute + move_delta [0, 1]
+            if self.dataframe.loc[bool_clipped, attribute].min() + move_delta > 0 or self.dataframe.loc[bool_clipped, attribute].max() + move_delta < 1:
+                if self.not_normalized_frame.loc[bool_clipped, attribute].min() + move_delta * 10 > 0 or self.not_normalized_frame.loc[bool_clipped, attribute].max() + move_delta * 10 < 1:
+                    self.dataframe.loc[bool_clipped, attribute] += move_delta
+                    self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
 
     def load_from_csv(self, filename: str):
         """Load the dataset from a CSV file."""

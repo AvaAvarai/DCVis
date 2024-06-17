@@ -30,6 +30,7 @@ class HelpDialog(QDialog):
             Left Click: Select and highlight data points.
             Right Click: Set clipping boundaries or clear data.
             Middle Click and Drag: Pan the plot.
+            Middle Click and Hold: Grow selection box.
             Scroll Wheel: Zoom in and out on the plot.
         
         All other controls are available through the GUI.

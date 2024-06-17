@@ -10,8 +10,8 @@ lib/
 lib64
 *.cfg
 Scripts
-datasets/experiments/
-datasets/dim_reductions/
+datasets/*/
+*.pdf
 share
 roc_plots/
 train_datasets/

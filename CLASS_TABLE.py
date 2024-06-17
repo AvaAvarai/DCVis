@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor, QBrush
-import COLORS
+
 
 def reset_checkmarks(table, count):
     for idx in range(count):
@@ -19,29 +19,26 @@ def uncheck_checkmarks(table, count):
 
 def table_swap(table, dataset, plot, event):
     moved_from = table.currentRow()
+    from_item = table.item(moved_from, 0).text()
     moved_to = table.rowAt(round(event.position().y()))
 
-    if moved_from == moved_to or moved_to == -1:
-        return
-
-    # Swap the text and colors
-    from_item = table.item(moved_from, 0)
     to_item = table.item(moved_to, 0)
+    if not to_item:
+        return
+    to_item = to_item.text()
 
-    from_text = from_item.text()
-    to_text = to_item.text()
+    from_rgb = dataset.class_colors[moved_to]
+    to_rgb = dataset.class_colors[moved_from]
+    
+    table.item(moved_from, 0).setText(to_item)
+    table.item(moved_from, 0).setForeground(QBrush(QColor(to_rgb[0], to_rgb[1], to_rgb[2])))
+    
+    table.item(moved_to, 0).setText(from_item)
+    table.item(moved_to, 0).setForeground(QBrush(QColor(from_rgb[0], from_rgb[1], from_rgb[2])))
 
-    from_color = from_item.foreground().color()
-    to_color = to_item.foreground().color()
-
-    from_item.setText(to_text)
-    from_item.setForeground(QBrush(to_color))
-
-    to_item.setText(from_text)
-    to_item.setForeground(QBrush(from_color))
-
-    # Swap the class orders
-    dataset.class_order[moved_from], dataset.class_order[moved_to] = dataset.class_order[moved_to], dataset.class_order[moved_from]
+    place_holder = dataset.class_order[moved_from]
+    dataset.class_order[moved_from] = dataset.class_order[moved_to]
+    dataset.class_order[moved_to] = place_holder
 
     plot.update()
 
@@ -79,8 +76,7 @@ class ClassTable(QtWidgets.QTableWidget):
         counter = 0
         for ele in dataset.class_names:
             class_name = QtWidgets.QTableWidgetItem(str(ele))
-            color = dataset.class_colors[dataset.class_order[counter]].to_rgb()
-            class_name.setForeground(QBrush(QColor(color[0], color[1], color[2])))
+            class_name.setForeground(QBrush(QColor(dataset.class_colors[dataset.class_order[counter]][0], dataset.class_colors[dataset.class_order[counter]][1], dataset.class_colors[dataset.class_order[counter]][2])))
             self.setItem(counter, 0, class_name)
 
             class_checkbox = CheckBox(counter, dataset, self.refresh_GUI, 'class', parent=self)
@@ -119,8 +115,7 @@ class Button(QtWidgets.QPushButton):
         if color.isValid():
             rgb = color.getRgb()
             self.cell.setForeground(QBrush(QColor(rgb[0], rgb[1], rgb[2])))
-            self.data.class_colors[self.index] = COLORS.RGBColor(rgb[0], rgb[1], rgb[2])
-            self.r.emit()
+            self.data.class_colors[self.index] = [rgb[0], rgb[1], rgb[2]]
 
 
 # class for checkbox in the class table

@@ -9,7 +9,8 @@ from PyQt6.QtCore import *
 
 from typing import List
 import numpy as np
-import GCA, CLIPPING, COLORS
+import GCA, CLIPPING
+from COLORS import getColors, shift_hue
 
 
 def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, is_inner, class_index):
@@ -48,19 +49,16 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
 
     return control1, control2
 
-def adjust_point_towards_center(point, multiplier=1.0):
-    # Calculate direction vector from point towards the center (0, 0)
+def adjust_point_towards_center(point, atts=1):
+    # Calculate direction vector from point towards the center (assumed to be at (0, 0))
     direction = [-point[0], -point[1]]
-    # Define the scale factor
-    scale = 0.0025 * multiplier  # Adjust this base scale factor as needed
+    scale = 0.0025
+    adjust = atts * scale
     # Normalize the direction vector
     norm = (direction[0]**2 + direction[1]**2)**0.5
-    if norm == 0:
-        return point  # Return original if normalization fails
     direction_normalized = [direction[0]/norm, direction[1]/norm]
-    # Adjust point by moving it towards the center by the scaled amount
-    adjusted_point = [point[0] + scale * direction_normalized[0], point[1] + scale * direction_normalized[1]]
-    return adjusted_point
+    # Adjust point to move 0.025 units towards the center
+    return [point[0] + adjust * direction_normalized[0], point[1] + adjust * direction_normalized[1]]
 
 def draw_cubic_bezier_curve(start, control1, control2, end, inner, atts):
     # Draw a cubic Bezier curve using OpenGL's immediate mode.
@@ -84,9 +82,9 @@ def draw_cubic_bezier_curve(start, control1, control2, end, inner, atts):
     glEnd()
 
 def calculate_angle(x, y):
-    angle = np.arctan2(y, x)  # Ensure y is first in arctan2
+    angle = np.arctan2(x, y)
     if angle < 0:
-        angle += 2 * np.pi  # Normalize to 0 to 2π if needed
+        angle += 2 * np.pi
     return angle
 
 def is_point_in_sector(point, center, start_angle, end_angle, radius):
@@ -109,12 +107,6 @@ def draw_filled_sector(center, start_angle, end_angle, radius, segments=100):
         angle = start_angle + (end_angle - start_angle) * segment / segments
         glVertex2f(center[0] + np.cos(angle) * radius, center[1] + np.sin(angle) * radius)
     glEnd()
-
-def calculate_radius(data):
-    circumference = data.attribute_count
-    # Calculate the radius from the circumference which is the number of attributes
-    radius = circumference / ((2 + data.attribute_count / 100) * np.pi)
-    return radius
 
 def draw_highlighted_curves(dataset, line_vao):
     glEnable(GL_BLEND)
@@ -167,150 +159,19 @@ def draw_highlighted_curves(dataset, line_vao):
     glLineWidth(1)
     glDisable(GL_BLEND)
 
-def draw_unhighlighted_curves(data, line_vao):
-    glEnable(GL_BLEND)
-    glEnable(GL_LINE_SMOOTH)
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
-    
-    radius = calculate_radius(data)
-    class_count_one = data.class_count == 1
-    
-    end_hue_shift_amount = 0.1
-    hue_shift_amount = 0.02 
+def draw_radial_line(start, end):
+    glBegin(GL_LINES)
+    glVertex2f(*start)
+    glVertex2f(*end)
+    glEnd()
 
-    for class_index in range(data.class_count):
-        if data.active_classes[class_index]:
-            glBindVertexArray(line_vao[class_index])
-            datapoint_count = 0
-            size_index = 0
-            smallest_vector = float('inf')
-            largest_vector = 0
+def calculate_radius(data):
+    circumference = data.attribute_count
+    # Calculate the radius from the circumference which is the number of attributes
+    radius = circumference / ((2 + data.attribute_count / 100) * np.pi)
+    return radius
 
-            # Initialize the radial bounds for this class if not already present
-            if class_index not in data.radial_bounds:
-                data.radial_bounds[class_index] = {'smallest': None, 'largest': None}
-
-            for j in range(data.class_count):
-                if j < class_index:
-                    size_index += data.count_per_class[j]
-
-            was_inner = False
-            is_inner = (class_index == data.class_order[0]) and not class_count_one
-            if len(data.class_order) > 1:
-                was_inner = (class_index == data.class_order[1])
-            
-            curve_color = data.class_colors[class_index]
-            for j in range(0, len(data.positions[class_index]), data.vertex_count):
-                for h in range(1, data.vertex_count):
-                    index = size_index + datapoint_count
-                    if index < len(data.clear_samples) and (h > data.attribute_count or data.clear_samples[index]):
-                        continue
-
-
-                    # Adjust color based on trace mode
-                    if data.trace_mode:
-                        hue_shift_amount += 0.02
-                        glColor4ub(*curve_color.__copy__().shift_hue(hue_shift_amount).to_rgb(), data.attribute_alpha if data.active_attributes[h - 1] else 255)
-                    elif h == data.attribute_count - 1:
-                        glColor4ub(*data.class_colors[class_index].__copy__().shift_hue(end_hue_shift_amount).to_rgb(), data.attribute_alpha if data.active_attributes[h - 1] else 255)
-                    else:
-                        hue_shift_amount = 0.
-                        glColor4ub(*curve_color.to_rgb(), data.attribute_alpha if data.active_attributes[h - 1] else 255)
-
-                    start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
-                    angle = np.arctan2(end[1], end[0])
-
-                    if angle < smallest_vector:
-                        smallest_vector = angle
-                    if angle > largest_vector:
-                        largest_vector = angle
-
-                    # Adjust start and end for inner classes
-                    if is_inner:
-                        start = adjust_point_towards_center(start)
-                        end = adjust_point_towards_center(end)
-                    if was_inner:
-                        start = adjust_point_towards_center(start, -data.attribute_count)
-                        end = adjust_point_towards_center(end, -data.attribute_count)
-
-                    # Draw the curve
-                    control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
-                    draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
-
-                datapoint_count += 1
-
-            # Update the radial bounds for this class
-            data.radial_bounds[class_index]['smallest'] = smallest_vector
-            data.radial_bounds[class_index]['largest'] = largest_vector
-
-            glBindVertexArray(0)
-
-    glDisable(GL_BLEND)
-
-def draw_unhighlighted_curves_vertices(data, marker_vao):
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    glLineWidth(1)
-    
-    hue_shift = 0.1
-    class_count_one = data.class_count == 1
-    
-    for class_index in range(data.class_count):
-        data.overlap_points[class_index] = 0
-        if data.active_markers[class_index]:
-            for j in range(data.vertex_count):
-                glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
-                curve_vertex_color = data.class_colors[class_index]
-                # last marker hue shift
-                if j == data.vertex_count - 1:
-                    curve_vertex_color = curve_vertex_color.__copy__().shift_hue(hue_shift)
-                glColor4ub(*curve_vertex_color.to_rgb(), data.attribute_alpha if data.active_attributes[j] else 255)
-                was_inner = False
-                is_inner = class_index == data.class_order[0] and not class_count_one
-                if len(data.class_order) > 1:
-                    was_inner = (class_index == data.class_order[1])
-                
-                for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
-                    position = data.positions[class_index][pos_index + j]
-
-                    if is_inner:
-                        position = adjust_point_towards_center(position, data.attribute_count)
-                    if was_inner:
-                        position = adjust_point_towards_center(position, -data.attribute_count)
-
-                    # if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in sectors) > 1:
-                    #     # append dataframe index to overlap indices
-                    #     index = pos_index // data.vertex_count
-                    #     if index not in data.overlap_indices:
-                    #         data.overlap_points[class_index] += 1
-                    #         data.overlap_indices.append(index)
-                    #     glPointSize(10)
-                    #     glColor4ub(255, 0, 0, 255)
-                        
-                    glBegin(GL_POINTS)
-                    glVertex2f(*position)
-                    glEnd()
-                    
-                    glPointSize(5)
-                    
-                    glBegin(GL_POINTS)
-                    glVertex2f(*position)
-                    glEnd()
-
-                glBindVertexArray(0)
-
-    # overlap = ""
-    # for i in range(data.class_count):
-    #     overlap += f"Class {i + 1} {data.class_names[i]}: {data.overlap_points[i]}\n"
-    #     data.overlap_points[i] = 0
-    # count = len(data.overlap_indices)
-    # overlap += f"Total Overlaps: {count} / {data.sample_count} samples\n= {round(100 * (count / data.sample_count), 2)}% overlap for {round(100 * (1 - (count / data.sample_count)), 2)}% accuracy.\n"
-    # self.overlaps_textbox.setText(overlap)
-    # if count > 0:
-    #     self.replot_overlaps_btn.setEnabled(True)
-    glDisable(GL_BLEND)
-
-def draw_unhighlighted_polylines(dataset, class_vao):
+def draw_unhighlighted_nd_points(dataset, class_vao):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
@@ -326,18 +187,21 @@ def draw_unhighlighted_polylines(dataset, class_vao):
 
         # Draw polylines and markers
         if dataset.active_classes[i]:
+            # Adjust color based on trace mode
+            color = dataset.class_colors[i]
             glBindVertexArray(class_vao[i])
 
             for j in range(dataset.class_count):
                 if j < i:
-                    size_index += dataset.count_per_class[j] if j < len(dataset.count_per_class) else 0
+                    size_index += dataset.count_per_class[j]
 
             # Iterate over positions for polylines
             for l in range(0, len(dataset.positions[i]), dataset.vertex_count):
-                # Adjust color based on trace mode
+                
                 if dataset.trace_mode:
+                    color = shift_hue(color, hue_shift_amount)
                     hue_shift_amount += 0.02
-        
+                
                 if size_index + datapoint_cnt < len(dataset.vertex_in):
                     if dataset.clear_samples[size_index + datapoint_cnt]:
                         datapoint_cnt += 1
@@ -345,15 +209,11 @@ def draw_unhighlighted_polylines(dataset, class_vao):
 
                 sub_alpha = 0
                 if any(dataset.clipped_samples):
-                    sub_alpha = 0  # TODO: Make this a scrollable option
-                
+                    sub_alpha = 100  # TODO: Make this a scrollable option
+
                 glBegin(GL_LINES)
                 for m in range(1, dataset.vertex_count):
-                    if dataset.trace_mode:
-                        shifted_color = dataset.class_colors[i].__copy__().shift_hue(hue_shift_amount).to_rgb()
-                        glColor4ub(*shifted_color, dataset.attribute_alpha - sub_alpha if dataset.active_attributes[m - 1] else 255 - sub_alpha)
-                    else:
-                        glColor4ub(*dataset.class_colors[i].to_rgb(), dataset.attribute_alpha - sub_alpha if dataset.active_attributes[m - 1] else 255 - sub_alpha)
+                    glColor4ub(color[0], color[1], color[2], dataset.attribute_alpha - sub_alpha if dataset.active_attributes[m - 1] else 255 - sub_alpha)
                     glVertex2f(dataset.positions[i][l + m - 1][0], dataset.positions[i][l + m - 1][1])
                     glVertex2f(dataset.positions[i][l + m][0], dataset.positions[i][l + m][1])
                 glEnd()
@@ -363,35 +223,42 @@ def draw_unhighlighted_polylines(dataset, class_vao):
 
     glDisable(GL_BLEND)
 
-def draw_unhighlighted_polylines_vertices(dataset, marker_vao):
+def draw_unhighlighted_nd_point_vertices(dataset, marker_vao):
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glLineWidth(1)
-
+    
     # Loop through classes in class order
     for i in dataset.class_order[::-1]:
         size_index = 0
 
-        for j in range(dataset.class_count):
-            if j < i:
-                size_index += dataset.count_per_class[j] if j < len(dataset.count_per_class) else 0
-                
-        if dataset.active_markers[i]:
-            # Draw markers            
-            for j in range(dataset.vertex_count):
-                glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
-                glPointSize(5 if j < dataset.vertex_count - 1 else 7)  # Different size for the last marker
+        # Draw polylines and markers
+        if dataset.active_classes[i]:
+            # Adjust color based on trace mode
+            color = dataset.class_colors[i]
+            class_color = color
 
-                glColor4ub(*dataset.class_colors[i].to_rgb(), dataset.attribute_alpha if dataset.active_attributes[j] else 255)
-                glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
+            for j in range(dataset.class_count):
+                if j < i:
+                    size_index += dataset.count_per_class[j]
+                    
+            if dataset.active_markers[i]:
+                # Draw markers
+                for j in range(dataset.vertex_count):
+                    glBindVertexArray(marker_vao[i * dataset.vertex_count + j])
+                    glPointSize(5 if j < dataset.vertex_count - 1 else 7)  # Different size for the last marker
 
-                glBindVertexArray(0)
+                    # Apply adjusted color for each marker
+                    glColor4ub(class_color[0], class_color[1], class_color[2], dataset.attribute_alpha if dataset.active_attributes[j] else 255)
+                    glDrawArrays(GL_POINTS, 0, int(len(dataset.positions[i]) / dataset.vertex_count))
+
+                    glBindVertexArray(0)
 
     glDisable(GL_BLEND)
 
-def draw_highlighted_polylines(dataset, class_vao):
+def draw_highlighted_nd_points(dataset, class_vao):
     # highlight color and width
     glEnable(GL_BLEND)
     glEnable(GL_LINE_SMOOTH)
@@ -402,16 +269,17 @@ def draw_highlighted_polylines(dataset, class_vao):
     # loop through classes in class order
     for i in dataset.class_order[::-1]:
         datapoint_cnt = 0
-
-        size = len(dataset.positions[i])
+        # check if active
         if dataset.active_classes[i]:
             # positions of the class
             glBindVertexArray(class_vao[i])
             size_index = 0
             for j in range(dataset.class_count):
                 if j < i:
-                    size_index += dataset.count_per_class[j] if j < len(dataset.count_per_class) else 0
+                    size_index += dataset.count_per_class[j]
+
             # draw polyline
+            size = len(dataset.positions[i])
             for j in range(0, size, dataset.vertex_count):
                 if size_index + datapoint_cnt < len(dataset.vertex_in):
                     if dataset.clear_samples[size_index + datapoint_cnt]:
@@ -526,23 +394,14 @@ class Plot(QOpenGLWidget):
         self.zoomed_height = 1.125
         self.is_zooming = False
         self.is_panning = False
-    
+
         # for dragging
         self.has_dragged = False  # bool to check for starting location
         self.prev_horiz = None  # need previous x location
         self.prev_vert = None  # need previous y location
 
-        self.background_color = [171 / 255, 171 / 255, 171 / 255, 1]  # Default gray in RGBA
+        self.background_color = [239 / 255, 239 / 255, 239 / 255, 1]  # Default gray in RGBA
         self.axes_color = [0, 0, 0, 0]  # Default black
-
-        # if class names lower has benign and malignant case insensitive then set colors to green and red
-        if isinstance(self.data.class_names[0], str):
-            if ('benign' in [x.lower() for x in self.data.class_names] and 'malignant' in [x.lower() for x in self.data.class_names] or 'negative' in [x.lower() for x in self.data.class_names] and 'positive' in [x.lower() for x in self.data.class_names]) and len(self.data.class_names) == 2:
-                self.color_instance = COLORS.generate_benign_malignant_colors()
-        if not hasattr(self, 'color_instance'):
-            self.color_instance = COLORS.generate_colors(self.data.class_count)
-        
-        self.data.class_colors, self.data.colors_names = self.color_instance
 
     def reset_zoom(self):
         self.m_left = -1.125
@@ -631,14 +490,13 @@ class Plot(QOpenGLWidget):
 
         # draw n-D points
         if self.data.plot_type in ['SCC', 'DCC']:  # Bezier curves
-            draw_unhighlighted_curves(self.data, self.line_vao)
+            self.draw_unhighlighted_curves(self.data, self.line_vao)
             draw_highlighted_curves(self.data, self.line_vao)
-            draw_unhighlighted_curves_vertices(self.data, self.marker_vao)
-            #self.draw_attribute_radials(self.data)
+            self.draw_unhighlighted_curves_vertices(self.data, self.marker_vao)
         else:  # Polylines
-            draw_unhighlighted_polylines(self.data, self.line_vao)
-            draw_highlighted_polylines(self.data, self.line_vao)
-            draw_unhighlighted_polylines_vertices(self.data, self.marker_vao)
+            draw_unhighlighted_nd_points(self.data, self.line_vao)
+            draw_highlighted_nd_points(self.data, self.line_vao)
+            draw_unhighlighted_nd_point_vertices(self.data, self.marker_vao)
         
         draw_box(self.all_rect, [1.0, 0.0, 0.0, 0.5])
         
@@ -657,8 +515,12 @@ class Plot(QOpenGLWidget):
                     if str(key).endswith('(pure)'):
                         class_name = key[:-7]
                         class_index = self.data.class_names.index(class_name)
-                        c = COLORS.upRange(self.data.class_colors[class_index].__copy__().to_rgb())
-                        draw_box(box, [*c, 1/3])
+                        c = self.data.class_colors[class_index].copy()
+                        for i, _c in enumerate(c):
+                            c[i] = _c / 255
+                        if len(c) == 3:
+                            c.append(1/3)
+                        draw_box(box, c)
                     else:
                         draw_box(box, [1.0, 1.0, 1.0, 1/3])
                 else:
@@ -827,49 +689,179 @@ class Plot(QOpenGLWidget):
 
         event.accept()
 
-    def draw_radial_lines(self, data):
+    def draw_unhighlighted_curves_vertices(self, data, marker_vao):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glLineWidth(2)  # Adequate line width for visibility
-        radius = calculate_radius(data)  # Correct radius for your plot
+        hue_shift = 0.08
+        glLineWidth(1)
+        class_count_one = data.class_count == 1
+        for class_index in range(data.class_count):
+            data.overlap_points[class_index] = 0
+            if data.active_markers[class_index]:
+                for j in range(data.vertex_count):
+                    glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
+                    color = data.class_colors[class_index]
+                    # last marker hue shift
+                    if j == data.vertex_count - 1:
+                        color = shift_hue(color, hue_shift)
 
-        for class_index, bounds in data.radial_bounds.items():
-            if bounds['smallest'] is not None and bounds['largest'] is not None:
-                x_min = radius * np.cos(bounds['smallest'])
-                y_min = radius * np.sin(bounds['smallest'])
-                x_max = radius * np.cos(bounds['largest'])
-                y_max = radius * np.sin(bounds['largest'])
+                    was_inner = False
+                    is_inner = class_index == data.class_order[0] and not class_count_one
+                    if len(data.class_order) > 1:
+                        was_inner = (class_index == data.class_order[1])
+                    for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
+                        position = data.positions[class_index][pos_index + j]
 
-                glColor3ub(*data.class_colors[class_index % len(data.class_colors)])  # Using class colors
+                        if is_inner:
+                            position = adjust_point_towards_center(position, data.attribute_count)
+                        if was_inner:
+                            position = adjust_point_towards_center(position, -data.attribute_count)
+                        
+                        
+                        if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
+                            # append dataframe index to overlap indices
+                            index = pos_index // data.vertex_count
+                            if index not in data.overlap_indices:
+                                data.overlap_points[class_index] += 1
+                                data.overlap_indices.append(index)
+                            glPointSize(10)
+                            glColor4ub(255, 0, 0, 255)
+                            
+                        glBegin(GL_POINTS)
+                        glVertex2f(*position)
+                        glEnd()
+                        
+                        glPointSize(5)
+                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)  # Normal color
+                        
+                        glBegin(GL_POINTS)
+                        glVertex2f(*position)
+                        glEnd()
 
-                glBegin(GL_LINES)
-                glVertex2f(0, 0)
-                glVertex2f(5*x_min, 5*y_min)
-                glEnd()
+                    glBindVertexArray(0)
 
-                glBegin(GL_LINES)
-                glVertex2f(0, 0)
-                glVertex2f(5*x_max, 5*y_max)
-                glEnd()
-
+        overlap = ""
+        for i in range(data.class_count):
+            overlap += f"Class {i + 1} {data.class_names[i]}: {data.overlap_points[i]}\n"
+            data.overlap_points[i] = 0
+        count = len(data.overlap_indices)
+        overlap += f"Total Overlaps: {count} / {data.sample_count} samples\n= {round(100 * (count / data.sample_count), 2)}% overlap for {round(100 * (1 - (count / data.sample_count)), 2)}% accuracy.\n"
+        self.overlaps_textbox.setText(overlap)
+        if count > 0:
+            self.replot_overlaps_btn.setEnabled(True)
         glDisable(GL_BLEND)
 
-    def draw_attribute_radials(self, data):
+    def draw_unhighlighted_curves(self, data, line_vao):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glLineWidth(2)
-        center = (0, 0)
-        # Draw radial lines
-        for i in range(data.attribute_count):
-            if i < len(data.max_radial_distances):
-                angle = 2 * np.pi * i / data.attribute_count
-                x = data.max_radial_distances[i] * np.cos(angle)
-                y = data.max_radial_distances[i] * np.sin(angle)
-                glColor3ub(*data.class_colors[i % len(data.class_colors)])
-                glBegin(GL_LINES)
-                glVertex2f(*center)
-                glVertex2f(x, y)
-                glEnd()
+        radius = calculate_radius(data)
+        self.sectors = []
+        hue_shift_amount = 0.02
+
+        class_count_one = data.class_count == 1
+
+        for class_index in range(data.class_count):
+            min_angle = np.inf
+            max_angle = -np.inf
+            closest = furthest = None
+            
+            was_inner = False
+            is_inner = (class_index == data.class_order[0]) and not class_count_one
+            if len(data.class_order) > 1:
+                was_inner = (class_index == data.class_order[1])
+            if data.active_classes[class_index]:
+                glBindVertexArray(line_vao[class_index])
+
+                datapoint_count = 0
+                size_index = 0
+                for j in range(data.class_count):
+                    if j < class_index:
+                        size_index += data.count_per_class[j]
+
+                for j in range(0, len(data.positions[class_index]), data.vertex_count):
+                    sub_alpha = 0
+                    for h in range(1, data.vertex_count):
+                        index = size_index + datapoint_count
+                        if index < len(data.clear_samples) and (h > data.attribute_count or data.clear_samples[index]):
+                            continue
+                        
+                        if data.trace_mode:
+                            color = shift_hue(data.class_colors[class_index], hue_shift_amount)
+                            hue_shift_amount += 0.02  # Increase hue shift for each attribute or sample
+                        elif h == data.attribute_count - 1:
+                            color = shift_hue(data.class_colors[class_index], 0.1)  # Apply a hue shift for the last attribute
+                        else:
+                            color = shift_hue(data.class_colors[class_index], 0)  # No hue shift if not the last attribute or not in trace mode
+                            
+                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha - sub_alpha if data.active_attributes[h] else 255 - sub_alpha)
+
+                        start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
+                        
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)       
+
+                        # Adjust start and end for inner classes
+                        if is_inner:
+                            start = adjust_point_towards_center(start)
+                            end = adjust_point_towards_center(end)
+                        if was_inner:
+                            start = adjust_point_towards_center(start, -data.attribute_count)
+                            end = adjust_point_towards_center(end, -data.attribute_count)
+
+                        draw_cubic_bezier_curve(start, control1, control2, end, is_inner, data.attribute_count)
+
+                        angle = calculate_angle(end[0], end[1])
+                        
+                        if angle < min_angle and h == data.attribute_count - 1:
+                            min_angle = angle
+                            closest = end
+                        if angle > max_angle:
+                            max_angle = angle
+                            furthest = end
+                            
+                    datapoint_count += 1
+
+                glBindVertexArray(0)
+
+                mult = 5
+                if class_index == data.class_count-1:
+                    mult = 2.5
+                
+                if closest is not None:
+                    extended_closest = (closest[0] * mult, closest[1] * mult)
+                    if self.data.active_sectors[class_index]:
+                        draw_radial_line((0, 0), extended_closest)
+                if furthest is not None:
+                    extended_endest = (furthest[0] * mult, furthest[1] * mult)
+                    if self.data.active_sectors[class_index]:
+                        draw_radial_line((0, 0), extended_endest)
+                
+                if closest is not None and furthest is not None:
+                    glColor4ub(color[0], color[1], color[2], 50)
+                    closest_angle = np.arctan2(closest[1], closest[0])
+                    furthest_angle = np.arctan2(furthest[1], furthest[0])
+
+                    if self.data.plot_type == 'SCC':
+                        # Adjust angles to be positive
+                        closest_angle = closest_angle if closest_angle >= 0 else closest_angle + 2 * np.pi
+                        furthest_angle = furthest_angle if furthest_angle >= 0 else furthest_angle + 2 * np.pi
+
+                    # Ensure start_angle < end_angle for drawing the sector correctly
+                    if closest_angle > furthest_angle:
+                        closest_angle, furthest_angle = furthest_angle, closest_angle
+                        
+                    sector_radius = radius * (data.class_count + 1)
+
+                    # Draw the filled sector
+                    if self.data.active_sectors[class_index]:
+                        draw_filled_sector((0, 0), closest_angle, furthest_angle, sector_radius, segments=50)
+
+                if closest is not None and furthest is not None:
+                    sector_info = {
+                        'start_angle': closest_angle,
+                        'end_angle': furthest_angle,
+                        'radius': sector_radius
+                    }
+                    self.sectors.append(sector_info)
 
         glDisable(GL_BLEND)
 
