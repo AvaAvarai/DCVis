@@ -156,6 +156,10 @@ class Dataset:
         # get sample information
         self.sample_count = len(self.dataframe.index)
         self.count_per_class = self.dataframe['class'].value_counts().tolist()
+        for name in self.class_names:
+            if name not in self.dataframe['class'].unique():
+                self.count_per_class.insert(self.class_names.index(name), 0)
+        
         # initialize arrays for clipping options
         self.clipped_samples = np.repeat(False, self.sample_count)
         self.clear_samples = np.repeat(False, self.sample_count)
