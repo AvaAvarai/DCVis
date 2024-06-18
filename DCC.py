@@ -30,8 +30,9 @@ class DCC:
         lda.fit(X, y)
         lda_coefs = np.abs(lda.coef_).mean(axis=0)
 
-        #coefArr = lda_coefs / 100
-        coefArr = [1 for i in range(len(lda_coefs))]
+        coefArr = lda_coefs / 100
+        dataset.coefs = lda_coefs
+        #coefArr = [1 for i in range(len(lda_coefs))]
 
         for index, col in enumerate(working_coef.columns):
             columnCoef = coefArr[index]
