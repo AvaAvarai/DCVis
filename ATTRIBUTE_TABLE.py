@@ -17,7 +17,7 @@ def table_swap(table, dataset, event, replot_func):
 
     table.item(moved_from, 0).setText(to_item)
     table.item(moved_to, 0).setText(from_item)
-
+    
     place_holder = dataset.attribute_names[moved_from]
     dataset.attribute_names[moved_from] = dataset.attribute_names[moved_to]
     dataset.attribute_names[moved_to] = place_holder
@@ -29,6 +29,9 @@ def table_swap(table, dataset, event, replot_func):
     place_holder = dataset.active_attributes[moved_from]
     dataset.active_attributes[moved_from] = dataset.active_attributes[moved_to]
     dataset.active_attributes[moved_to] = place_holder
+
+    if dataset.plot_type == 'DCC':
+        dataset.coefs[moved_from], dataset.coefs[moved_to] = dataset.coefs[moved_to], dataset.coefs[moved_from]
 
     replot_func()
 

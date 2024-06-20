@@ -23,8 +23,8 @@ class DCC:
 
         # Prepare the data for LDA
         X = attributes_scaled
-        y = working_df['class'].values  # Assuming 'class' column contains the class labels
-
+        y = working_df['class'].values
+        
         # Fit LDA model first run only
         if not dataset.fitted:
             lda = LinearDiscriminantAnalysis()
@@ -32,9 +32,15 @@ class DCC:
             lda_coefs = np.abs(lda.coef_).mean(axis=0)
             dataset.fitted = True
             dataset.coefs = lda_coefs
+            # sort the attributes by the coefficients
+            sorted_indices = np.argsort(lda_coefs)[::-1]
+            dataset.attribute_names = list(np.array(dataset.attribute_names)[sorted_indices])
+            dataset.attribute_order = sorted_indices
+            dataset.coefs = dataset.coefs[sorted_indices]
         
+        # update coefs with update_coef(attribute_index, new_coef) func
         coefArr = dataset.coefs / 100
-
+        
         for index, col in enumerate(working_frame.columns):
             columnCoef = coefArr[index]
             working_df[col] = columnCoef * working_df[col]
