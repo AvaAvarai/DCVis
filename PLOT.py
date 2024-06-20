@@ -797,7 +797,7 @@ class Plot(QOpenGLWidget):
 
                         start, end = data.positions[class_index][j + h - 1], data.positions[class_index][j + h]
                         
-                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)       
+                        control1, control2 = calculate_cubic_bezier_control_points(start, end, radius, data.attribute_count, is_inner, class_index)
 
                         # Adjust start and end for inner classes
                         if is_inner:

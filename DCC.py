@@ -32,7 +32,6 @@ class DCC:
 
         coefArr = lda_coefs / 100
         dataset.coefs = lda_coefs
-        #coefArr = [1 for i in range(len(lda_coefs))]
 
         for index, col in enumerate(working_coef.columns):
             columnCoef = coefArr[index]

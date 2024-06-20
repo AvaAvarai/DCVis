@@ -35,8 +35,8 @@ class View(QtWidgets.QMainWindow):
         '''Centers the window on the screen.'''
         screen = QApplication.primaryScreen()
         resolution = screen.geometry()
-        self.move(int(resolution.width() / 2 - self.frameSize().width() / 2),
-                  int(resolution.height() / 2 - (self.frameSize().height() * 1.045) / 2))
+        self.move(int(resolution.width() / 2 - self.frameSize().width() / 2),             # win_width  <- screen_width  / 2 - frame_width / 2
+                  int(resolution.height() / 2 - (self.frameSize().height() * 1.08) / 2))  # win_height <- screen_height / 2 - (frame_height * 1.08) / 2
     
     def highlightAssociatedRegions(self, item):
         rule_num = item.text().split()[1][:-1]

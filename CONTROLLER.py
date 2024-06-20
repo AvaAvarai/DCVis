@@ -20,9 +20,8 @@ class Controller:
         self.view.actionControls_List.triggered.connect(self.show_help_dialog)
 
     def show_help_dialog(self):
-        # This method creates and shows the HelpDialog
         dialog = HelpDialog(self.view)
-        dialog.exec()  # Use exec() to show it as a modal dialog
+        dialog.exec()  # modal dialog
 
     def setup_connections(self):
         # Bind buttons to functions

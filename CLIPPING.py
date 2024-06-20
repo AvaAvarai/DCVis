@@ -4,11 +4,11 @@ from csv import writer
 import os
 
 # exit codes for cohen-sutherland
-INSIDE = 0
-LEFT = 1
-RIGHT = 2
-BOTTOM = 4
-TOP = 8
+INSIDE = 0  # 0000b
+LEFT   = 1  # 0001b
+RIGHT  = 2  # 0010b
+BOTTOM = 4  # 0100b
+TOP    = 8  # 1000b
 
 
 def clip_display(textbox, total_sample):
@@ -16,8 +16,7 @@ def clip_display(textbox, total_sample):
     clip_types = ['Line Clip', 'Vertex Clip', 'End Clip']
     info_string = ''
 
-    cnt = 0
-    for file in filenames:
+    for cnt, file in enumerate(filenames):
         df = pd.read_csv(file)
         # get dataset name
         name = os.path.basename(file)
@@ -37,7 +36,6 @@ def clip_display(textbox, total_sample):
             counter += 1
 
         info_string += '\n\nDataset Name: ' + name + '\n===============\n\n'
-        cnt += 1
 
     textbox.setText(info_string)
 

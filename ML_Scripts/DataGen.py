@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 # Define the number of cases
-num_cases = 100
+num_cases = 250
 
 # Function to generate scores between 70 and 100
 def generate_scores():
@@ -38,4 +38,4 @@ average_scores = df.mean(axis=1)
 df['class'] = average_scores.apply(calculate_grade)
 
 # Save to CSV with headers
-df.to_csv('.\datasets\synthetic_grades', index=False)
+df.to_csv('.\datasets\synthetic_grades_250', index=False)
