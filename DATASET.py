@@ -56,6 +56,7 @@ class Dataset:
         self.trace_mode: bool = False
 
         self.coefs = []
+        self.fitted = False
 
         self.active_attributes: np.ndarray = np.array([], dtype=bool)
         self.active_classes: List[bool] = []

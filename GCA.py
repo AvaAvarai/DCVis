@@ -10,7 +10,7 @@ import numpy as np
 class GCA:
     def __init__(self, dataset):
         dataset.positions = []
-
+        
         if dataset.plot_type == 'PC':
             dataset.vertex_count = dataset.attribute_count
             PC.PC(dataset)

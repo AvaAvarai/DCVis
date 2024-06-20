@@ -367,7 +367,7 @@ class Plot(QOpenGLWidget):
         super(Plot, self).__init__(parent)
 
         self.data = dataset
-
+        
         self.vertex_info = GCA.GCA(self.data)
         self.line_vao = []
         self.marker_vao = []

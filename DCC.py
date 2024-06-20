@@ -6,17 +6,17 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 class DCC:
     def __init__(self, dataset):
         dataset.minmax_arc_lengths = []
-
+        
         working_df = dataset.dataframe.copy()
         scaler = MinMaxScaler((0, 1))
         working_df[dataset.attribute_names] = scaler.fit_transform(working_df[dataset.attribute_names])
 
         dataset.normalized_dataframe = working_df
 
-        working_coef = working_df.copy()
+        working_frame = working_df.copy()
 
         # strip last column
-        working_coef = working_coef.iloc[:, 0:-1]
+        working_frame = working_frame.iloc[:, 0:-1]
         
         scaler = MinMaxScaler((0, 1))
         attributes_scaled = scaler.fit_transform(working_df[dataset.attribute_names])
@@ -25,15 +25,17 @@ class DCC:
         X = attributes_scaled
         y = working_df['class'].values  # Assuming 'class' column contains the class labels
 
-        # Fit LDA model
-        lda = LinearDiscriminantAnalysis()
-        lda.fit(X, y)
-        lda_coefs = np.abs(lda.coef_).mean(axis=0)
+        # Fit LDA model first run only
+        if not dataset.fitted:
+            lda = LinearDiscriminantAnalysis()
+            lda.fit(X, y)
+            lda_coefs = np.abs(lda.coef_).mean(axis=0)
+            dataset.fitted = True
+            dataset.coefs = lda_coefs
+        
+        coefArr = dataset.coefs / 100
 
-        coefArr = lda_coefs / 100
-        dataset.coefs = lda_coefs
-
-        for index, col in enumerate(working_coef.columns):
+        for index, col in enumerate(working_frame.columns):
             columnCoef = coefArr[index]
             working_df[col] = columnCoef * working_df[col]
 
