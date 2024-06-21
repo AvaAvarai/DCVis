@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
-
 class DCC:
     def __init__(self, dataset):
         dataset.minmax_arc_lengths = []
@@ -26,7 +25,7 @@ class DCC:
         y = working_df['class'].values
         
         # Fit LDA model first run only
-        if not dataset.fitted:
+        if not dataset.fitted: 
             lda = LinearDiscriminantAnalysis()
             lda.fit(X, y)
             lda_coefs = np.abs(lda.coef_).mean(axis=0)
@@ -39,7 +38,7 @@ class DCC:
             dataset.coefs = dataset.coefs[sorted_indices]
         
         # update coefs with update_coef(attribute_index, new_coef) func
-        coefArr = dataset.coefs / 100
+        coefArr = dataset.coefs / dataset.coefs.sum()
         
         for index, col in enumerate(working_frame.columns):
             columnCoef = coefArr[index]

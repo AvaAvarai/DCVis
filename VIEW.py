@@ -186,6 +186,22 @@ class View(QtWidgets.QMainWindow):
                 self.plot_layout.removeWidget(self.plot_widget)
             self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
             self.plot_layout.addWidget(self.plot_widget)
+        
+        elif key == QtCore.Qt.Key.Key_I:
+            # inject a data point with a value of 0.5 for each attribute show option to pick class
+            # using function def inject_datapoint(self, data_point: List[float], class_name: str):
+            data_point = [0.5] * self.controller.data.attribute_count
+            class_name = None
+            # show drop down with class names to select class_name
+            class_name = QtWidgets.QInputDialog.getItem(self, "Select Class", "Select Class", self.controller.data.class_names, 0, False)
+            self.controller.data.inject_datapoint(data_point, class_name[0])
+            
+            self.controller.display_data()
+            if self.plot_widget:
+                self.plot_layout.removeWidget(self.plot_widget)
+            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+            self.plot_layout.addWidget(self.plot_widget)
+            
         self.refresh()
 
     # function to refresh plot

@@ -22,7 +22,7 @@ class Dataset:
         self.class_count: int = 0
         self.count_per_class: List[int] = []
         self.class_names: List[str] = []
-        self.class_colors: List[Tuple[int, int, int, int]] = []  # RGB colors TODO: change to using RGBA for individualized attribute alpha slider control
+        self.class_colors: List[Tuple[int, int, int, int]] = []
 
         self.rule_regions = {}
 
@@ -99,6 +99,15 @@ class Dataset:
                 print(f"Error reloading data: {e}")
         else:
             print("No filepath set for reloading.")
+
+    def inject_datapoint(self, data_point: List[float], class_name: str):
+        self.dataframe = self.dataframe._append(pd.Series(data_point + [class_name], index=self.dataframe.columns), ignore_index=True)
+        self.not_normalized_frame = self.not_normalized_frame._append(pd.Series(data_point + [class_name], index=self.not_normalized_frame.columns), ignore_index=True)
+        self.sample_count += 1
+        self.count_per_class[self.class_names.index(class_name)] += 1
+        # update clipped_samples array with new sample
+        self.clipped_samples = np.append(self.clipped_samples, False)
+        self.clear_samples = np.append(self.clear_samples, False)
 
     def update_coef(self, attribute_index, new_coef_value):
         if 0 <= attribute_index < len(self.coefs):
@@ -198,12 +207,24 @@ class Dataset:
             return
 
         bool_clipped = np.array(self.clipped_samples, dtype=bool)
+        
         for attribute in self.attribute_names:
-            # validate attribute + move_delta [0, 1]
-            if self.dataframe.loc[bool_clipped, attribute].min() + move_delta > 0 or self.dataframe.loc[bool_clipped, attribute].max() + move_delta < 1:
-                if self.not_normalized_frame.loc[bool_clipped, attribute].min() + move_delta * 10 > 0 or self.not_normalized_frame.loc[bool_clipped, attribute].max() + move_delta * 10 < 1:
-                    self.dataframe.loc[bool_clipped, attribute] += move_delta
-                    self.not_normalized_frame.loc[bool_clipped, attribute] += move_delta * 10
+            normalized_range = self.dataframe[attribute].max() - self.dataframe[attribute].min()
+            if normalized_range == 0:
+                continue  # Skip attributes with no variation
+
+            proportional_delta = move_delta / normalized_range
+            
+            # Calculate the proportional move for the normalized and not_normalized frames
+            if self.dataframe.loc[bool_clipped, attribute].min() + proportional_delta > 0 and self.dataframe.loc[bool_clipped, attribute].max() + proportional_delta < 1:
+                not_normalized_range = self.not_normalized_frame[attribute].max() - self.not_normalized_frame[attribute].min()
+                if not_normalized_range == 0:
+                    continue  # Skip attributes with no variation
+
+                not_normalized_proportional_delta = proportional_delta * not_normalized_range
+                
+                self.dataframe.loc[bool_clipped, attribute] += proportional_delta
+                self.not_normalized_frame.loc[bool_clipped, attribute] += not_normalized_proportional_delta
 
     def load_from_csv(self, filename: str):
         """Load the dataset from a CSV file."""
