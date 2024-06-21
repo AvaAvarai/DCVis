@@ -695,8 +695,9 @@ class Plot(QOpenGLWidget):
         hue_shift = 0.08
         glLineWidth(1)
         class_count_one = data.class_count == 1
+        overlap_points = [0 for _ in range(data.class_count)]
         for class_index in range(data.class_count):
-            data.overlap_points[class_index] = 0
+            overlap_points[class_index] = 0
             if data.active_markers[class_index]:
                 for j in range(data.vertex_count):
                     glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
@@ -722,7 +723,7 @@ class Plot(QOpenGLWidget):
                             # append dataframe index to overlap indices
                             index = pos_index // data.vertex_count
                             if index not in data.overlap_indices:
-                                data.overlap_points[class_index] += 1
+                                overlap_points[class_index] += 1
                                 data.overlap_indices.append(index)
                             glPointSize(10)
                             glColor4ub(255, 0, 0, 255)
@@ -739,16 +740,18 @@ class Plot(QOpenGLWidget):
                         glEnd()
 
                     glBindVertexArray(0)
+        if data.overlap_points != overlap_points and overlap_points != [0 for _ in range(data.class_count)]:
+            data.overlap_points = overlap_points
 
         overlap = ""
         for i in range(data.class_count):
-            overlap += f"Class {i + 1} {data.class_names[i]}: {data.overlap_points[i]}\n"
-            data.overlap_points[i] = 0
+            overlap += f"Class {i + 1} {data.class_names[data.class_order[i]]}: {data.overlap_points[i]}\n"
         count = len(data.overlap_indices)
         overlap += f"Total Overlaps: {count} / {data.sample_count} samples\n= {round(100 * (count / data.sample_count), 2)}% overlap for {round(100 * (1 - (count / data.sample_count)), 2)}% accuracy.\n"
         self.overlaps_textbox.setText(overlap)
         if count > 0:
             self.replot_overlaps_btn.setEnabled(True)
+        
         glDisable(GL_BLEND)
 
     def draw_unhighlighted_curves(self, data, line_vao):
