@@ -57,4 +57,4 @@ class SCC:
                                 class_index)
             for class_index, class_name in enumerate(data.class_names)]
 
-        data.axis_count = 0
+        data.axis_count = data.attribute_count

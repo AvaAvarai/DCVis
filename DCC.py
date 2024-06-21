@@ -24,7 +24,7 @@ class DCC:
         X = attributes_scaled
         y = working_df['class'].values
         
-        # Fit LDA model first run only
+        # Fit LDA model first plot of DCC only per data loaded
         if not dataset.fitted: 
             lda = LinearDiscriminantAnalysis()
             lda.fit(X, y)
@@ -37,7 +37,7 @@ class DCC:
             dataset.attribute_order = sorted_indices
             dataset.coefs = dataset.coefs[sorted_indices]
         
-        coefArr = dataset.coefs / dataset.coefs.sum()
+        coefArr = dataset.coefs / 100
         
         for index, col in enumerate(working_frame.columns):
             columnCoef = coefArr[index]
@@ -93,4 +93,4 @@ class DCC:
             pos_array = np.column_stack((x_coord, y_coord))
             dataset.positions.append(pos_array)
 
-        dataset.axis_count = 0
+        dataset.axis_count = dataset.attribute_count

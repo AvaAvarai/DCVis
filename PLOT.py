@@ -325,7 +325,7 @@ def draw_axes(dataset, axis_vao, color):
                 # Draw tick marks
                 tick_length = radius * 2  # Adjust the tick length as needed
                 for i in range(dataset.attribute_count):
-                    angle_for_tick = i * angle_between_ticks - np.pi / 2
+                    angle_for_tick = (-i * angle_between_ticks + np.pi / 2) % (2 * np.pi)  # Start from the top and go clockwise
                     inner_x = (radius - tick_length / 2) * np.cos(angle_for_tick)
                     inner_y = (radius - tick_length / 2) * np.sin(angle_for_tick)
                     outer_x = (radius + tick_length / 2) * np.cos(angle_for_tick)
