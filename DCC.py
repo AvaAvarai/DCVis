@@ -37,7 +37,6 @@ class DCC:
             dataset.attribute_order = sorted_indices
             dataset.coefs = dataset.coefs[sorted_indices]
         
-        # update coefs with update_coef(attribute_index, new_coef) func
         coefArr = dataset.coefs / dataset.coefs.sum()
         
         for index, col in enumerate(working_frame.columns):

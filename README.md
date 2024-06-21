@@ -6,7 +6,7 @@ This software enables users to interactively construct visual ML models and expl
 
 ## Key Publications
 
-- **Synthetic Data Generation and Automated Multidimensional Data Labeling for AI/ML in General and Circular Coordinates** by Alice Williams and Dr. Boris Kovalerchuk
+- **[Preprint] Synthetic Data Generation and Automated Multidimensional Data Labeling for AI/ML in General and Circular Coordinates** by Alice Williams and Dr. Boris Kovalerchuk
 - **Interpretable Machine Learning for Self-Service High-Risk Decision-Making** by Charles Recaido and Dr. Boris Kovalerchuk
 
 DCVis is a complete rebuild of the [DSCVis](https://github.com/Charles57-CWU/DSCVis) software, incorporating new visualizations and enhanced tooling. The DCVis software is freely available under the MIT License, permitting both personal and commercial use.

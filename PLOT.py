@@ -583,7 +583,7 @@ class Plot(QOpenGLWidget):
 
             event.accept()
         
-        if event.button() == Qt.MouseButton.MiddleButton:
+        if event.button() == Qt.MouseButton.XButton2:
             # if mouse in a previous self.rect expand eps and remake it bigger
             seen = False
             for rect in self.all_rect:
@@ -696,8 +696,9 @@ class Plot(QOpenGLWidget):
         glLineWidth(1)
         class_count_one = data.class_count == 1
         overlap_points = [0 for _ in range(data.class_count)]
+        data.overlap_indices = []  # Reset overlap indices
+
         for class_index in range(data.class_count):
-            overlap_points[class_index] = 0
             if data.active_markers[class_index]:
                 for j in range(data.vertex_count):
                     glBindVertexArray(marker_vao[class_index * data.vertex_count + j])
@@ -710,6 +711,7 @@ class Plot(QOpenGLWidget):
                     is_inner = class_index == data.class_order[0] and not class_count_one
                     if len(data.class_order) > 1:
                         was_inner = (class_index == data.class_order[1])
+
                     for pos_index in range(0, len(data.positions[class_index]), data.vertex_count):
                         position = data.positions[class_index][pos_index + j]
 
@@ -717,10 +719,10 @@ class Plot(QOpenGLWidget):
                             position = adjust_point_towards_center(position, data.attribute_count)
                         if was_inner:
                             position = adjust_point_towards_center(position, -data.attribute_count)
-                        
-                        
-                        if sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1:
-                            # append dataframe index to overlap indices
+
+                        is_overlap = sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1
+
+                        if is_overlap:
                             index = pos_index // data.vertex_count
                             if index not in data.overlap_indices:
                                 overlap_points[class_index] += 1
@@ -728,30 +730,30 @@ class Plot(QOpenGLWidget):
                             glPointSize(10)
                             glColor4ub(255, 0, 0, 255)
                             
-                        glBegin(GL_POINTS)
-                        glVertex2f(*position)
-                        glEnd()
-                        
+                            glBegin(GL_POINTS)
+                            glVertex2f(*position)
+                            glEnd()
+
                         glPointSize(5)
-                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)  # Normal color
-                        
+                        glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
                         glBegin(GL_POINTS)
                         glVertex2f(*position)
                         glEnd()
 
                     glBindVertexArray(0)
-        if data.overlap_points != overlap_points and overlap_points != [0 for _ in range(data.class_count)]:
+
+        if data.overlap_points != overlap_points:
             data.overlap_points = overlap_points
 
-        overlap = ""
+        overlap_summary = ""
         for i in range(data.class_count):
-            overlap += f"Class {i + 1} {data.class_names[data.class_order[i]]}: {data.overlap_points[i]}\n"
-        count = len(data.overlap_indices)
-        overlap += f"Total Overlaps: {count} / {data.sample_count} samples\n= {round(100 * (count / data.sample_count), 2)}% overlap for {round(100 * (1 - (count / data.sample_count)), 2)}% accuracy.\n"
-        self.overlaps_textbox.setText(overlap)
-        if count > 0:
+            overlap_summary += f"Class {i + 1} {data.class_names[data.class_order[i]]}: {data.overlap_points[i]}\n"
+        total_overlaps = len(data.overlap_indices)
+        overlap_summary += f"Total Overlaps: {total_overlaps} / {data.sample_count} samples\n= {round(100 * (total_overlaps / data.sample_count), 2)}% overlap for {round(100 * (1 - (total_overlaps / data.sample_count)), 2)}% accuracy.\n"
+        self.overlaps_textbox.setText(overlap_summary)
+        if total_overlaps > 0:
             self.replot_overlaps_btn.setEnabled(True)
-        
+
         glDisable(GL_BLEND)
 
     def draw_unhighlighted_curves(self, data, line_vao):
