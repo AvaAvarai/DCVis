@@ -113,14 +113,14 @@ class Dataset:
         if 0 <= attribute_index < len(self.coefs):
             self.coefs[attribute_index] = new_coef_value
 
-    def load_frame(self, df: pd.DataFrame, not_normal = None):
+    def load_frame(self, df: pd.DataFrame, not_normal=None):
         # put class column to end of dataframe
         df.insert(len(df.columns) - 1, 'class', df.pop('class'))
 
         # get class information
         self.class_count = len(df['class'].unique())
-        self.class_names = df['class'].value_counts().index.tolist()
-        self.count_per_class = df['class'].value_counts().tolist()
+        self.class_names = df['class'].unique().tolist()  # Keep unique class names in their original order
+        self.count_per_class = [df['class'].tolist().count(name) for name in self.class_names]
         self.class_order = np.arange(0, self.class_count)
 
         # get class colors
@@ -151,7 +151,7 @@ class Dataset:
 
         # general dataframe
         self.dataframe = df
-        
+
         if not_normal is not None:
             self.not_normalized_frame = not_normal
         else:
@@ -159,22 +159,21 @@ class Dataset:
 
     def delete_clip(self):
         """Delete the selected samples from the dataframe."""
-        clipped_mask = np.array(self.clipped_samples, dtype=bool)
-        self.dataframe = self.dataframe[~clipped_mask].reset_index(drop=True)
-        self.not_normalized_frame = self.not_normalized_frame[~clipped_mask].reset_index(drop=True).copy()
-        self.clipped_samples = np.zeros(len(self.dataframe), dtype=bool)
-        # get sample information
-        self.sample_count = len(self.dataframe.index)
-        self.count_per_class = self.dataframe['class'].value_counts().tolist()
-        for name in self.class_names:
-            if name not in self.dataframe['class'].unique():
-                self.count_per_class.insert(self.class_names.index(name), 0)
+        self.dataframe = self.dataframe.drop(self.dataframe[self.clipped_samples].index)
+        self.not_normalized_frame = self.not_normalized_frame.drop(self.not_normalized_frame[self.clipped_samples].index)
         
-        # initialize arrays for clipping options
+        # Update class information
+        self.sample_count = len(self.dataframe.index)
+        self.count_per_class = [self.dataframe['class'].tolist().count(name) for name in self.class_names]
+        
+        # Initialize arrays for clipping options
         self.clipped_samples = np.repeat(False, self.sample_count)
         self.clear_samples = np.repeat(False, self.sample_count)
         self.vertex_in = np.repeat(False, self.sample_count)
         self.last_vertex_in = np.repeat(False, self.sample_count)
+
+        # Reload the frame to ensure consistency
+        self.load_frame(self.dataframe, self.not_normalized_frame)
 
     def copy_clip(self):
         """Duplicate the selected samples in the dataframe."""
