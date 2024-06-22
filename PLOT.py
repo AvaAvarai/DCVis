@@ -209,7 +209,7 @@ def draw_unhighlighted_nd_points(dataset, class_vao):
 
                 sub_alpha = 0
                 if any(dataset.clipped_samples):
-                    sub_alpha = 100  # TODO: Make this a scrollable option
+                    sub_alpha = 100
 
                 glBegin(GL_LINES)
                 for m in range(1, dataset.vertex_count):
@@ -408,6 +408,15 @@ class Plot(QOpenGLWidget):
         self.m_right = 1.125
         self.m_bottom = -1.125
         self.m_top = 1.125
+
+    def get_zoom(self):
+        return self.m_left, self.m_right, self.m_bottom, self.m_top
+
+    def set_zoom(self, m_left, m_right, m_bottom, m_top):
+        self.m_left = m_left
+        self.m_right = m_right
+        self.m_bottom = m_bottom
+        self.m_top = m_top
 
     def resize(self):
         if self.data.plot_type == 'PC':  # fit PC to window
@@ -720,7 +729,9 @@ class Plot(QOpenGLWidget):
                         if was_inner:
                             position = adjust_point_towards_center(position, -data.attribute_count)
 
-                        is_overlap = sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors) > 1
+                        # Check overlaps across all sectors
+                        sector_overlaps = sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors)
+                        is_overlap = sector_overlaps > 1
 
                         if is_overlap:
                             index = pos_index // data.vertex_count

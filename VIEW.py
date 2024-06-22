@@ -158,19 +158,10 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.move_samples(-0.01)
             self.create_plot()
         elif key == QtCore.Qt.Key.Key_P:
-            clipped_indices = [i for i, value in enumerate(self.controller.data.clipped_samples) if value]
-            print("Indices of clipped samples:", clipped_indices)
-            clipped_positions = [self.controller.data.dataframe.iloc[i] for i in clipped_indices if i < self.controller.data.sample_count]
-
-            print("Positions of clipped samples:")
-            for pos in clipped_positions:
-                for i, val in enumerate(pos):
-                    label = ""
-                    if i < len(self.controller.data.attribute_names):
-                        label = self.controller.data.attribute_names[i]
-                    else:
-                        label = "class"
-                    print(f"{label}: {val}")
+            # print dataframe information for clipped indices
+            print(self.controller.data.dataframe[self.controller.data.clipped_samples == 1])
+            # and not normalized frame
+            print(self.controller.data.not_normalized_frame[self.controller.data.clipped_samples == 1])
         elif key == QtCore.Qt.Key.Key_C:
             self.controller.data.copy_clip()
             self.controller.display_data()
@@ -497,7 +488,9 @@ class View(QtWidgets.QMainWindow):
         ATTRIBUTE_TABLE.reset_checkmarks(self.attribute_table, self.controller.data.vertex_count, self.controller.data.plot_type)
         if self.attribute_table:
             self.attribute_table.clearTableWidgets()
+        v1, v2, v3, v4 = self.plot_widget.get_zoom()
         self.create_plot()
+        self.plot_widget.set_zoom(v1, v2, v3, v4)
 
     def open_background_color_picker(self):
         if not self.plot_widget:
