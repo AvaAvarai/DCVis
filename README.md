@@ -164,6 +164,11 @@ This visualization tool features multiple visualisation methods:
 - Static Circular Coordinates (SCC) ![SCC](/screenshots/SCC.png)
 - Dynamic Circular Coordinates (DCC) ![DCC](/screenshots/DCC.png)
 
+## Demonstrative Examples
+
+93.33% classification of Iris with three rules found in SPC:
+![Basic SPC classification](/screenshots/SPC_Iris_3_rules_93.png)
+
 ## Software Issues
 
 If you encounter any difficulties with the software please submit an issue with screenshots of the behavior occurring and explanation of the expected behavior.
