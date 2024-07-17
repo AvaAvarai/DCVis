@@ -436,32 +436,44 @@ class View(QtWidgets.QMainWindow):
         self.plot_widget.update()
 
     def onRuleItemChanged(self, item):
-        # Check if the item's checkbox is checked
-        if item.checkState() == QtCore.Qt.CheckState.Checked:
+        try:
+            # Extract rule number from item text
             rule_num = item.text().split()[1][:-1]
             rule_num = int(rule_num) - 1
+
+            # Ensure the rule_num is within the range of existing rules
+            if rule_num < 0 or rule_num >= len(self.controller.data.rule_regions):
+                print(f"Rule number {rule_num} is out of range.")
+                return
+
             rules = self.controller.data.rule_regions
-            rule = rules[list(rules.keys())[rule_num]]
-            for rect in rule[1]:
-                positions = self.controller.data.positions
-                CLIPPING.Clipping(rect, self.controller.data)
-                CLIPPING.clip_samples(positions, rect, self.controller.data)
+            rule_keys = list(rules.keys())
             
-            self.controller.data.clear_samples = np.subtract(self.controller.data.clear_samples, self.controller.data.clipped_samples)
-            self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-        else:
-            rule_num = item.text().split()[1][:-1]
-            rule_num = int(rule_num) - 1
-            rules = self.controller.data.rule_regions
-            if len(rules) > rule_num:
-                rule = rules[list(rules.keys())[rule_num]]
-                for rect in rule[1]:
-                    positions = self.controller.data.positions
-                    CLIPPING.Clipping(rect, self.controller.data)
-                    CLIPPING.clip_samples(positions, rect, self.controller.data)
-                self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
-                self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
-        self.plot_widget.update()
+            # Ensure the rule_key is valid
+            if rule_num < len(rule_keys):
+                rule = rules[rule_keys[rule_num]]
+
+                if item.checkState() == QtCore.Qt.CheckState.Checked:
+                    for rect in rule[1]:
+                        positions = self.controller.data.positions
+                        CLIPPING.Clipping(rect, self.controller.data)
+                        CLIPPING.clip_samples(positions, rect, self.controller.data)
+
+                    self.controller.data.clear_samples = np.subtract(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+                    self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+                else:
+                    for rect in rule[1]:
+                        positions = self.controller.data.positions
+                        CLIPPING.Clipping(rect, self.controller.data)
+                        CLIPPING.clip_samples(positions, rect, self.controller.data)
+                    self.controller.data.clear_samples = np.add(self.controller.data.clear_samples, self.controller.data.clipped_samples)
+                    self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
+                    
+                self.plot_widget.update()
+            else:
+                print(f"Rule key {rule_num} is out of range.")
+        except Exception as e:
+            print(f"Error in onRuleItemChanged: {e}")
 
     def table_swap(self, event):
         table = event.source()

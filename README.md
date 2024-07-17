@@ -169,6 +169,9 @@ This visualization tool features multiple visualisation methods:
 93.33% classification of Iris with three rules found in SPC:
 ![Basic SPC classification](/screenshots/SPC_Iris_3_rules_93.png)
 
+DCC Iris Setosa and Versicolor classes with LDA coefficients separation
+![Basic DCC LDA separation](/screenshots/DCC_Setosa_Versicolor_LDA_separation.png)
+
 ## Software Issues
 
 If you encounter any difficulties with the software please submit an issue with screenshots of the behavior occurring and explanation of the expected behavior.
