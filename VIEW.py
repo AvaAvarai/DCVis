@@ -175,7 +175,7 @@ class View(QtWidgets.QMainWindow):
             self.controller.display_data()
             if self.plot_widget:
                 self.plot_layout.removeWidget(self.plot_widget)
-            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self, reset_zoom=[self.plot_widget.m_left, self.plot_widget.m_right, self.plot_widget.m_bottom, self.plot_widget.m_top])
             self.plot_layout.addWidget(self.plot_widget)
         
         elif key == QtCore.Qt.Key.Key_I:

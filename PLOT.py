@@ -363,7 +363,7 @@ def set_view_frustrum(m_left, m_right, m_bottom, m_top):
 
 
 class Plot(QOpenGLWidget):
-    def __init__(self, dataset, overlaps_textbox, replot_overlaps_btn, parent=None):
+    def __init__(self, dataset, overlaps_textbox, replot_overlaps_btn, parent=None, reset_zoom=None):
         super(Plot, self).__init__(parent)
 
         self.data = dataset
@@ -387,8 +387,14 @@ class Plot(QOpenGLWidget):
         
         self.overlaps_textbox.setText('Requires Circular Coordinates\n\nSelect SCC or DCC to view overlaps.')
         
-        self.reset_zoom()
-        self.resize()
+        if not reset_zoom:
+            self.reset_zoom()
+            self.resize()
+        else:
+            self.m_left = reset_zoom[0]
+            self.m_right = reset_zoom[1]
+            self.m_bottom = reset_zoom[2]
+            self.m_top = reset_zoom[3]
 
         self.zoomed_width = 1.125
         self.zoomed_height = 1.125
