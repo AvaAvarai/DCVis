@@ -37,7 +37,7 @@ To set up the project:
 |          | fish      | `$ source <venv>/bin/activate.fish`                 |
 |          | csh/tcsh  | `$ source <venv>/bin/activate.csh`                  |
 | PowerShell |         | `$ <venv>/bin/Activate.ps1`                         |
-| Windows  | cmd.exe   | `C:\> <venv>\Scriptsctivate.bat`                  |
+| Windows  | cmd.exe   | `C:\> <venv>\Scripts\activate.bat`                  |
 |          | PowerShell| `PS C:\> <venv>\Scripts\Activate.ps1`               |
 
 Source: [Python Virtual Environments Documentation](https://docs.python.org/3/library/venv.html)
