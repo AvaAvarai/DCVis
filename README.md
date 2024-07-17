@@ -122,14 +122,14 @@ These features provide an interactive, user-friendly experience for data analysi
 | Sinusoidal Wave                        | 200    | 2        | 2       | sin_cos.csv                    |
 | Wheat Seed                             | 210    | 7        | 3       | wheat_seeds.csv                |
 | Wine                                   | 4,898  | 11       | 7       | wine.csv                       |
-| Fisher Iris 2                          | 150    | 4        | 3       | fisher_iris2.csv               |
+| Fisher Iris 2 (doubled classes)        | 300    | 4        | 6       | fisher_iris2.csv               |
 | Fisher Iris Setosa vs Versicolor       | 100    | 4        | 2       | fisher_iris_SvVe.csv           |
 | Iris Setosa                            | 50     | 4        | 1       | iris_setosa.csv                |
 | Iris Setosa vs Virginica               | 100    | 4        | 2       | iris_S_vs_VV.csv               |
 | Iris Versicolor vs Virginica           | 100    | 4        | 2       | iris_V_vs_V.csv                |
 | Iris Setosa vs Versicolor vs Virginica | 150    | 4        | 3       | iris_SVe_vs_Vi.csv             |
 | Synthetic Grades (100 cases)           | 100    | 3        | 3       | synthetic_grades_100case.csv   |
-| Synthetic Grades (250 cases)           | 250    | 3        | 3       | synthetic_grades_250           |
+| Synthetic Grades (250 cases)           | 250    | 3        | 3       | synthetic_grades_250case.csv   |
 | Synthetic Grades (25 cases)            | 25     | 3        | 3       | synthetic_grades_25case.csv    |
 | Synthetic Grades (50 cases)            | 50     | 3        | 3       | synthetic_grades_50case.csv    |
 | Synthetic Grades (75 cases)            | 75     | 3        | 3       | synthetic_grades_75case.csv    |
@@ -166,7 +166,7 @@ This visualization tool features multiple visualisation methods:
 
 ## Demonstrative Examples
 
-93.33% classification of Iris with three rules found in SPC:
+93.33% classification of Iris with three rules found in SPC
 ![Basic SPC classification](/screenshots/SPC_Iris_3_rules_93.png)
 
 DCC Iris Setosa and Versicolor classes with LDA coefficients separation
