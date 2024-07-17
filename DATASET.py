@@ -159,21 +159,39 @@ class Dataset:
 
     def delete_clip(self):
         """Delete the selected samples from the dataframe."""
-        self.dataframe = self.dataframe.drop(self.dataframe[self.clipped_samples].index)
-        self.not_normalized_frame = self.not_normalized_frame.drop(self.not_normalized_frame[self.clipped_samples].index)
-        
+        if self.dataframe is None or self.dataframe.empty:
+            print("DataFrame is not loaded or is empty.")
+            return
+
+        if not any(self.clipped_samples):
+            print("No samples selected for deletion.")
+            return
+
+        # Create a boolean mask for rows to be deleted
+        bool_clipped = np.array(self.clipped_samples, dtype=bool)
+
+        # Drop the rows from both dataframes
+        self.dataframe = self.dataframe.loc[~bool_clipped].reset_index(drop=True)
+        self.not_normalized_frame = self.not_normalized_frame.loc[~bool_clipped].reset_index(drop=True)
+
         # Update class information
         self.sample_count = len(self.dataframe.index)
         self.count_per_class = [self.dataframe['class'].tolist().count(name) for name in self.class_names]
-        
+
         # Initialize arrays for clipping options
         self.clipped_samples = np.repeat(False, self.sample_count)
         self.clear_samples = np.repeat(False, self.sample_count)
         self.vertex_in = np.repeat(False, self.sample_count)
         self.last_vertex_in = np.repeat(False, self.sample_count)
 
+        # Preserve the current class colors mapping
+        class_color_mapping = dict(zip(self.class_names, self.class_colors))
+
         # Reload the frame to ensure consistency
         self.load_frame(self.dataframe, self.not_normalized_frame)
+
+        # Restore the preserved class colors mapping
+        self.class_colors = [class_color_mapping[class_name] for class_name in self.class_names]
 
     def copy_clip(self):
         """Duplicate the selected samples in the dataframe."""

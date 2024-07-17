@@ -592,7 +592,7 @@ class Plot(QOpenGLWidget):
 
             event.accept()
         
-        if event.button() == Qt.MouseButton.XButton2:
+        if event.button() == Qt.MouseButton.MiddleButton:
             # if mouse in a previous self.rect expand eps and remake it bigger
             seen = False
             for rect in self.all_rect:
