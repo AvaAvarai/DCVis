@@ -147,6 +147,10 @@ This visualization tool features multiple visualisation methods:
 - Static Circular Coordinates (SCC) ![SCC](/screenshots/SCC.png)
 - Dynamic Circular Coordinates (DCC) ![DCC](/screenshots/DCC.png)
 
+## Software Issues
+
+If you encounter any difficulties with the software please submit an issue with screenshots of the behavior occurring and explanation of the expected behavior.
+
 ## Key Publications
 
 - **[Preprint] Synthetic Data Generation and Automated Multidimensional Data Labeling for AI/ML in General and Circular Coordinates** by Alice Williams and Dr. Boris Kovalerchuk
