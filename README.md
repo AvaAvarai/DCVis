@@ -1,6 +1,6 @@
 # DCVis: Dynamic Coordinate Visualization System
 
-DCVis is software suite for Visual Knowledge Discovery (VKD) developed at Central Washington University's Visual Knowledge Discovery Lab. Initiated in 2022, the project is built by Alice Williams, James Battistoni IV, Charles Recaido, and Dr. Boris Kovalerchuk.
+DCVis is software for Visual Knowledge Discovery (VKD) developed at Central Washington University's Visual Knowledge Discovery Lab. Initiated in 2022, the project is built by Alice Williams, James Battistoni IV, Charles Recaido, and Dr. Boris Kovalerchuk.
 
 DCVis allows users to interactively build visual ML models for classifying new data. It offers tools to explore multidimensional data using General Line Coordinate visualizations and includes features for interactive classification and synthetic data generation to enhance supervised learning models.
 
