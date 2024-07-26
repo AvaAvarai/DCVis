@@ -123,8 +123,12 @@ class Dataset:
         self.count_per_class = [df['class'].tolist().count(name) for name in self.class_names]
         self.class_order = np.arange(0, self.class_count)
 
-        # get class colors
-        self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0], [1, 1, 1]).colors_array
+        # get class colors and lower case
+        names = [name.lower() for name in self.class_names]
+        if 'benign' in names or 'malignant' in names:
+            self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0], [1, 1, 1], names, benign_malignant=True).colors_array
+        else:
+            self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0], [1, 1, 1], names).colors_array
 
         # initialize arrays for class options
         self.active_markers = np.repeat(True, self.class_count)

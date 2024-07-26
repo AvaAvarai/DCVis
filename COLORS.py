@@ -2,7 +2,7 @@ import colorsys
 
 
 class getColors:
-    def __init__(self, num_colors, bg_color, axis_color, default_colors=None, color_names=None):
+    def __init__(self, num_colors, bg_color, axis_color, class_names, default_colors=None, color_names=None, benign_malignant=False):
         self.bg_color = [x / 255.0 for x in bg_color]  # Normalize to [0, 1]
         self.axis_color = [x / 255.0 for x in axis_color]  # Normalize to [0, 1]
         self.colors_array = []
@@ -12,7 +12,20 @@ class getColors:
             if color_names is not None:
                 self.colors_names_array = color_names
         self.num_colors = num_colors
-        self.generate_colors()
+        
+        if benign_malignant:
+            # for each class in class_names, assign a color with generate colors or use red for malignant and green for benign
+            for i in range(len(class_names)):
+                if class_names[i] == 'benign':
+                    self.colors_array.append([0, 255, 0])
+                    self.colors_names_array.append('Green')
+                    self.num_colors -= 1
+                elif class_names[i] == 'malignant':
+                    self.colors_array.append([255, 0, 0])
+                    self.colors_names_array.append('Red')
+                    self.num_colors -= 1
+        if self.num_colors > 0:
+            self.generate_colors()
 
     def generate_colors(self):
         for i in range(self.num_colors):
