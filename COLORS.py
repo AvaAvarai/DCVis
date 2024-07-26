@@ -1,6 +1,5 @@
 import colorsys
 
-
 class getColors:
     def __init__(self, num_colors, bg_color, axis_color, class_names, default_colors=None, color_names=None, benign_malignant=False):
         self.bg_color = [x / 255.0 for x in bg_color]  # Normalize to [0, 1]
@@ -16,17 +15,20 @@ class getColors:
         if benign_malignant:
             # for each class in class_names, assign a color with generate colors or use red for malignant and green for benign
             for i in range(len(class_names)):
-                if class_names[i] == 'benign':
+                name = class_names[i].lower()
+                if 'benign' in name or 'positive' in name:
                     self.colors_array.append([0, 255, 0])
                     self.colors_names_array.append('Green')
                     self.num_colors -= 1
-                elif class_names[i] == 'malignant':
+                elif 'malignant' in name or 'negative' in name:
                     self.colors_array.append([255, 0, 0])
                     self.colors_names_array.append('Red')
                     self.num_colors -= 1
-        if self.num_colors > 0:
+        if benign_malignant and self.num_colors > 0:
+            # Generate the remaining colors using the red / green colors as defaults
+            self.__init__(self.num_colors, bg_color, axis_color, class_names, self.colors_array, self.colors_names_array, benign_malignant=False)
+        else:
             self.generate_colors()
-
     def generate_colors(self):
         for i in range(self.num_colors):
             hue = i / float(self.num_colors)
@@ -37,7 +39,6 @@ class getColors:
 
             self.colors_array.append([r, g, b])
             self.colors_names_array.append(f"color_{i}")
-
 
 def shift_hue(rgb, amount):
     # Convert RGB to HSV

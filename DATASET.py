@@ -125,7 +125,11 @@ class Dataset:
 
         # get class colors and lower case
         names = [name.lower() for name in self.class_names]
-        if 'benign' in names or 'malignant' in names:
+        gen_green_red = False
+        for name in names:
+            if name in ['benign', 'malignant', 'positive', 'negative']:
+                gen_green_red = True
+        if gen_green_red:
             self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0], [1, 1, 1], names, benign_malignant=True).colors_array
         else:
             self.class_colors = COLORS.getColors(self.class_count, [0, 0, 0], [1, 1, 1], names).colors_array
