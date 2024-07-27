@@ -462,6 +462,10 @@ class View(QtWidgets.QMainWindow):
         self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
         self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         
+        # check all the rule boxes to show the rules
+        for i in range(self.rulesListWidget.count()):
+            self.rulesListWidget.item(i).setCheckState(QtCore.Qt.CheckState.Checked)
+        
         self.plot_widget.update()
 
     def onRuleItemChanged(self, item):

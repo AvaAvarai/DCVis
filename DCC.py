@@ -32,7 +32,7 @@ class DCC:
             dataset.fitted = True
             dataset.coefs = lda_coefs
             # sort the attributes by the coefficients
-            sorted_indices = np.argsort(lda_coefs)[::-1]
+            sorted_indices = np.argsort(lda_coefs)
             dataset.attribute_names = list(np.array(dataset.attribute_names)[sorted_indices])
             dataset.attribute_order = sorted_indices
             dataset.coefs = dataset.coefs[sorted_indices]
