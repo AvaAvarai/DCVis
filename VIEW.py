@@ -153,10 +153,14 @@ class View(QtWidgets.QMainWindow):
         elif key == QtCore.Qt.Key.Key_W:
             # move data samples up by 0.1 on all attributes and replot
             self.controller.data.move_samples(0.01)
+            back_color = self.controller.view.plot_widget.background_color
             self.create_plot()
+            self.controller.view.plot_widget.background_color = back_color
         elif key == QtCore.Qt.Key.Key_S:
             self.controller.data.move_samples(-0.01)
+            back_color = self.controller.view.plot_widget.background_color
             self.create_plot()
+            self.controller.view.plot_widget.background_color = back_color
         elif key == QtCore.Qt.Key.Key_P:
             # print dataframe information for clipped indices
             print(self.controller.data.dataframe[self.controller.data.clipped_samples == 1])
@@ -173,11 +177,12 @@ class View(QtWidgets.QMainWindow):
             # delete all clipped samples from dataset
             self.controller.data.delete_clip()
             self.controller.display_data()
+            back_color = self.controller.view.plot_widget.background_color
             if self.plot_widget:
                 self.plot_layout.removeWidget(self.plot_widget)
             self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self, reset_zoom=[self.plot_widget.m_left, self.plot_widget.m_right, self.plot_widget.m_bottom, self.plot_widget.m_top])
             self.plot_layout.addWidget(self.plot_widget)
-        
+            self.controller.view.plot_widget.background_color = back_color
         elif key == QtCore.Qt.Key.Key_I:
             # inject a data point with a value of 0.5 for each attribute show option to pick class
             # using function def inject_datapoint(self, data_point: List[float], class_name: str):
