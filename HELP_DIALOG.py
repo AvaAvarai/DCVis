@@ -25,6 +25,7 @@ class HelpDialog(QDialog):
             S: Move selected data points down
             D: Delete selected data points
             C: Clone selected data points
+            I: Insert new data point of selected class
             
             Mouse Controls:
             Left Click: Select and highlight data points.
@@ -32,6 +33,8 @@ class HelpDialog(QDialog):
             Middle Click and Drag: Pan the plot.
             Middle Click and Hold: Grow selection box.
             Scroll Wheel: Zoom in and out on the plot.
+        
+        For deleting rules can right click and delete individual rules or click the clear all rules button.
         
         All other controls are available through the GUI.
         Please see the README.md file for more information.

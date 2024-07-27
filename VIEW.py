@@ -458,6 +458,9 @@ class View(QtWidgets.QMainWindow):
         self.rulesListWidget.itemChanged.connect(self.onRuleItemChanged)
 
         self.rule_count += 1
+        self.plot_widget.all_rect = []
+        self.controller.data.clear_samples = np.zeros(self.controller.data.sample_count)
+        self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
         
         self.plot_widget.update()
 
