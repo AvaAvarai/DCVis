@@ -154,35 +154,45 @@ class View(QtWidgets.QMainWindow):
             # move data samples up by 0.1 on all attributes and replot
             self.controller.data.move_samples(0.01)
             back_color = self.controller.view.plot_widget.background_color
+            axes_color = self.controller.view.plot_widget.axes_color
             self.create_plot()
             self.controller.view.plot_widget.background_color = back_color
+            self.controller.view.plot_widget.axes_color = axes_color
         elif key == QtCore.Qt.Key.Key_S:
             self.controller.data.move_samples(-0.01)
             back_color = self.controller.view.plot_widget.background_color
+            axes_color = self.controller.view.plot_widget.axes_color
             self.create_plot()
             self.controller.view.plot_widget.background_color = back_color
+            self.controller.view.plot_widget.axes_color = axes_color
         elif key == QtCore.Qt.Key.Key_P:
             # print dataframe information for clipped indices
             print(self.controller.data.dataframe[self.controller.data.clipped_samples == 1])
             # and not normalized frame
             print(self.controller.data.not_normalized_frame[self.controller.data.clipped_samples == 1])
         elif key == QtCore.Qt.Key.Key_C:
+            back_color = self.controller.view.plot_widget.background_color
+            axes_color = self.controller.view.plot_widget.axes_color
             self.controller.data.copy_clip()
             self.controller.display_data()
             if self.plot_widget:
                 self.plot_layout.removeWidget(self.plot_widget)
             self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
             self.plot_layout.addWidget(self.plot_widget)
+            self.controller.view.plot_widget.background_color = back_color
+            self.controller.view.plot_widget.axes_color = axes_color
         elif key == QtCore.Qt.Key.Key_D:
             # delete all clipped samples from dataset
             self.controller.data.delete_clip()
             self.controller.display_data()
             back_color = self.controller.view.plot_widget.background_color
+            axes_color = self.controller.view.plot_widget.axes_color
             if self.plot_widget:
                 self.plot_layout.removeWidget(self.plot_widget)
             self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self, reset_zoom=[self.plot_widget.m_left, self.plot_widget.m_right, self.plot_widget.m_bottom, self.plot_widget.m_top])
             self.plot_layout.addWidget(self.plot_widget)
             self.controller.view.plot_widget.background_color = back_color
+            self.controller.view.plot_widget.axes_color = axes_color
         elif key == QtCore.Qt.Key.Key_I:
             # inject a data point with a value of 0.5 for each attribute show option to pick class
             # using function def inject_datapoint(self, data_point: List[float], class_name: str):
@@ -244,6 +254,13 @@ class View(QtWidgets.QMainWindow):
             print("No class data available to display in ClassTable.")
             return
 
+        background_color = None
+        axes_color = None
+        # if plot widget exists, save the current background color and axes color
+        if self.plot_widget:
+            background_color = self.plot_widget.background_color
+            axes_color = self.plot_widget.axes_color
+
         # remove initial placeholder
         if self.pl:
             self.plot_layout.removeWidget(self.pl)
@@ -294,6 +311,10 @@ class View(QtWidgets.QMainWindow):
         
         self.controller.view.class_table = CLASS_TABLE.ClassTable(self.controller.data, parent=self)
         self.class_table_layout.addWidget(self.controller.view.class_table)
+        
+        if background_color and axes_color:
+            self.plot_widget.background_color = background_color
+            self.plot_widget.axes_color = axes_color
         
     def analyze_clip(self):
         if not self.plot_widget:
