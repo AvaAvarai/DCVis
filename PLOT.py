@@ -26,11 +26,16 @@ def calculate_cubic_bezier_control_points(start, end, radius, attribute_count, i
     if is_inner:  # first class always inside axis
         factor = 0.01
         distance = np.sqrt(midX ** 2 + midY ** 2)
-        # Calculate scaled control points
-        scale = factor * radius * radius_factor / distance
 
-        control1 = (midX * scale, midY * scale)
-        control2 = (midX * scale, midY * scale)
+        if distance == 0:
+            # Handle the special case where distance is zero
+            control1 = (midX, midY)
+            control2 = (midX, midY)
+        else:
+            # Calculate scaled control points
+            scale = factor * radius * radius_factor / distance
+            control1 = (midX * scale, midY * scale)
+            control2 = (midX * scale, midY * scale)
 
         return control1, control2
 
