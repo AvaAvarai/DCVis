@@ -746,6 +746,13 @@ class Plot(QOpenGLWidget):
 
                         if is_overlap:
                             index = pos_index // data.vertex_count
+                            
+                            # count all cases in case indices less than the current
+                            size_offset = 0
+                            for k in range(class_index):
+                                size_offset += data.count_per_class[k]
+                            index += size_offset
+                            
                             if index not in data.overlap_indices:
                                 overlap_points[class_index] += 1
                                 data.overlap_indices.append(index)
