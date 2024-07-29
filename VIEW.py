@@ -167,9 +167,10 @@ class View(QtWidgets.QMainWindow):
             self.controller.view.plot_widget.axes_color = axes_color
         elif key == QtCore.Qt.Key.Key_P:
             # print dataframe information for clipped indices
-            print(self.controller.data.dataframe[self.controller.data.clipped_samples == 1])
+            clipped_samples_bool = np.array(self.controller.data.clipped_samples, dtype=bool)
+            print(self.controller.data.dataframe.loc[clipped_samples_bool])
             # and not normalized frame
-            print(self.controller.data.not_normalized_frame[self.controller.data.clipped_samples == 1])
+            print(self.controller.data.not_normalized_frame.loc[clipped_samples_bool])
         elif key == QtCore.Qt.Key.Key_C:
             back_color = self.controller.view.plot_widget.background_color
             axes_color = self.controller.view.plot_widget.axes_color

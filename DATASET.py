@@ -273,7 +273,7 @@ class Dataset:
                     continue  # Skip attributes with no variation
 
                 not_normalized_proportional_delta = proportional_delta * not_normalized_range
-                
+                self.not_normalized_frame[attribute] = self.not_normalized_frame[attribute].astype(float)
                 self.dataframe.loc[bool_clipped, attribute] += proportional_delta
                 self.not_normalized_frame.loc[bool_clipped, attribute] += not_normalized_proportional_delta
 
