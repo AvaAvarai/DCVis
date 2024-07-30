@@ -95,8 +95,6 @@ def calculate_angle(x, y):
 def is_point_in_sector(point, start_angle, end_angle):
     # Calculate the angle and distance from the start angle to the end angle
     angle = np.arctan2(point[1], point[0])
-    if angle < -np.pi/2:
-        angle += 2 * np.pi
     return start_angle <= angle <= end_angle
     
 def draw_filled_sector(start_angle, end_angle, radius, segments=100):
@@ -875,8 +873,14 @@ class Plot(QOpenGLWidget):
                         # Adjust angles to be positive
                         closest_angle = closest_angle if closest_angle >= 0 else closest_angle + 2 * np.pi
                         furthest_angle = furthest_angle if furthest_angle >= 0 else furthest_angle + 2 * np.pi
-
-                    # Ensure start_angle < end_angle for drawing the sector correctly
+                    elif self.data.plot_type == 'DCC':
+                        # Ensure start_angle < end_angle for drawing the sector correctly
+                        if closest_angle < -np.pi / 2:
+                            closest_angle += 2 * np.pi
+                        if furthest_angle < -np.pi / 2:
+                            furthest_angle += 2 * np.pi
+                        closest_angle = closest_angle if closest_angle > furthest_angle else closest_angle
+                        furthest_angle = furthest_angle if furthest_angle < closest_angle else furthest_angle - 2 * np.pi
                     if closest_angle > furthest_angle:
                         closest_angle, furthest_angle = furthest_angle, closest_angle
                     
