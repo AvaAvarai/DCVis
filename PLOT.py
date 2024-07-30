@@ -92,25 +92,22 @@ def calculate_angle(x, y):
         angle += 2 * np.pi
     return angle
 
-def is_point_in_sector(point, center, start_angle, end_angle, radius):
-    # Calculate the angle and distance from the center to the point
-    angle = np.arctan2(point[1] - center[1], point[0] - center[0])
-    if angle < 0:
+def is_point_in_sector(point, start_angle, end_angle):
+    # Calculate the angle and distance from the start angle to the end angle
+    angle = np.arctan2(point[1], point[0])
+    if angle < -np.pi/2:
         angle += 2 * np.pi
-    distance = np.sqrt((point[0] - center[0])**2 + (point[1] - center[1])**2)
-
-    # Check if the point's angle and distance place it within the sector
-    return distance <= radius and start_angle <= angle <= end_angle
-
-def draw_filled_sector(center, start_angle, end_angle, radius, segments=100):
+    return start_angle <= angle <= end_angle
+    
+def draw_filled_sector(start_angle, end_angle, radius, segments=100):
     """
     Draws a filled sector (part of a circle) between two angles with a specified radius.
     """
     glBegin(GL_TRIANGLE_FAN)
-    glVertex2f(*center)  # Center point
+    glVertex2f(*(0, 0))  # Center point
     for segment in range(segments + 1):
         angle = start_angle + (end_angle - start_angle) * segment / segments
-        glVertex2f(center[0] + np.cos(angle) * radius, center[1] + np.sin(angle) * radius)
+        glVertex2f(np.cos(angle) * radius, np.sin(angle) * radius)
     glEnd()
 
 def draw_highlighted_curves(dataset, line_vao):
@@ -741,7 +738,7 @@ class Plot(QOpenGLWidget):
                             position = adjust_point_towards_center(position, -data.attribute_count)
 
                         # Check overlaps across all sectors
-                        sector_overlaps = sum(is_point_in_sector(position, (0, 0), sector['start_angle'], sector['end_angle'], sector['radius']) for sector in self.sectors)
+                        sector_overlaps = sum(is_point_in_sector(position, sector['start_angle'], sector['end_angle']) for sector in self.sectors)
                         is_overlap = sector_overlaps > 1
 
                         if is_overlap:
@@ -882,18 +879,16 @@ class Plot(QOpenGLWidget):
                     # Ensure start_angle < end_angle for drawing the sector correctly
                     if closest_angle > furthest_angle:
                         closest_angle, furthest_angle = furthest_angle, closest_angle
-                        
+                    
                     sector_radius = radius * (data.class_count + 1)
 
                     # Draw the filled sector
                     if self.data.active_sectors[class_index]:
-                        draw_filled_sector((0, 0), closest_angle, furthest_angle, sector_radius, segments=50)
+                        draw_filled_sector(closest_angle, furthest_angle, sector_radius, segments=50)
 
-                if closest is not None and furthest is not None:
                     sector_info = {
                         'start_angle': closest_angle,
-                        'end_angle': furthest_angle,
-                        'radius': sector_radius
+                        'end_angle': furthest_angle
                     }
                     self.sectors.append(sector_info)
 
