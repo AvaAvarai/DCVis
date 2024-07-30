@@ -31,6 +31,9 @@ from sklearn.calibration import CalibratedClassifierCV
 
 warnings.filterwarnings("ignore")
 
+# set seed to 42
+np.random.seed(42)
+
 models = {
     'DT': DecisionTreeClassifier,       # Decision Tree
     'RF': RandomForestClassifier,       # Random Forest

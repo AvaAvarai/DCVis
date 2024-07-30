@@ -96,8 +96,8 @@ class AttributeTable(QtWidgets.QTableWidget):
     def init_dcc_row(self, idx):
         # Initialize slider
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        slider.setMinimum(-100)
-        slider.setMaximum(100)  # [0, 1]
+        slider.setMinimum(-100)  # [-1, 1] range for coefficients
+        slider.setMaximum(100)
         slider.setValue(int(self.dataset.coefs[idx]))
         slider.valueChanged.connect(lambda value, x=idx: self.update_text_box(x, value, update_dataset=True))
 

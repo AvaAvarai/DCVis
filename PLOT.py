@@ -315,6 +315,11 @@ def draw_axes(dataset, axis_vao, color):
 
             radius = base_radius * radius_factor
 
+            # draw center point
+            glBegin(GL_POINTS)
+            glVertex2f(0, 0)
+            glEnd()
+
             # Draw axis circle
             glBegin(GL_LINE_LOOP)
             for i in range(lineSeg + 1):
@@ -751,6 +756,8 @@ class Plot(QOpenGLWidget):
                             if index not in data.overlap_indices:
                                 overlap_points[class_index] += 1
                                 data.overlap_indices.append(index)
+                            
+                            # TODO: Add a toggle to show/hide overlap points
                             glPointSize(10)
                             glColor4ub(255, 0, 0, 255)
                             
