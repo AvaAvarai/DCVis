@@ -561,3 +561,10 @@ class View(QtWidgets.QMainWindow):
             WARNINGS.no_data_warning()
             return
         self.plot_widget.replot_overlaps()
+
+    def highlight_overlaps(self):
+        if not self.plot_widget:
+            WARNINGS.no_data_warning()
+            return
+        self.plot_widget.highlight_overlaps = not self.plot_widget.highlight_overlaps
+        self.plot_widget.update()

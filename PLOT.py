@@ -414,6 +414,8 @@ class Plot(QOpenGLWidget):
         self.background_color = [239 / 255, 239 / 255, 239 / 255, 1]  # Default gray in RGBA
         self.axes_color = [0, 0, 0, 0]  # Default black
 
+        self.highlight_overlaps = True
+
     def reset_zoom(self):
         self.m_left = -1.125
         self.m_right = 1.125
@@ -757,13 +759,13 @@ class Plot(QOpenGLWidget):
                                 overlap_points[class_index] += 1
                                 data.overlap_indices.append(index)
                             
-                            # TODO: Add a toggle to show/hide overlap points
-                            glPointSize(10)
-                            glColor4ub(255, 0, 0, 255)
-                            
-                            glBegin(GL_POINTS)
-                            glVertex2f(*position)
-                            glEnd()
+                            if self.highlight_overlaps:
+                                glPointSize(10)
+                                glColor4ub(255, 0, 0, 255)
+
+                                glBegin(GL_POINTS)
+                                glVertex2f(*position)
+                                glEnd()
 
                         glPointSize(5)
                         glColor4ub(color[0], color[1], color[2], data.attribute_alpha if data.active_attributes[j] else 255)
