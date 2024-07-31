@@ -368,7 +368,7 @@ def set_view_frustrum(m_left, m_right, m_bottom, m_top):
 
 
 class Plot(QOpenGLWidget):
-    def __init__(self, dataset, overlaps_textbox, replot_overlaps_btn, parent=None, reset_zoom=None):
+    def __init__(self, dataset, replot_overlaps_box, overlaps_textbox, replot_overlaps_btn, parent=None, reset_zoom=None):
         super(Plot, self).__init__(parent)
 
         self.data = dataset
@@ -414,8 +414,14 @@ class Plot(QOpenGLWidget):
         self.background_color = [239 / 255, 239 / 255, 239 / 255, 1]  # Default gray in RGBA
         self.axes_color = [0, 0, 0, 0]  # Default black
 
-        self.highlight_overlaps = True
-
+        self.highlight_overlaps = self.data.plot_type in ['SCC', 'DCC']
+        replot_overlaps_box.setChecked(self.highlight_overlaps)
+        if self.highlight_overlaps:
+            replot_overlaps_box.setEnabled(True)   
+        else:
+            replot_overlaps_box.setEnabled(False)
+            self.highlight_overlaps = True
+        
     def reset_zoom(self):
         self.m_left = -1.125
         self.m_right = 1.125

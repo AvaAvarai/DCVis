@@ -178,7 +178,7 @@ class View(QtWidgets.QMainWindow):
             self.controller.display_data()
             if self.plot_widget:
                 self.plot_layout.removeWidget(self.plot_widget)
-            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+            self.plot_widget = PLOT.Plot(self.controller.data, self.highlight_overlaps_toggle, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
             self.plot_layout.addWidget(self.plot_widget)
             self.controller.view.plot_widget.background_color = back_color
             self.controller.view.plot_widget.axes_color = axes_color
@@ -190,7 +190,7 @@ class View(QtWidgets.QMainWindow):
             axes_color = self.controller.view.plot_widget.axes_color
             if self.plot_widget:
                 self.plot_layout.removeWidget(self.plot_widget)
-            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self, reset_zoom=[self.plot_widget.m_left, self.plot_widget.m_right, self.plot_widget.m_bottom, self.plot_widget.m_top])
+            self.plot_widget = PLOT.Plot(self.controller.data, self.highlight_overlaps_toggle, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self, reset_zoom=[self.plot_widget.m_left, self.plot_widget.m_right, self.plot_widget.m_bottom, self.plot_widget.m_top])
             self.plot_layout.addWidget(self.plot_widget)
             self.controller.view.plot_widget.background_color = back_color
             self.controller.view.plot_widget.axes_color = axes_color
@@ -206,7 +206,7 @@ class View(QtWidgets.QMainWindow):
             self.controller.display_data()
             if self.plot_widget:
                 self.plot_layout.removeWidget(self.plot_widget)
-            self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+            self.plot_widget = PLOT.Plot(self.controller.data, self.highlight_overlaps_toggle, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
             self.plot_layout.addWidget(self.plot_widget)
             
         self.refresh()
@@ -287,7 +287,7 @@ class View(QtWidgets.QMainWindow):
         else:
             return
 
-        self.plot_widget = PLOT.Plot(self.controller.data, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
+        self.plot_widget = PLOT.Plot(self.controller.data, self.highlight_overlaps_toggle, self.overlaps_textbox, self.controller.view.replot_overlaps_btn, parent=self)
         
         # class table placeholder
         if self.class_pl_exists:

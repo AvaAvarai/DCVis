@@ -50,6 +50,7 @@ class Controller:
         self.view.save_model_button.clicked.connect(self.save_model)
         self.view.refresh_button.clicked.connect(self.view.refresh_plot)
         self.view.highlight_overlaps_toggle.clicked.connect(self.view.highlight_overlaps)
+        self.view.highlight_overlaps_toggle.setEnabled(False)
         
         # Set keyboard shortcuts
         self.view.load_button.setShortcut(Qt.Key.Key_F1)
