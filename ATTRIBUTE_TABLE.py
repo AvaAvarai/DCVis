@@ -86,18 +86,18 @@ class AttributeTable(QtWidgets.QTableWidget):
 
         if self.dataset.plot_type == 'DCC':
             for idx in range(self.dataset.attribute_count):
-                self.init_dcc_row(idx)
+                self.init_dcc_row(idx, self.dataset.attribute_count)
         for idx, attribute_name in enumerate(self.dataset.attribute_names):
             self.setItem(idx, 0, QtWidgets.QTableWidgetItem(attribute_name))
             self.setCellWidget(idx, 1, CheckBox(idx, self.dataset, 'Alpha', parent=self))
             if not self.dataset.plot_type == 'DCC':    
                 self.setCellWidget(idx, 2, InversionCheckBox(idx, self.dataset, self.replot_func, parent=self))
 
-    def init_dcc_row(self, idx):
+    def init_dcc_row(self, idx, att_count):
         # Initialize slider
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        slider.setMinimum(-100)  # [-1, 1] range for coefficients
-        slider.setMaximum(100)
+        slider.setMinimum(-100 * att_count)  # [-1, 1] range for coefficients
+        slider.setMaximum(100 * att_count)
         slider.setValue(int(self.dataset.coefs[idx]))
         slider.valueChanged.connect(lambda value, x=idx: self.update_text_box(x, value, update_dataset=True))
 
