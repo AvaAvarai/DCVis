@@ -9,13 +9,17 @@ class AboutDialog(QDialog):
     def init_ui(self):
         layout = QVBoxLayout()
         about_info = """
-            Dynamic Coordinates Visualisation System
-            A General Line Coordinates (GLC) system for Visual Knowledge Discovery (VKD),
-            Our system is designed to support:
-              multidimensional data visualization
-              data classification
-              data mining
-              synthetic data generation
+        DCVis, the Dynamic Coordinates Visualisation System, rebuilt from DSCVis,
+        the Dynamic Scaffold Coordinates Visualisation System, this project is a
+        Visual Knowledge Discovery system using the lossless multidimensional
+        General Line Coordinates (GLC), and is an ongoing research project at
+        Central Washington University's Visual Knowledge Discovery and Imaging Lab.
+
+        Our system is designed to support features of:
+            multidimensional data visualization
+            data classification
+            data mining
+            synthetic data generation
         
         Please see the README.md file for more information.
         
