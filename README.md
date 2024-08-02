@@ -4,6 +4,10 @@ DCVis is software for Visual Knowledge Discovery (VKD) developed at Central Wash
 
 DCVis allows users to interactively build visual ML models for classifying new data. It offers tools to explore multidimensional data using General Line Coordinate visualizations and includes features for interactive classification and synthetic data generation to enhance supervised learning models.
 
+## Demo Video
+
+Please see a quick video to watch the software in action [here](https://youtu.be/a0F5xT2oiZ8).
+
 ## Requirements
 
 - Python 3.x: Recommended version 3.6 or higher (primarily developed on Python 3.10.6).
