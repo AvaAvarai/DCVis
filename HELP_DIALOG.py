@@ -8,15 +8,7 @@ class HelpDialog(QDialog):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        controls_info = """
-            Dynamic Coordinates Visualisation System
-            A General Line Coordinates (GLC) system for Visual Knowledge Discovery (VKD),
-            Our system is designed to support:
-              multidimensional data visualization
-              data classification
-              data mining
-              synthetic data generation
-            
+        controls_info = """        
             Keyboard Shortcuts:
               F1: Load Dataset
               F2: Recenter Plot

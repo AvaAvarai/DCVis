@@ -1060,6 +1060,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionControls_List"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
@@ -1077,7 +1078,12 @@
   </action>
   <action name="actionControls_List">
    <property name="text">
-    <string>Help Information</string>
+    <string>Controls</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

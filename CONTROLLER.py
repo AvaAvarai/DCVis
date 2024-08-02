@@ -1,6 +1,7 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from HELP_DIALOG import HelpDialog
+from ABOUT_DIALOG import AboutDialog
 
 import sys
 
@@ -18,9 +19,15 @@ class Controller:
     def setup_menu(self):
         self.view.menuHelp.addAction(self.view.actionControls_List)
         self.view.actionControls_List.triggered.connect(self.show_help_dialog)
+        self.view.menuHelp.addAction(self.view.actionAbout)
+        self.view.actionAbout.triggered.connect(self.show_about_dialog)
 
     def show_help_dialog(self):
         dialog = HelpDialog(self.view)
+        dialog.exec()  # modal dialog
+
+    def show_about_dialog(self):
+        dialog = AboutDialog(self.view)
         dialog.exec()  # modal dialog
 
     def setup_connections(self):
