@@ -384,6 +384,10 @@ class View(QtWidgets.QMainWindow):
             self.controller.data.clipped_samples = np.zeros(self.controller.data.sample_count)
 
     def remove_rules(self):
+        if not self.plot_widget:
+            WARNINGS.no_data_warning()
+            return
+        
         self.rule_count = 0
         
         self.controller.data.rule_regions = {}
@@ -398,6 +402,10 @@ class View(QtWidgets.QMainWindow):
         self.plot_widget.update()
 
     def add_rule(self):
+        if not self.plot_widget:
+            WARNINGS.no_data_warning()
+            return
+        
         if not self.plot_widget.all_rect:
             print("No clipping area selected.")
             return
