@@ -16,17 +16,22 @@ To set up the project:
 1. **Download the project and open it in a terminal:**
    - Use git to download and open in an IDE with an integrated terminal.
 2. **Create a virtual environment:**
+
    ```sh
    python -m venv venv
    ```
+
    (The virtual environment will be named `venv`)
 3. **Activate the virtual environment:**
    (Refer to the table below for your OS and shell)
 4. **Install the required libraries:**
+
    ```sh
    python -m pip install -r requirements.txt
    ```
+
 5. **Start the application:**
+
    ```sh
    python DCVIS_MAIN.py
    ```
@@ -45,6 +50,7 @@ Source: [Python Virtual Environments Documentation](https://docs.python.org/3/li
 ## Running
 
 Execute the `DCVIS_MAIN.py` script to launch the DCVis application:
+
 ```sh
 python DCVIS_MAIN.py
 ```
@@ -108,8 +114,6 @@ These features provide an interactive, user-friendly experience for data analysi
 
 ## Datasets Included
 
-## Datasets Included
-
 | Dataset                                | Cases  | Features | Classes | File Name                      |
 |----------------------------------------|--------|----------|---------|--------------------------------|
 | Fisher Iris                            | 150    | 4        | 3       | fisher_iris.csv                |
@@ -146,9 +150,9 @@ DCVis works with structured numerical datasets and requires a data format of:
 - Header Row: Must include headers for feature names and the label column.
 - Label Column: Must be named 'class'.
 - Feature Columns:
-    - Variable number of columns
-    - Labeled in the header
-    - Must contain numerical data only
+  - Variable number of columns
+  - Labeled in the header
+  - Must contain numerical data only
 
 These requirements ensure proper data recognition and processing for accurate visualizations in DCVis. Datasets included meet these requirements.
 

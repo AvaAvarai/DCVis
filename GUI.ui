@@ -1077,7 +1077,7 @@
   </action>
   <action name="actionControls_List">
    <property name="text">
-    <string>Controls List</string>
+    <string>Help Information</string>
    </property>
   </action>
  </widget>
