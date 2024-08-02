@@ -124,7 +124,7 @@ class Dataset:
         self.class_order = np.arange(0, self.class_count)
 
         # get class colors and lower case
-        names = [name.lower() for name in self.class_names]
+        names = [str(name).lower() for name in self.class_names]
         gen_green_red = False
         for name in names:
             if name in ['benign', 'malignant', 'positive', 'negative']:
