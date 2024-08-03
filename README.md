@@ -66,6 +66,8 @@ DCVis offers tools for visualizing and analyzing multidimensional numerical data
 ## Visualization Capabilities
 
 - **2D Visualizations**: Use OpenGL to render multidimensional data from .csv or .txt files.
+- **Color Palette Generation**: Generates default palette colors with most possibly distinct colors.  
+('Benign' and 'Positive' class names get green by default and 'Malignant' and 'Negative' class names are assigned red.)
 - **Interactive Plotting**: Pan, zoom, and adjust color/transparency options.
 - **Dynamic Visualization**: Reorder or invert axes to uncover patterns in n-D data.
 
