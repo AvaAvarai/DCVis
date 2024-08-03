@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from csv import writer
 import os
+import DATASET
 
 # exit codes for cohen-sutherland
 INSIDE = 0  # 0000b
@@ -13,8 +14,8 @@ TOP    = 8  # 1000b
 # Vertex clip: check if the vertex is inside the rectangle
 # Line clip: check if the line is inside the rectangle
 # End clip: check if the last vertex of the line is inside the rectangle
-def clip_display(textbox, total_sample):
-    # TODO: Add total cases per class to calculate percentage of class clipped
+def clip_display(textbox, dataset):
+    total_sample = dataset.sample_count
     filenames = ['test_line.csv', 'test_vertex.csv', 'test_end.csv']
     clip_types = ['Line Clip', 'Vertex Clip', 'End Clip']
     info_string = ''
@@ -34,8 +35,10 @@ def clip_display(textbox, total_sample):
 
         # loop through class names
         for counter, ele in enumerate(class_names):
-            info_string += ('\n' + 'Class ' + str(counter+1) + ': ' + str(ele) + '\n' + 'Class Case Count: ' + str(count_per_class[counter]))
-        info_string += '\n\n'
+            if counter == 0:
+                info_string += '\n'
+            info_string += ('Class ' + str(counter+1) + ': ' + str(ele) + '\n' + 'Class Case Count: ' + str(count_per_class[counter]) + '/' + str(dataset.count_per_class[counter]) + ' ({:.2f}'.format(count_per_class[counter] / dataset.count_per_class[counter] * 100) + '%)\n')
+        info_string += '\n'
 
     textbox.setText(info_string)
 
@@ -95,7 +98,7 @@ def clip_files(dataset, textbox):
     output_test3.close()
 
     # build text box
-    clip_display(textbox, dataset.sample_count)
+    clip_display(textbox, dataset)
 
 
 class MinAndMax(object):
