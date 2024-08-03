@@ -73,7 +73,11 @@ DCVis offers tools for visualizing and analyzing multidimensional numerical data
 
 ## Data Interaction
 
-- **Clipping Tools**: Dual-right click to highlight, analyze, export, or hide data.
+- **Clipping Tools**: Dual-right click to highlight, analyze, export, or hide data.  
+Clip Types, (all three are exported each clip analysis execution to CSV files):
+  - Vertex clip: check if the vertex is inside the rectangle
+  - Line clip: check if the line is inside the rectangle
+  - End clip: check if the last vertex of the line is inside the rectangle
 - **Point Selection**: Select points directly on the plot for detailed examination.
 
 ## Classification and Analysis
