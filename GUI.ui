@@ -324,7 +324,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Analyze Cases</string>
+                 <string>Analyze Clips</string>
                 </property>
                </widget>
               </item>

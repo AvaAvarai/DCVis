@@ -6,7 +6,7 @@ DCVis allows users to interactively build visual ML models for classifying new d
 
 ## Demo Video
 
-Please see a quick video to watch the software in action [here](https://youtu.be/a0F5xT2oiZ8).
+Please see a quick 3 minute video to watch the software in action [here](https://youtu.be/a0F5xT2oiZ8).
 
 ## Requirements
 

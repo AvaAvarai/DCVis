@@ -10,8 +10,11 @@ RIGHT  = 2  # 0010b
 BOTTOM = 4  # 0100b
 TOP    = 8  # 1000b
 
-
+# Vertex clip: check if the vertex is inside the rectangle
+# Line clip: check if the line is inside the rectangle
+# End clip: check if the last vertex of the line is inside the rectangle
 def clip_display(textbox, total_sample):
+    # TODO: Add total cases per class to calculate percentage of class clipped
     filenames = ['test_line.csv', 'test_vertex.csv', 'test_end.csv']
     clip_types = ['Line Clip', 'Vertex Clip', 'End Clip']
     info_string = ''
@@ -27,15 +30,12 @@ def clip_display(textbox, total_sample):
         sample_count = len(df.index)
 
         # display class data
-        info_string += ('Clip Type: ' + clip_types[cnt] + '\n\n' + 'Number of Samples: ' + str(sample_count) + '\n' + 'Amount of Dataset: ' + '{:.2f}'.format(sample_count / total_sample * 100)) + '%'
+        info_string += ('Clip Type: ' + clip_types[cnt] + '  (Output File: ' + name + ')\nTotal Case Count: ' + str(sample_count) + '/' + str(total_sample) + ' ({:.2f}'.format(sample_count / total_sample * 100)) + '%)\n'
 
         # loop through class names
-        counter = 1
-        for ele in class_names:
-            info_string += ('\n\n' + 'Class ' + str(counter) + ': ' + str(ele) + '\n' + '--Count: ' + str(count_per_class[counter - 1]))
-            counter += 1
-
-        info_string += '\n\nDataset Name: ' + name + '\n===============\n\n'
+        for counter, ele in enumerate(class_names):
+            info_string += ('\n' + 'Class ' + str(counter+1) + ': ' + str(ele) + '\n' + 'Class Case Count: ' + str(count_per_class[counter]))
+        info_string += '\n\n'
 
     textbox.setText(info_string)
 
