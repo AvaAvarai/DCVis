@@ -210,14 +210,15 @@ class Plot(QGraphicsView):
                         self.scene.addItem(AxisLine((inner_x, inner_y), (outer_x, outer_y), [0, 0, 0]))
 
     def draw_nd_points(self):
-        hue_shift_amount = 0.02
+        hue_shift_amount = 0.1
         for class_index in self.data.class_order[::-1]:
             if self.data.active_classes[class_index]:
                 color = self.data.class_colors[class_index]
                 for l in range(0, len(self.data.positions[class_index]), self.data.vertex_count):
                     for m in range(1, self.data.vertex_count):
                         color = self.data.class_colors[class_index]
-                        hue_shift_amount += 0.02
+                        if m == self.data.vertex_count - 1:
+                            color = shift_hue(color, hue_shift_amount)
                         start, end = self.data.positions[class_index][l + m - 1], self.data.positions[class_index][l + m]
                         self.scene.addItem(AxisLine(start, end, color))
 
