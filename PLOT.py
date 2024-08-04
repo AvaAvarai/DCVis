@@ -32,7 +32,7 @@ class BezierCurve(QGraphicsItem):
 class AxisLine(QGraphicsLineItem):
     def __init__(self, start, end, color):
         super().__init__(QLineF(QPointF(*start), QPointF(*end)))
-        self.setPen(QPen(QColor(*color), 1))
+        self.setPen(QPen(QColor(*color), 0.001))
 
 
 class DataPoint(QGraphicsEllipseItem):
