@@ -216,7 +216,7 @@ class Plot(QGraphicsView):
                 color = self.data.class_colors[class_index]
                 for l in range(0, len(self.data.positions[class_index]), self.data.vertex_count):
                     for m in range(1, self.data.vertex_count):
-                        color = shift_hue(color, hue_shift_amount)
+                        color = self.data.class_colors[class_index]
                         hue_shift_amount += 0.02
                         start, end = self.data.positions[class_index][l + m - 1], self.data.positions[class_index][l + m]
                         self.scene.addItem(AxisLine(start, end, color))
