@@ -93,14 +93,9 @@ class View(QtWidgets.QMainWindow):
             self.removeSelectedRule()
 
     def recenter_plot(self):
-        if not self.plot_widget:
-            WARNINGS.no_data_warning()
-            return
-
         self.plot_widget.reset_zoom()
-        self.plot_widget.resize()
-        
-        self.refresh()
+        self.plot_widget.update_transform()
+        self.plot_widget.update_scene()
 
     def attr_slider(self):
         if not self.controller.data or not self.plot_widget:
