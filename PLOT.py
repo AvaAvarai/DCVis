@@ -242,8 +242,7 @@ class Plot(QGraphicsView):
         color = QColor(255, 0, 0, 128)
         for rect in self.all_rect:
             rect_item = self.scene.addRect(QRectF(rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]), pen=QPen(color), brush=color)
-            rect_item.setZValue(-1)
-
+            
     def mousePressEvent(self, event):
         x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width()
         y = self.m_bottom + ((self.height() - event.position().y()) * (self.m_top - self.m_bottom)) / self.height()

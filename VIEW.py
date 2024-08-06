@@ -352,7 +352,7 @@ class View(QtWidgets.QMainWindow):
 
             self.clipped_area_textbox.clear()
 
-            self.plot_widget.update()
+            self.plot_widget.update_scene()
         else:
             print("No rectangles to remove.")
 
@@ -369,9 +369,7 @@ class View(QtWidgets.QMainWindow):
 
         self.clipped_area_textbox.setText('')
 
-        self.plot_widget.update()
-        
-        return
+        self.plot_widget.update_scene()
 
     def hide_clip(self):
         if self.controller.data.plot_type not in ['SCC', 'DCC']:
