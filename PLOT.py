@@ -241,7 +241,7 @@ class Plot(QGraphicsView):
     def draw_boxes(self):
         color = QColor(255, 0, 0, 128)
         for rect in self.all_rect:
-            rect_item = self.scene.addRect(QRectF(rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]), pen=QPen(color), brush=color)
+            self.scene.addRect(QRectF(rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]), pen=QPen(color), brush=color)
             
     def mousePressEvent(self, event):
         x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width()
@@ -277,27 +277,6 @@ class Plot(QGraphicsView):
                 self.all_rect.append(self.rect)
                 self.rect = []
                 self.update_scene()
-            event.accept()
-        elif event.button() == Qt.MouseButton.MiddleButton:
-            seen = False
-            for rect in self.all_rect:
-                if x > rect[0] and x < rect[2] and y > rect[1] and y < rect[3]:
-                    self.rect = rect
-                    self.all_rect.remove(rect)
-                    seen = True
-                    width = (rect[2] - rect[0]) / 2
-                    break
-            eps = 0.01
-            if seen:
-                eps += width
-            self.rect = []
-            self.rect.append(x - eps)
-            self.rect.append(y - eps)
-            self.rect.append(x + eps)
-            self.rect.append(y + eps)
-            CLIPPING.Clipping(self.rect, self.data)
-            self.all_rect.append(self.rect)
-            self.update_scene()
             event.accept()
 
     def mouseReleaseEvent(self, event):

@@ -104,7 +104,6 @@ These features provide an interactive, user-friendly experience for data analysi
 - **Zoom**: Scroll the mouse wheel.
 - **Box Clipping**: Right-click twice to create a clipping rectangle.
 - **Select Point**: Left-click to select single or multiple points.
-- **Grow Clipping Box**: Middle-click once to create clipping box, again to grow it.
 
 ## Keyboard Shortcuts
 

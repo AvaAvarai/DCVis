@@ -314,7 +314,7 @@ class View(QtWidgets.QMainWindow):
         if background_color and axes_color:
             self.plot_widget.background_color = background_color
             self.plot_widget.axes_color = axes_color
-    
+
     def analyze_clip(self):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
@@ -541,6 +541,7 @@ class View(QtWidgets.QMainWindow):
         v1, v2, v3, v4 = self.plot_widget.get_zoom()
         self.create_plot()
         self.plot_widget.set_zoom(v1, v2, v3, v4)
+        self.plot_widget.update_transform()
 
     def open_background_color_picker(self):
         if not self.plot_widget:

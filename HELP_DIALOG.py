@@ -30,7 +30,6 @@ class HelpDialog(QDialog):
           Left Click: Select and highlight data points.
           Right Click: Set clipping boundaries or clear data.
           Middle Click and Drag: Pan the plot.
-          Middle Click and Hold: Grow selection box.
           Scroll Wheel: Zoom in and out on the plot.
         
         For deleting associative rules can right click and delete individual rules or click the clear all rules button.

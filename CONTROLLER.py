@@ -61,10 +61,12 @@ class Controller:
         
         # Set frequently used UI buttons to keyboard shortcuts
         self.view.load_button.setShortcut(Qt.Key.Key_F1)
+        self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
         self.view.plot_button.setShortcut(Qt.Key.Key_F3)
         self.view.refresh_button.setShortcut(Qt.Key.Key_F4)
+        
         self.view.exit_button.setShortcut(Qt.Key.Key_Escape)
-        self.view.recenter_button.setShortcut(Qt.Key.Key_F2)
+        
         self.view.trace_mode.setShortcut(Qt.Key.Key_T)
         self.view.show_axes.setShortcut(Qt.Key.Key_A)
 
