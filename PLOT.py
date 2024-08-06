@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, QRectF, QPointF, QLineF
-from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QCursor, QTransform, QBrush
+from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QCursor, QTransform
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsItem, QApplication, QGraphicsEllipseItem, QGraphicsLineItem
 
 from typing import List
@@ -250,7 +250,7 @@ class Plot(QGraphicsView):
                 width = right - left
                 height = top - bottom
                 
-                self.scene.addRect(QRectF(left, bottom, width, height), pen=QPen(QColor(0, 0, 0 ,0)), brush=QBrush(color, Qt.BrushStyle.SolidPattern))
+                self.scene.addRect(QRectF(left, bottom, width, height), pen=QPen(QColor(0, 0, 0 ,0)), brush=color)
                 
     def mousePressEvent(self, event):
         x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width()
