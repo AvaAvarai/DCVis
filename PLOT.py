@@ -173,6 +173,8 @@ class Plot(QGraphicsView):
     def update_scene(self):
         self.scene.clear()
         self.setSceneRect(self.m_left, self.m_bottom, self.m_right - self.m_left, self.m_top - self.m_bottom)
+        # draw background color
+        self.scene.addRect(self.scene.sceneRect(), pen=QPen(self.background_color), brush=self.background_color)
         if self.data.plot_type not in ['SCC', 'DCC']:
             self.draw_axes()
             self.draw_nd_points()
@@ -186,7 +188,7 @@ class Plot(QGraphicsView):
             for j in range(0, self.data.axis_count * 2, 2):
                 start = self.data.axis_positions[j]
                 end = self.data.axis_positions[j + 1]
-                self.scene.addItem(AxisLine(start, end, [0, 0, 0]))
+                self.scene.addItem(AxisLine(start, end, [x % 256 for x in self.axes_color.getRgb()]))
         else:
             lineSeg = 100
             angle_between_ticks = 2 * np.pi / self.data.attribute_count
@@ -197,7 +199,7 @@ class Plot(QGraphicsView):
                 for i in range(lineSeg + 1):
                     start = (radius * np.cos(i * 2 * np.pi / lineSeg), radius * np.sin(i * 2 * np.pi / lineSeg))
                     if i > 0:
-                        self.scene.addItem(AxisLine(prev, start, [0, 0, 0]))
+                        self.scene.addItem(AxisLine(prev, start, [x % 256 for x in self.axes_color.getRgb()]))
                     prev = start
                 if self.data.plot_type == 'SCC':
                     tick_length = radius * 2
@@ -207,7 +209,7 @@ class Plot(QGraphicsView):
                         inner_y = (radius - tick_length / 2) * np.sin(angle_for_tick)
                         outer_x = (radius + tick_length / 2) * np.cos(angle_for_tick)
                         outer_y = (radius + tick_length / 2) * np.sin(angle_for_tick)
-                        self.scene.addItem(AxisLine((inner_x, inner_y), (outer_x, outer_y), [0, 0, 0]))
+                        self.scene.addItem(AxisLine((inner_x, inner_y), (outer_x, outer_y), [x % 256 for x in self.axes_color.getRgb()]))
 
     def draw_nd_points(self):
         hue_shift_amount = 0.1
