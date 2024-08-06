@@ -125,13 +125,16 @@ class Plot(QGraphicsView):
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.resize()
         self.update_transform()
-
+        self.update_scene()
+        
     def reset_zoom(self):
         self.m_left = -1.125
         self.m_right = 1.125
         self.m_bottom = -1.125
         self.m_top = 1.125
+        self.resize()
         self.update_transform()
 
     def get_zoom(self):

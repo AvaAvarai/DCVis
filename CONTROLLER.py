@@ -31,7 +31,7 @@ class Controller:
         dialog.exec()  # modal dialog
 
     def setup_connections(self):
-        # Bind buttons to functions
+        # Bind UI buttons to functions
         self.view.load_button.clicked.connect(self.load_dataset)
         self.view.plot_button.clicked.connect(self.view.create_plot)
         self.view.exit_button.clicked.connect(lambda: sys.exit())
@@ -59,7 +59,7 @@ class Controller:
         self.view.highlight_overlaps_toggle.clicked.connect(self.view.highlight_overlaps)
         self.view.highlight_overlaps_toggle.setEnabled(False)
         
-        # Set keyboard shortcuts
+        # Set frequently used UI buttons to keyboard shortcuts
         self.view.load_button.setShortcut(Qt.Key.Key_F1)
         self.view.plot_button.setShortcut(Qt.Key.Key_F3)
         self.view.refresh_button.setShortcut(Qt.Key.Key_F4)

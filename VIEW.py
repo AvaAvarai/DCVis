@@ -93,6 +93,9 @@ class View(QtWidgets.QMainWindow):
             self.removeSelectedRule()
 
     def recenter_plot(self):
+        if not self.plot_widget:
+            WARNINGS.no_data_warning()
+            return
         self.plot_widget.reset_zoom()
         self.plot_widget.update_transform()
         self.plot_widget.update_scene()
@@ -311,7 +314,7 @@ class View(QtWidgets.QMainWindow):
         if background_color and axes_color:
             self.plot_widget.background_color = background_color
             self.plot_widget.axes_color = axes_color
-        
+    
     def analyze_clip(self):
         if not self.plot_widget:
             WARNINGS.no_data_warning()
