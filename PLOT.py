@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, QRectF, QPointF, QLineF
-from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QCursor, QTransform
+from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QCursor, QTransform, QBrush
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsItem, QApplication, QGraphicsEllipseItem, QGraphicsLineItem
 
 from typing import List
@@ -239,24 +239,36 @@ class Plot(QGraphicsView):
                         self.scene.addItem(BezierCurve(start, control1, control2, end, self.data.class_colors[class_index]))
 
     def draw_boxes(self):
-        color = QColor(255, 0, 0, 128)
-        for rect in self.all_rect:
-            self.scene.addRect(QRectF(rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]), pen=QPen(color), brush=color)
-            
+        if self.all_rect:
+            color = QColor(255, 0, 0, 128)
+            for rect in self.all_rect:
+                x1, y1, x2, y2 = rect
+                left = min(x1, x2)
+                right = max(x1, x2)
+                top = max(y1, y2)
+                bottom = min(y1, y2)
+                width = right - left
+                height = top - bottom
+                
+                self.scene.addRect(QRectF(left, bottom, width, height), pen=QPen(QColor(0, 0, 0 ,0)), brush=QBrush(color, Qt.BrushStyle.SolidPattern))
+                
     def mousePressEvent(self, event):
         x = self.m_left + (event.position().x() * (self.m_right - self.m_left)) / self.width()
         y = self.m_bottom + ((self.height() - event.position().y()) * (self.m_top - self.m_bottom)) / self.height()
+        
         if event.button() == Qt.MouseButton.LeftButton:
             precision_exp = -4
             tuning = 0.005
             precision = 10 ** precision_exp
             self.data.clipped_count = 0
             self.data.clipped_samples = [False for _ in range(self.data.sample_count)]
+            
             while self.data.clipped_count == 0 and precision_exp < -3:
                 self.left_rect = [x - precision, y - precision, x + precision, y + precision]
                 CLIPPING.Clipping(self.left_rect, self.data)
                 precision_exp += tuning
                 precision = 10 ** precision_exp
+            
             if self.data.clipped_count > 1:
                 positions = self.data.positions[self.data.clipped_samples]
                 distances = np.linalg.norm(positions - np.array([x, y]), axis=1)
@@ -264,13 +276,17 @@ class Plot(QGraphicsView):
                 closest_sample = np.where(self.data.clipped_samples)[0][min_index]
                 self.data.clipped_samples[:] = False
                 self.data.clipped_samples[closest_sample] = True
+            
             self.update_scene()
             event.accept()
+        
         elif event.button() == Qt.MouseButton.RightButton:
             self.rect.append(x)
             self.rect.append(y)
+            
             if len(self.rect) == 2:
                 QApplication.instance().setOverrideCursor(QCursor(Qt.CursorShape.CrossCursor))
+            
             if len(self.rect) == 4:
                 QApplication.instance().restoreOverrideCursor()
                 CLIPPING.Clipping(self.rect, self.data)
